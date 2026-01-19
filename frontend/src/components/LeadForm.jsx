@@ -211,7 +211,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">First Name</label>
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">First Name *</label>
                             <input
                                 type="text"
                                 required
@@ -222,7 +222,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Last Name</label>
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Last Name *</label>
                             <input
                                 type="text"
                                 required
@@ -236,7 +236,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Age</label>
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Age *</label>
                             <input
                                 type="number"
                                 required
@@ -247,7 +247,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Gender</label>
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Gender *</label>
                             <select
                                 required
                                 className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors appearance-none"
@@ -262,7 +262,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Email Address</label>
+                        <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Email Address *</label>
                         <div className="relative">
                             <Mail className="absolute left-3 top-3.5 text-gray-500" size={18} />
                             <input
@@ -277,7 +277,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Phone Number</label>
+                        <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Phone Number *</label>
                         <div className="relative">
                             <Smartphone className="absolute left-3 top-3.5 text-gray-500" size={18} />
                             <input
