@@ -53,14 +53,26 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
         }
 
         try {
-            // 1. Send data to backend
-            const payload = {
-                ...formData,
-                analysis_data: analysisData
-            };
+            // 1. Send data to backend as FormData
+            const payload = new FormData();
+
+            // Append simple fields
+            Object.keys(formData).forEach(key => {
+                payload.append(key, formData[key]);
+            });
+
+            // Append Analysis Data as JSON string
+            payload.append('analysis_data', JSON.stringify(analysisData));
+
+            // Append Image File
+            if (imageBlob) {
+                payload.append('file', imageBlob);
+            }
 
             const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
-            const response = await axios.post(`${API_URL}/lead`, payload);
+            const response = await axios.post(`${API_URL}/lead`, payload, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
 
             if (response.data.status === 'success') {
                 onSubmitSuccess();
