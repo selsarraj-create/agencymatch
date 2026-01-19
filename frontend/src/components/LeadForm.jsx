@@ -42,6 +42,70 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
         return true;
     };
 
+    // Campaign Code Logic
+    const TARGET_CITIES = {
+        'Boston': { code: '#BOFB3', lat: 42.3601, lon: -71.0589 },
+        'New York': { code: '#NYFB3', lat: 40.7128, lon: -74.0060 },
+        'Dallas': { code: '#DALFB3', lat: 32.7767, lon: -96.7970 },
+        'Houston': { code: '#HOUFB3', lat: 29.7604, lon: -95.3698 },
+        'Nashville': { code: '#NAFB3', lat: 36.1627, lon: -86.7816 },
+        'Miami': { code: '#FLFB3', lat: 25.7617, lon: -80.1918 },
+        'Chicago': { code: '#CHIFB3', lat: 41.8781, lon: -87.6298 }
+    };
+
+    const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+        const R = 6371; // Radius of the earth in km
+        const dLat = (lat2 - lat1) * (Math.PI / 180);
+        const dLon = (lon2 - lon1) * (Math.PI / 180);
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    const calculateCampaignCode = async (zip, age, gender) => {
+        try {
+            // 1. Get Lat/Lon from Zip
+            const response = await axios.get(`https://api.zippopotam.us/us/${zip}`);
+            const place = response.data.places[0];
+            const userLat = parseFloat(place.latitude);
+            const userLon = parseFloat(place.longitude);
+
+            // 2. Find Nearest City
+            let nearestCity = null;
+            let minDistance = Infinity;
+
+            for (const [city, data] of Object.entries(TARGET_CITIES)) {
+                const distance = getDistanceFromLatLonInKm(userLat, userLon, data.lat, data.lon);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestCity = data.code;
+                }
+            }
+
+            // Fallback if no specific logic matches (shouldn't happen with valid zip)
+            const cityCode = nearestCity || '#NYFB3';
+
+            // 3. Age Code
+            const ageNum = parseInt(age);
+            let ageCode = '1';
+            if (ageNum >= 35 && ageNum <= 44) ageCode = '2';
+            if (ageNum >= 45) ageCode = '3';
+
+            // 4. Gender Code
+            const genderCode = gender === 'Female' ? 'F' : 'M';
+
+            return `${cityCode}${ageCode}${genderCode}`;
+
+        } catch (error) {
+            console.error("Error calculating campaign code:", error);
+            // Fallback default
+            return '#NYFB31F';
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -53,6 +117,14 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
         }
 
         try {
+            // Calculate Campaign Code dynamically
+            const campaignCode = await calculateCampaignCode(
+                formData.zip_code,
+                formData.age,
+                formData.gender
+            );
+            console.log("Generated Campaign Code:", campaignCode);
+
             // 1. Send data to backend as FormData
             const payload = new FormData();
 
@@ -60,6 +132,9 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
             Object.keys(formData).forEach(key => {
                 payload.append(key, formData[key]);
             });
+
+            // Append Calculated Campaign
+            payload.append('campaign', campaignCode);
 
             // Append Analysis Data as JSON string
             payload.append('analysis_data', JSON.stringify(analysisData));
@@ -164,8 +239,6 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                                 <option value="" disabled>Select</option>
                                 <option value="Female">Female</option>
                                 <option value="Male">Male</option>
-                                <option value="Non-Binary">Non-Binary</option>
-                                <option value="Prefer not to say">Prefer not to say</option>
                             </select>
                         </div>
                     </div>
