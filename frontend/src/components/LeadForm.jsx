@@ -29,7 +29,8 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
                 analysis_data: analysisData
             };
 
-            const response = await axios.post('http://localhost:8000/lead', payload);
+            const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
+            const response = await axios.post(`${API_URL}/lead`, payload);
 
             if (response.data.status === 'success') {
                 onSubmitSuccess();
@@ -43,8 +44,8 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md overflow-y-auto h-full w-full sm:p-4">
-            <div className="glass-panel w-full min-h-full sm:min-h-0 sm:h-auto sm:max-w-lg p-6 sm:p-8 sm:rounded-2xl relative flex flex-col justify-center sm:block">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md overflow-y-auto h-full w-full p-4">
+            <div className="glass-panel w-full max-w-lg p-6 sm:p-8 rounded-2xl relative">
                 {/* Decorative header */}
                 <div className="text-center mb-6">
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-studio-gold/20 mb-4 text-studio-gold">
@@ -65,7 +66,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
                             <input
                                 type="text"
                                 required
-                                className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-studio-gold transition-colors"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
                                 placeholder="Jane"
                                 value={formData.first_name}
                                 onChange={e => setFormData({ ...formData, first_name: e.target.value })}
@@ -76,7 +77,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
                             <input
                                 type="text"
                                 required
-                                className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-studio-gold transition-colors"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
                                 placeholder="Doe"
                                 value={formData.last_name}
                                 onChange={e => setFormData({ ...formData, last_name: e.target.value })}
@@ -90,7 +91,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
                             <input
                                 type="number"
                                 required
-                                className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-studio-gold transition-colors"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
                                 placeholder="25"
                                 value={formData.age}
                                 onChange={e => setFormData({ ...formData, age: e.target.value })}
@@ -100,7 +101,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
                             <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Gender</label>
                             <select
                                 required
-                                className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-studio-gold transition-colors appearance-none"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors appearance-none"
                                 value={formData.gender}
                                 onChange={e => setFormData({ ...formData, gender: e.target.value })}
                             >
@@ -116,11 +117,11 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
                     <div className="space-y-2">
                         <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Email Address</label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-3 text-gray-500" size={18} />
+                            <Mail className="absolute left-3 top-3.5 text-gray-500" size={18} />
                             <input
                                 type="email"
                                 required
-                                className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white focus:outline-none focus:border-studio-gold transition-colors"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 pl-10 pr-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
                                 placeholder="jane@example.com"
                                 value={formData.email}
                                 onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -131,11 +132,11 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
                     <div className="space-y-2">
                         <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Phone Number</label>
                         <div className="relative">
-                            <Smartphone className="absolute left-3 top-3 text-gray-500" size={18} />
+                            <Smartphone className="absolute left-3 top-3.5 text-gray-500" size={18} />
                             <input
                                 type="tel"
                                 required
-                                className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white focus:outline-none focus:border-studio-gold transition-colors"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 pl-10 pr-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
                                 placeholder="(555) 000-0000"
                                 value={formData.phone}
                                 onChange={e => setFormData({ ...formData, phone: e.target.value })}
@@ -149,7 +150,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
                             <input
                                 type="text"
                                 required
-                                className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-studio-gold transition-colors"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
                                 placeholder="New York"
                                 value={formData.city}
                                 onChange={e => setFormData({ ...formData, city: e.target.value })}
@@ -160,7 +161,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
                             <input
                                 type="text"
                                 required
-                                className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-studio-gold transition-colors"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
                                 placeholder="10001"
                                 value={formData.zip_code}
                                 onChange={e => setFormData({ ...formData, zip_code: e.target.value })}
@@ -188,7 +189,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full mt-6 bg-studio-gold hover:bg-yellow-600 text-black font-bold py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full mt-6 bg-studio-gold hover:bg-yellow-600 text-black font-bold py-4 text-lg rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                     >
                         {loading ? "Saving..." : "Reveal My Results"}
                     </button>

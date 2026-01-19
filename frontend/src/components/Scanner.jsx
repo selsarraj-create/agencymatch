@@ -98,14 +98,14 @@ const Scanner = () => {
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto min-h-[600px] flex flex-col items-center">
+        <div className="w-full max-w-4xl mx-auto min-h-[600px] flex flex-col items-center px-4">
 
             {/* Header */}
-            <div className="mb-8 text-center">
-                <h1 className="text-4xl md:text-5xl font-bold tracking-tighter mb-2">
+            <div className="mb-6 sm:mb-8 text-center">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter mb-2">
                     Model Suitability <span className="text-studio-gold">Scanner</span>
                 </h1>
-                <p className="text-gray-400">AI-Powered Industry Analysis • 2026 Standards</p>
+                <p className="text-sm sm:text-base text-gray-400">AI-Powered Industry Analysis • 2026 Standards</p>
             </div>
 
             {/* Main Area */}
@@ -114,7 +114,7 @@ const Scanner = () => {
                 {/* IDLE STATE */}
                 {state === 'IDLE' && (
                     <div
-                        className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-white/20 hover:border-studio-gold transition-colors cursor-pointer"
+                        className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-white/20 hover:border-studio-gold transition-colors cursor-pointer p-6"
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
@@ -126,11 +126,11 @@ const Scanner = () => {
                             accept="image/*"
                             onChange={(e) => handleFileSelect(e.target.files[0])}
                         />
-                        <div className="w-20 h-20 bg-studio-gold/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                            <Upload className="text-studio-gold" size={32} />
+                        <div className="w-24 h-24 sm:w-20 sm:h-20 bg-studio-gold/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <Upload className="text-studio-gold" size={40} />
                         </div>
-                        <h3 className="text-xl font-semibold mb-2">Upload High-Res Portrait</h3>
-                        <p className="text-gray-500 text-sm">Drag & drop or click to browse</p>
+                        <h3 className="text-xl sm:text-xl font-semibold mb-2 text-center">Upload High-Res Portrait</h3>
+                        <p className="text-gray-500 text-sm text-center">Drag & drop or click to browse</p>
                     </div>
                 )}
 
