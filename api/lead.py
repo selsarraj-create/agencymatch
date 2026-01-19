@@ -4,12 +4,15 @@ import os
 import sys
 
 # Add backend directory to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'backend'))
+# Add backend directory to path - NOT NEEDED as we copied the file
+# sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'backend'))
 
 from supabase import create_client, Client
 from webhook_utils import send_webhook
 
 class handler(BaseHTTPRequestHandler):
+
+    def do_POST(self):
             # Parse multipart/form-data using cgi.FieldStorage
             # cgi.FieldStorage requires the request headers and input stream
             content_type = self.headers.get('Content-Type', '')
