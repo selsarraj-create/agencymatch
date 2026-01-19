@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-studio-charcoal/80 backdrop-blur-md border border-white/10 shadow-xl;
+  }
+}
+
+body {
+  @apply bg-studio-black text-studio-white;
+}
