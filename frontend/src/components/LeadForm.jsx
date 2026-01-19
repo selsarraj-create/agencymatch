@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, CheckCircle, Smartphone, Mail, User } from 'lucide-react';
+import { Lock, CheckCircle, Smartphone, Mail, User, X } from 'lucide-react';
 import axios from 'axios';
 
 const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
