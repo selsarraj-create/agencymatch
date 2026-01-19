@@ -149,7 +149,7 @@ const Scanner = () => {
 
                 {/* PREVIEW & COMPLETE STATE */}
                 {(state === 'PREVIEW' || state === 'COMPLETE') && analysisResult && (
-                    <div className="absolute inset-0 flex flex-col md:flex-row">
+                    <div className="flex flex-col h-full md:absolute md:inset-0 md:flex-row">
                         {/* Image Side */}
                         <div className="relative w-full md:w-1/3 h-64 md:h-full">
                             <img src={previewUrl} className="w-full h-full object-cover" alt="Analyzed" />
