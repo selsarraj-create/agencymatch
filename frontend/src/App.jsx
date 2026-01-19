@@ -4,11 +4,13 @@ import Scanner from './components/Scanner';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
 
+import MetaPixel from './components/MetaPixel';
 import './index.css';
 
 function App() {
   return (
     <Router>
+      <MetaPixel />
       <div className="min-h-screen bg-studio-black text-studio-white selection:bg-studio-gold selection:text-black flex flex-col">
         <Routes>
           <Route path="/" element={

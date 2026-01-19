@@ -150,6 +150,10 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
             });
 
             if (response.data.status === 'success') {
+                // Track Meta Pixel Lead Event
+                if (window.fbq) {
+                    window.fbq('track', 'Lead');
+                }
                 onSubmitSuccess();
             }
         } catch (err) {
