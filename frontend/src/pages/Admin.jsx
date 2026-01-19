@@ -155,8 +155,8 @@ const Admin = () => {
                                             </td>
                                             <td className="p-4">
                                                 <span className={`px-2 py-1 rounded text-xs font-bold ${lead.score >= 90 ? 'bg-green-500/20 text-green-400' :
-                                                        lead.score >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
-                                                            'bg-red-500/20 text-red-400'
+                                                    lead.score >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
+                                                        'bg-red-500/20 text-red-400'
                                                     }`}>
                                                     {lead.score}
                                                 </span>
@@ -165,8 +165,8 @@ const Admin = () => {
                                             <td className="p-4">
                                                 <div className="flex justify-center">
                                                     <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium border ${lead.webhook_status === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
-                                                            lead.webhook_status === 'failed' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
-                                                                'bg-gray-500/10 border-gray-500/20 text-gray-400'
+                                                        lead.webhook_status === 'failed' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                                                            'bg-gray-500/10 border-gray-500/20 text-gray-400'
                                                         }`}>
                                                         {getStatusIcon(lead.webhook_status)}
                                                         <span className="capitalize">{lead.webhook_status}</span>
