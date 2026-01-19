@@ -16,7 +16,7 @@
   ],
   "functions": {
     "api/**/*.py": {
-      "runtime": "python3.9"
+      "runtime": "python3.9@3.9.19"
     }
   }
 }
