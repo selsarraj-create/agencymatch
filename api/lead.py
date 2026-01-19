@@ -1,7 +1,13 @@
 from http.server import BaseHTTPRequestHandler
 import json
 import os
+import sys
+
+# Add backend directory to path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'backend'))
+
 from supabase import create_client, Client
+from webhook_utils import send_webhook
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -16,6 +22,7 @@ class handler(BaseHTTPRequestHandler):
             # Initialize Supabase client
             supabase_url = os.getenv('SUPABASE_URL')
             supabase_key = os.getenv('SUPABASE_PUBLISHABLE_KEY')
+            webhook_url = os.getenv('CRM_WEBHOOK_URL')
             
             if not supabase_url or not supabase_key:
                 self.send_response(500)
@@ -30,6 +37,7 @@ class handler(BaseHTTPRequestHandler):
             supabase: Client = create_client(supabase_url, supabase_key)
             
             # Extract analysis data
+            # ... (rest of extraction logic same as before)
             analysis_data = data.get('analysis_data', {})
             score = analysis_data.get('suitability_score', 0)
             market_data = analysis_data.get('market_categorization', {})
@@ -60,16 +68,24 @@ class handler(BaseHTTPRequestHandler):
             if result.data:
                 lead_id = result.data[0]['id']
                 
-                # TODO: Send webhook to CRM here
-                # webhook_url = os.getenv('CRM_WEBHOOK_URL')
-                # if webhook_url:
-                #     webhook_response = send_to_crm(webhook_url, lead_record)
-                #     # Update webhook status
-                #     supabase.table('leads').update({
-                #         'webhook_sent': True,
-                #         'webhook_status': 'success' if webhook_response.ok else 'failed',
-                #         'webhook_response': webhook_response.text
-                #     }).eq('id', lead_id).execute()
+                # Send webhook to CRM
+                if webhook_url:
+                    webhook_response = send_webhook(webhook_url, lead_record)
+                    
+                    # Update status
+                    status = 'success' if webhook_response and webhook_response.status_code < 300 else 'failed'
+                    response_text = webhook_response.text if webhook_response else "Connection failed"
+                    
+                    supabase.table('leads').update({
+                        'webhook_sent': True,
+                        'webhook_status': status,
+                        'webhook_response': response_text
+                    }).eq('id', lead_id).execute()
+                else:
+                     supabase.table('leads').update({
+                        'webhook_status': 'not_configured',
+                        'webhook_response': 'CRM_WEBHOOK_URL not set'
+                    }).eq('id', lead_id).execute()
                 
                 # Send response
                 self.send_response(200)
