@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Lock, CheckCircle, Smartphone, Mail, User, X } from 'lucide-react';
 import axios from 'axios';
 
-const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
+const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
     const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
@@ -76,6 +76,16 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess }) => {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md overflow-y-auto h-full w-full p-4">
             <div className="glass-panel w-full max-w-lg p-6 sm:p-8 rounded-2xl relative">
+                {/* Close Button */}
+                {onCancel && (
+                    <button
+                        onClick={onCancel}
+                        className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-2"
+                        type="button"
+                    >
+                        <X size={24} />
+                    </button>
+                )}
                 {/* Decorative header */}
                 <div className="text-center mb-6">
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-studio-gold/20 mb-4 text-studio-gold">
