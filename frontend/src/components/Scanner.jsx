@@ -129,7 +129,7 @@ const Scanner = () => {
                         <div className="w-24 h-24 sm:w-20 sm:h-20 bg-studio-gold/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <Upload className="text-studio-gold" size={40} />
                         </div>
-                        <h3 className="text-xl sm:text-xl font-semibold mb-2 text-center">Upload High-Res Portrait</h3>
+                        <h3 className="text-xl sm:text-xl font-semibold mb-2 text-center">Upload A Clear Selfie</h3>
                         <p className="text-gray-500 text-sm text-center">Drag & drop or click to browse</p>
                     </div>
                 )}
