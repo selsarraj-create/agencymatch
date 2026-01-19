@@ -21,7 +21,10 @@ class handler(BaseHTTPRequestHandler):
             
             # Initialize Supabase client
             supabase_url = os.getenv('SUPABASE_URL') or os.getenv('VITE_SUPABASE_URL')
+            # Prioritize Manual Service Key for backend to bypass RLS
             supabase_key = (
+                os.getenv('BACKEND_SERVICE_KEY') or
+                os.getenv('SUPABASE_SERVICE_ROLE_KEY') or 
                 os.getenv('VITE_SUPABASE_ANON_KEY') or 
                 os.getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY') or 
                 os.getenv('SUPABASE_ANON_KEY') or 
@@ -29,7 +32,9 @@ class handler(BaseHTTPRequestHandler):
             )
             
             print(f"DEBUG: URL found: {bool(supabase_url)}, Key found: {bool(supabase_key)}")
-            if supabase_key: print(f"DEBUG: Key starts with: {supabase_key[:5]}...")
+            if supabase_key: 
+                print(f"DEBUG: Key starts with: {supabase_key[:5]}...")
+                print(f"DEBUG: Using BACKEND_SERVICE_KEY: {bool(os.getenv('BACKEND_SERVICE_KEY'))}")
             webhook_url = os.getenv('CRM_WEBHOOK_URL')
             
             if not supabase_url or not supabase_key:
