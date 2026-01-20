@@ -162,11 +162,23 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
             });
 
             if (response.data.status === 'success') {
+                console.log("Form submission success. Tracking Lead event...");
                 // Track Meta Pixel Lead Event
                 if (window.fbq) {
-                    window.fbq('track', 'Lead');
+                    try {
+                        window.fbq('track', 'Lead');
+                        console.log("Meta Pixel 'Lead' event fired.");
+                    } catch (e) {
+                        console.error("Meta Pixel tracking failed:", e);
+                    }
+                } else {
+                    console.warn("window.fbq is not defined. Pixel not tracking.");
                 }
-                onSubmitSuccess();
+
+                // Small delay to ensure tracking fires before component unmount
+                setTimeout(() => {
+                    onSubmitSuccess();
+                }, 500);
             }
         } catch (err) {
             console.error(err);

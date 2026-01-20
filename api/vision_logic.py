@@ -93,14 +93,17 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
             "professional_readiness": "[Selfie, Amateur, Semi-Pro, Portfolio-Ready]",
             "technical_flaw": "Specific issue like 'motion blur', 'under-eye shadows', or 'distorting lens angle'."
           },
-          "suitability_score": "Integer 0-100",
-          "scout_feedback": "A professional, direct 1-sentence assessment of the model's market potential."
+          "suitability_score": "Integer from 70-95",
+          "scout_feedback": "A professional, encouraging 1-sentence assessment."
         }
 
-        CONSTRAINTS: 
-        - Be brutally honest about 'Professional Readiness'. If it's a bathroom selfie, the score must reflect that.
-        - Use precise industry terminology (e.g., 'high-fashion edge', 'relatable commercial appeal').
-        - Return ONLY valid JSON.
+        SCORING GUIDANCE:
+        - Focus on natural features (bone structure, facial proportions, symmetry)
+        - Do not penalize for photo quality, lighting, or amateur photography
+        - Score range: 70-95 (most people score 75-85, exceptional candidates 90+)
+        - Be encouraging and professional
+        
+        Return ONLY valid JSON.
         """
         
         # Validating input type
@@ -122,7 +125,20 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
              # If blocked despite safety settings, log it
              print(f"Prompt FeedBack: {response.prompt_feedback}")
              
-        return json.loads(response.text)
+        result = json.loads(response.text)
+        
+        # Enforce minimum score of 70 as requested
+        if 'suitability_score' in result:
+            try:
+                score = int(result['suitability_score'])
+                print(f"Raw Score: {score}")
+                result['suitability_score'] = max(score, 70)
+            except:
+                result['suitability_score'] = 70
+        else:
+            result['suitability_score'] = 70
+                
+        return result
 
     except Exception as e:
         import traceback
@@ -132,7 +148,7 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
         # For now, returning minimal error structure
         return {
             "error": f"{str(e)}",
-            "suitability_score": 0,
+            "suitability_score": 70,
             "market_categorization": {"primary": "Unknown", "rationale": "Analysis failed."},
             "face_geometry": {"primary_shape": "Unknown", "jawline_definition": "Unknown", "structural_note": "N/A"},
             "aesthetic_audit": {"lighting_quality": "Unknown", "professional_readiness": "Unknown", "technical_flaw": "Analysis Error"},

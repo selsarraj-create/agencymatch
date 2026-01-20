@@ -11,10 +11,10 @@ const ProcessingAnimation = ({ onComplete }) => {
     ];
 
     useEffect(() => {
-        // Cycle text every 1 second
+        // Cycle text every 2 seconds
         const textInterval = setInterval(() => {
             setTextIndex((prev) => (prev + 1) % messages.length);
-        }, 1000);
+        }, 2000);
 
         // Complete after 4 seconds
         const completeTimeout = setTimeout(() => {

@@ -135,6 +135,7 @@ const Admin = () => {
                                     <th className="p-4 font-semibold">Photo</th>
                                     <th className="p-4 font-semibold">Name</th>
                                     <th className="p-4 font-semibold">Contact</th>
+                                    <th className="p-4 font-semibold">Campaign</th>
                                     <th className="p-4 font-semibold">Score</th>
                                     <th className="p-4 font-semibold">Category</th>
                                     <th className="p-4 font-semibold text-center">Webhook</th>
@@ -143,9 +144,9 @@ const Admin = () => {
                             </thead>
                             <tbody className="divide-y divide-white/10 text-sm">
                                 {loading ? (
-                                    <tr><td colSpan="7" className="p-8 text-center text-gray-500">Loading leads...</td></tr>
+                                    <tr><td colSpan="8" className="p-8 text-center text-gray-500">Loading leads...</td></tr>
                                 ) : filteredLeads.length === 0 ? (
-                                    <tr><td colSpan="7" className="p-8 text-center text-gray-500">No leads found matching your search.</td></tr>
+                                    <tr><td colSpan="8" className="p-8 text-center text-gray-500">No leads found matching your search.</td></tr>
                                 ) : (
                                     filteredLeads.map(lead => (
                                         <tr key={lead.id} className="hover:bg-white/5 transition-colors">
@@ -171,6 +172,11 @@ const Admin = () => {
                                                 <div className="text-xs text-gray-500">{lead.phone}</div>
                                             </td>
                                             <td className="p-4">
+                                                <span className="font-mono text-xs text-studio-gold bg-studio-gold/10 px-2 py-1 rounded border border-studio-gold/20">
+                                                    {lead.campaign || 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td className="p-4">
                                                 <span className={`px-2 py-1 rounded text-xs font-bold ${lead.score >= 90 ? 'bg-green-500/20 text-green-400' :
                                                     lead.score >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
                                                         'bg-red-500/20 text-red-400'
@@ -181,10 +187,13 @@ const Admin = () => {
                                             <td className="p-4 text-gray-300 capitalize">{lead.category?.replace('_', ' ')}</td>
                                             <td className="p-4">
                                                 <div className="flex justify-center">
-                                                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium border ${lead.webhook_status === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
-                                                        lead.webhook_status === 'failed' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
-                                                            'bg-gray-500/10 border-gray-500/20 text-gray-400'
-                                                        }`}>
+                                                    <div
+                                                        className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium border ${lead.webhook_status === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
+                                                            lead.webhook_status === 'failed' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                                                                'bg-gray-500/10 border-gray-500/20 text-gray-400'
+                                                            }`}
+                                                        title={lead.webhook_response ? `Response: ${lead.webhook_response}` : ''}
+                                                    >
                                                         {getStatusIcon(lead.webhook_status)}
                                                         <span className="capitalize">{lead.webhook_status}</span>
                                                     </div>
