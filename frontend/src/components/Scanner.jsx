@@ -35,7 +35,8 @@ const Scanner = () => {
             formData.append('file', compressedFile);
 
             const response = await axios.post(`${API_URL}/analyze`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: { 'Content-Type': 'multipart/form-data' },
+                timeout: 60000 // 60 seconds to accommodate Gemini API processing time
             });
             setAnalysisResult(response.data);
         } catch (error) {
@@ -109,9 +110,12 @@ const Scanner = () => {
             {/* Header */}
             <div className="mb-6 sm:mb-8 text-center">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter mb-2">
-                    Model Suitability <span className="text-studio-gold">Scanner</span>
+                    10 Second <span className="text-studio-gold">Model Scout</span>
                 </h1>
-                <p className="text-sm sm:text-base text-gray-400">AI-Powered Industry Analysis • 2026 Standards</p>
+                <div className="text-sm sm:text-base text-white space-y-1 font-medium">
+                    <p>Could You Be A Model?</p>
+                    <p>Find Out Instantly With Our AI Analysis</p>
+                </div>
             </div>
 
             {/* Main Area */}
@@ -136,7 +140,7 @@ const Scanner = () => {
                             <Upload className="text-studio-gold" size={40} />
                         </div>
                         <h3 className="text-xl sm:text-xl font-semibold mb-2 text-center">Upload A Clear Selfie</h3>
-                        <p className="text-gray-500 text-sm text-center">Drag & drop or click to browse</p>
+                        <p className="text-gray-500 text-sm text-center">Get Your Instant AI Analysis Now!</p>
                     </div>
                 )}
 
@@ -145,7 +149,7 @@ const Scanner = () => {
                     <>
                         <img src={previewUrl} className="absolute inset-0 w-full h-full object-cover opacity-50 filter grayscale" alt="Scanning" />
                         <div className="absolute inset-0 z-10">
-                            <ProcessingAnimation onComplete={onAnimationComplete} />
+                            <ProcessingAnimation onComplete={onAnimationComplete} hasResult={!!analysisResult} />
                         </div>
                         {state === 'WAITING_FOR_RESULT' && (
                             <div className="absolute bottom-10 left-0 right-0 text-center z-50">

@@ -4,6 +4,11 @@
   "installCommand": "pip install -r requirements.txt --break-system-packages",
   "devCommand": "cd frontend && npm run dev",
   "framework": null,
+  "functions": {
+    "api/**/*.py": {
+      "maxDuration": 60
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",

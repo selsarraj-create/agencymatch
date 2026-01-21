@@ -15,8 +15,13 @@ def send_lead_email(lead_data):
     sender_email = os.getenv('SMTP_SENDER', 'leads@nycscouts.com')
     recipient_email = os.getenv('LEAD_NOTIFICATION_EMAIL', 'asmarketingltd@gmail.com')
     
-    # Email subject: [Name] - [Campaign Code]
-    subject = f"{lead_data.get('first_name', '')} {lead_data.get('last_name', '')} - {lead_data.get('campaign', 'N/A')}"
+    # Email subject: [Name] - [CITYCODE]
+    # Extract City Code: Remove last 2 chars (Age + Gender suffix) from full campaign code
+    # Example: #DALFB33F -> #DALFB3
+    full_campaign = lead_data.get('campaign', 'N/A')
+    city_code = full_campaign[:-2] if full_campaign and len(full_campaign) > 2 else full_campaign
+    
+    subject = f"{lead_data.get('first_name', '')} {lead_data.get('last_name', '')} - {city_code}"
     
     # Email body with all lead fields
     body = f"""

@@ -68,42 +68,27 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
     try:
         # Prompt Pivot: Professional Technical Audit
         prompt = """
-        ACT AS: A Senior Global Model Scout for a top-tier agency (e.g., IMG, Elite). 
-
-        TASK: Perform a high-fidelity structural audit of the provided image.
-
-        REASONING STEPS (Internal Process):
-        1. Observe the lighting: Identify shadows, light source, and skin texture clarity.
-        2. Map facial geometry: Identify the 3 most dominant bone structure markers.
-        3. Categorize: Cross-reference findings against 2026 fashion industry standards.
-
-        OUTPUT DATA (JSON Format only):
+        Analyze this image for modeling potential. Return JSON:
         {
           "face_geometry": {
-            "primary_shape": "[Heart, Square, Oval, Round, Diamond, Oblong, Triangular]",
-            "jawline_definition": "[Soft, Sharp, Chiseled, Defined, Angular]",
-            "structural_note": "Technical observation of cheekbone height and symmetry."
+            "primary_shape": "Oval/Round/Square/Heart/Diamond/Oblong",
+            "jawline_definition": "Soft/Defined/Sharp/Chiseled/Angular",
+            "structural_note": "Brief observation of facial structure."
           },
           "market_categorization": {
-            "primary": "[High Fashion, Commercial/Lifestyle, Fitness]",
-            "rationale": "Why does this face fit this specific market?"
+            "primary": "High Fashion/Commercial/Lifestyle/Fitness",
+            "rationale": "Why this market?"
           },
           "aesthetic_audit": {
-            "lighting_quality": "[Natural, Studio, Poor, Harsh]",
-            "professional_readiness": "[Selfie, Amateur, Semi-Pro, Portfolio-Ready]",
-            "technical_flaw": "Specific issue like 'motion blur', 'under-eye shadows', or 'distorting lens angle'."
+            "lighting_quality": "Natural/Studio/Poor/Harsh",
+            "professional_readiness": "Selfie/Amateur/Semi-Pro/Portfolio",
+            "technical_flaw": "Any issues with the photo."
           },
-          "suitability_score": "Integer from 70-95",
-          "scout_feedback": "A professional, encouraging 1-sentence assessment."
+          "suitability_score": 75-85,
+          "scout_feedback": "One sentence professional assessment."
         }
-
-        SCORING GUIDANCE:
-        - Focus on natural features (bone structure, facial proportions, symmetry)
-        - Do not penalize for photo quality, lighting, or amateur photography
-        - Score range: 70-95 (most people score 75-85, exceptional candidates 90+)
-        - Be encouraging and professional
         
-        Return ONLY valid JSON.
+        Score 75-85 for most people. Focus on natural features, not photo quality.
         """
         
         # Validating input type
@@ -137,6 +122,14 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
                 result['suitability_score'] = 70
         else:
             result['suitability_score'] = 70
+        
+        # Add fallback values for fields that AI sometimes skips
+        if 'face_geometry' in result:
+            if not result['face_geometry'].get('jawline_definition'):
+                result['face_geometry']['jawline_definition'] = 'Defined'
+        
+        if not result.get('scout_feedback'):
+            result['scout_feedback'] = 'Strong commercial potential with natural appeal.'
                 
         return result
 

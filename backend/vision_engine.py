@@ -93,17 +93,16 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
             "professional_readiness": "[Selfie, Amateur, Semi-Pro, Portfolio-Ready]",
             "technical_flaw": "Specific issue like 'motion blur', 'under-eye shadows', or 'distorting lens angle'."
           },
-          "suitability_score": "Integer from 70-95",
-          "scout_feedback": "A professional, encouraging 1-sentence assessment."
+          "suitability_score": "Integer 70-100. Score based on natural modeling potential.",
+          "scout_feedback": "A professional, direct 1-sentence assessment of the model's market potential."
         }
 
-        SCORING GUIDANCE:
-        - Focus on natural features (bone structure, facial proportions, symmetry)
-        - Do not penalize for photo quality, lighting, or amateur photography
-        - Score range: 70-95 (most people score 75-85, exceptional candidates 90+)
-        - Be encouraging and professional
-        
-        Return ONLY valid JSON.
+        CONSTRAINTS: 
+        - Analyze ALL fields with precision. Every field must be filled.
+        - Be thorough about facial geometry analysis (jawline, face shape, structure).
+        - For suitability_score: Focus on natural features (bone structure, proportions). Most people score 75-85. Exceptional candidates 90+.
+        - Use precise industry terminology (e.g., 'high-fashion edge', 'relatable commercial appeal').
+        - Return ONLY valid JSON.
         """
         
         # Validating input type
@@ -137,6 +136,14 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
                 result['suitability_score'] = 70
         else:
             result['suitability_score'] = 70
+        
+        # Add fallback values for fields that AI sometimes skips
+        if 'face_geometry' in result:
+            if not result['face_geometry'].get('jawline_definition'):
+                result['face_geometry']['jawline_definition'] = 'Defined'
+        
+        if not result.get('scout_feedback'):
+            result['scout_feedback'] = 'Strong commercial potential with natural appeal.'
                 
         return result
 

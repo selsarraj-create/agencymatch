@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const ProcessingAnimation = ({ onComplete }) => {
+const ProcessingAnimation = ({ onComplete, hasResult }) => {
     const [textIndex, setTextIndex] = useState(0);
     const messages = [
         "Analyzing Facial Geometry...",
@@ -11,21 +11,30 @@ const ProcessingAnimation = ({ onComplete }) => {
     ];
 
     useEffect(() => {
-        // Cycle text every 2 seconds
+        // Cycle text every 1.2 seconds
         const textInterval = setInterval(() => {
             setTextIndex((prev) => (prev + 1) % messages.length);
-        }, 2000);
+        }, 1200);
 
-        // Complete after 4 seconds
-        const completeTimeout = setTimeout(() => {
+        return () => clearInterval(textInterval);
+    }, []);
+
+    useEffect(() => {
+        // Evaluate completion based on result availability
+        // Ensure at least a small delay (e.g. 2s) so it doesn't flash instantly if API is fast
+        // But since we want it "natural", if hasResult is true, we can just finish.
+        // Let's give it a minimum of 2 seconds to show at least partly.
+
+        let timeout;
+        if (hasResult) {
+            // If result is ready, we finish. 
+            // We can add a small delay if needed, but user said "finish earlier".
+            // Let's just finish immediately when hasResult is true.
             onComplete();
-        }, 4000);
+        }
 
-        return () => {
-            clearInterval(textInterval);
-            clearTimeout(completeTimeout);
-        };
-    }, [onComplete]);
+        return () => clearTimeout(timeout);
+    }, [hasResult, onComplete]);
 
     return (
         <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden rounded-xl">
