@@ -25,13 +25,19 @@ const ProcessingAnimation = ({ onComplete, hasResult }) => {
         // But since we want it "natural", if hasResult is true, we can just finish.
         // Let's give it a minimum of 2 seconds to show at least partly.
 
-        let timeout;
         if (hasResult) {
-            // If result is ready, we finish. 
-            // We can add a small delay if needed, but user said "finish earlier".
-            // Let's just finish immediately when hasResult is true.
             onComplete();
+            return;
         }
+
+        // Safety failsafe: If API hangs, finish animation after 15 seconds anyway
+        // This moves user to "Finalizing Analysis" state instead of infinite scanning
+        const timeout = setTimeout(() => {
+            if (!hasResult) {
+                console.warn("ProcessingAnimation timed out without result");
+                onComplete();
+            }
+        }, 15000);
 
         return () => clearTimeout(timeout);
     }, [hasResult, onComplete]);

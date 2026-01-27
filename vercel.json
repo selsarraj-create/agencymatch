@@ -5,14 +5,14 @@
   "devCommand": "cd frontend && npm run dev",
   "framework": null,
   "functions": {
-    "api/**/*.py": {
+    "api/server.py": {
       "maxDuration": 60
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.py"
+      "destination": "/api/server.py"
     },
     {
       "source": "/(.*)",

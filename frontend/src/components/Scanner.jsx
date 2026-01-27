@@ -27,6 +27,7 @@ const Scanner = () => {
 
         // Start Upload immediately
         try {
+            setAnalysisResult(null); // Clear previous result
             // Compress Image (resize to max 1500px, 0.8 quality)
             // This prevents 413 Payload Too Large errors on Vercel with iPhone photos
             const compressedFile = await compressImage(selectedFile);
@@ -136,6 +137,9 @@ const Scanner = () => {
                             accept=".jpg,.jpeg,.png"
                             onChange={(e) => handleFileSelect(e.target.files[0])}
                         />
+                        <p className="text-lg md:text-xl font-serif italic text-studio-gold/80 mb-8 text-center px-4">
+                            We're always looking <br className="block sm:hidden" />for new faces to join us
+                        </p>
                         <div className="w-24 h-24 sm:w-20 sm:h-20 bg-studio-gold/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <Upload className="text-studio-gold" size={40} />
                         </div>

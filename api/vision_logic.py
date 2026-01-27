@@ -3,18 +3,44 @@ import os
 import json
 import typing_extensions as typing
 from dotenv import load_dotenv
+from PIL import Image
+import io
 
 load_dotenv()
 
-# Fallback or load from environment
-# In a real scenario, ensure GOOGLE_API_KEY is in .env or passed here
-API_KEY = os.getenv("GOOGLE_API_KEY")
-API_KEY = os.getenv("GOOGLE_API_KEY")
-if not API_KEY:
-    # Allow running without key if just testing scaffolding, but warn.
-    print("WARNING: GOOGLE_API_KEY not found in environment.")
+# ... (rest of imports/setup) ... 
 
-genai.configure(api_key=API_KEY)
+# Helper for image optimization
+def optimize_image(image_bytes, max_size=1024, quality=85):
+    """
+    Resizes image if larger than max_size and compresses it.
+    Returns optimized bytes (JPEG).
+    """
+    try:
+        if not image_bytes:
+            return image_bytes
+            
+        print(f"Optimizing image. Original size: {len(image_bytes)} bytes")
+        img = Image.open(io.BytesIO(image_bytes))
+        
+        # Check dimensions
+        if img.width > max_size or img.height > max_size:
+            print(f"Resizing from {img.width}x{img.height}")
+            img.thumbnail((max_size, max_size))
+            print(f"Resized to {img.width}x{img.height}")
+            
+        # Convert to RGB if RGBA (needed for JPEG)
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+            
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=quality)
+        optimized_bytes = buffer.getvalue()
+        print(f"Optimized size: {len(optimized_bytes)} bytes")
+        return optimized_bytes
+    except Exception as e:
+        print(f"Image optimization warning: {e}")
+        return image_bytes # Fallback to original
 
 # Define the response schema explicitly for Gemini 1.5 strict output
 class FaceGeometry(typing.TypedDict):
@@ -60,12 +86,16 @@ model = genai.GenerativeModel(
     generation_config=generation_config,
     safety_settings=safety_settings
 )
-
 def analyze_image(image_bytes, mime_type="image/jpeg"):
     """
     Analyzes an image using Gemini 1.5 Flash to extract technical industry markers.
     """
     try:
+        # Optimize image first (resize & compress)
+        # We always convert to JPEG for uniformity and compression
+        optimized_bytes = optimize_image(image_bytes)
+        processing_mime_type = "image/jpeg" # We convert to JPEG
+
         # Prompt Pivot: Professional Technical Audit
         prompt = """
         Analyze this image for modeling potential. Return JSON:
@@ -92,14 +122,14 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
         """
         
         # Validating input type
-        if not image_bytes:
+        if not optimized_bytes:
             raise ValueError("No image data provided")
         
         # Ensure image_bytes is passed correctly
         # The SDK handles bytes directly if passed as a Part with mime_type
         response = model.generate_content(
             [
-                {"mime_type": mime_type, "data": image_bytes}, 
+                {"mime_type": processing_mime_type, "data": optimized_bytes}, 
                 prompt
             ]
         )
