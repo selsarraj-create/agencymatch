@@ -37,12 +37,26 @@ const Scanner = () => {
 
             const response = await axios.post(`${API_URL}/analyze`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
-                timeout: 60000 // 60 seconds to accommodate Gemini API processing time
+                timeout: 35000 // 35 seconds (slightly longer than backend timeout)
             });
             setAnalysisResult(response.data);
         } catch (error) {
             console.error("Analysis failed", error);
-            alert("Analysis failed. Please try again.");
+
+            // Better error messages for different scenarios
+            let errorMessage = "Analysis failed. Please try again.";
+
+            if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+                errorMessage = "Analysis is taking too long. Please try with a smaller image or try again later.";
+            } else if (error.response?.status === 504) {
+                errorMessage = "Server timeout. Our AI is busy - please try again in a moment.";
+            } else if (error.response?.status === 413) {
+                errorMessage = "Image file is too large. Please use a smaller photo.";
+            } else if (error.response?.data?.error) {
+                errorMessage = `Error: ${error.response.data.error}`;
+            }
+
+            alert(errorMessage);
             setState('IDLE');
         }
     };

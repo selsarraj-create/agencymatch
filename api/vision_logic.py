@@ -8,13 +8,19 @@ import io
 
 load_dotenv()
 
-# ... (rest of imports/setup) ... 
+# Configure Gemini API with API key
+API_KEY = os.getenv("GOOGLE_API_KEY")
+if not API_KEY:
+    print("WARNING: GOOGLE_API_KEY not found in environment.")
+else:
+    genai.configure(api_key=API_KEY)
 
 # Helper for image optimization
-def optimize_image(image_bytes, max_size=1024, quality=85):
+def optimize_image(image_bytes, max_size=800, quality=80):
     """
     Resizes image if larger than max_size and compresses it.
     Returns optimized bytes (JPEG).
+    Reduced size for faster API processing.
     """
     try:
         if not image_bytes:
@@ -81,11 +87,13 @@ safety_settings = {
     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
 }
 
+# Keep original model
 model = genai.GenerativeModel(
-    'gemini-3-flash-preview',
+    'gemini-2.0-flash-exp',
     generation_config=generation_config,
     safety_settings=safety_settings
 )
+
 def analyze_image(image_bytes, mime_type="image/jpeg"):
     """
     Analyzes an image using Gemini 1.5 Flash to extract technical industry markers.
@@ -127,12 +135,16 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
         
         # Ensure image_bytes is passed correctly
         # The SDK handles bytes directly if passed as a Part with mime_type
+        # Add timeout to prevent hanging (25 seconds max)
+        print("Sending request to Gemini API...")
         response = model.generate_content(
             [
                 {"mime_type": processing_mime_type, "data": optimized_bytes}, 
                 prompt
-            ]
+            ],
+            request_options={"timeout": 25}  # 25 second timeout
         )
+        print("Received response from Gemini API")
         
         # Check validation
         print(f"Candidates generated: {len(response.candidates)}")
