@@ -87,9 +87,9 @@ safety_settings = {
     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
 }
 
-# Keep original model
+# Update to gemini-3-flash-preview
 model = genai.GenerativeModel(
-    'gemini-2.0-flash-exp',
+    'gemini-3-flash-preview',
     generation_config=generation_config,
     safety_settings=safety_settings
 )
