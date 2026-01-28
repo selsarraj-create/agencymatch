@@ -8,17 +8,28 @@ const ClientDashboard = () => {
     const [submissions, setSubmissions] = useState([]);
     const [credits, setCredits] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [showBuyModal, setShowBuyModal] = useState(false);
+    const [processingPkg, setProcessingPkg] = useState(null);
     const navigate = useNavigate();
 
+    const PACKAGES = [
+        { credits: 10, price: '£5.00', amount: 500, id: 10, popular: false },
+        { credits: 30, price: '£10.00', amount: 1000, id: 30, popular: true },
+        { credits: 50, price: '£15.00', amount: 1500, id: 50, popular: false },
+        { credits: 100, price: '£25.00', amount: 2500, id: 100, popular: false },
+    ];
+
     // Handle Buy Credits
-    const handleBuyCredits = async () => {
+    const handleBuyCredits = async (pkgId) => {
         try {
+            setProcessingPkg(pkgId);
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
             const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
             const response = await axios.post(`${API_URL}/create-checkout-session`, {
-                user_id: user.id
+                user_id: user.id,
+                amount: pkgId
             });
 
             if (response.data.url) {
@@ -27,6 +38,7 @@ const ClientDashboard = () => {
         } catch (error) {
             console.error("Checkout Error:", error);
             alert("Failed to start checkout. Please try again.");
+            setProcessingPkg(null);
         }
     };
 
@@ -117,7 +129,57 @@ const ClientDashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-studio-black p-4 md:p-8">
+        <div className="min-h-screen bg-studio-black p-4 md:p-8 relative">
+
+            {/* Buy Credits Modal */}
+            {showBuyModal && (
+                <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                <Coins className="text-studio-gold" /> Top Up Credits
+                            </h3>
+                            <button onClick={() => setShowBuyModal(false)} className="text-gray-400 hover:text-white">
+                                <XCircle size={24} />
+                            </button>
+                        </div>
+                        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {PACKAGES.map((pkg) => (
+                                <button
+                                    key={pkg.id}
+                                    onClick={() => handleBuyCredits(pkg.id)}
+                                    disabled={!!processingPkg}
+                                    className={`relative group flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all ${pkg.popular
+                                            ? 'border-studio-gold bg-studio-gold/10 hover:bg-studio-gold/20'
+                                            : 'border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10'
+                                        }`}
+                                >
+                                    {pkg.popular && (
+                                        <div className="absolute -top-3 px-3 py-1 bg-studio-gold text-black text-xs font-bold uppercase tracking-wider rounded-full shadow-lg">
+                                            Most Popular
+                                        </div>
+                                    )}
+                                    <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform">
+                                        {pkg.credits} <span className="text-sm font-normal text-gray-400">Credits</span>
+                                    </div>
+                                    <div className={`text-lg font-semibold ${pkg.popular ? 'text-studio-gold' : 'text-gray-300'}`}>
+                                        {pkg.price}
+                                    </div>
+                                    {processingPkg === pkg.id && (
+                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl">
+                                            <Loader2 className="animate-spin text-white" />
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="p-4 bg-white/5 text-center text-xs text-gray-500">
+                            Secure payment via Stripe. Credits added instantly.
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="max-w-6xl mx-auto space-y-8">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -135,7 +197,7 @@ const ClientDashboard = () => {
                             <p className="text-2xl font-bold text-white leading-none">{credits}</p>
                         </div>
                         <button
-                            onClick={handleBuyCredits}
+                            onClick={() => setShowBuyModal(true)}
                             className="ml-4 px-4 py-2 bg-studio-gold text-black text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-white transition-colors"
                         >
                             Buy More

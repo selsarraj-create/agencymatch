@@ -431,29 +431,35 @@ async def test_webhook_connection():
 
 class CheckoutRequest(BaseModel):
     user_id: str
-    amount: int = 10 # Default to 10 credits
+    amount: int
 
 @app.post("/api/create-checkout-session")
 async def create_checkout_session(req: CheckoutRequest):
     try:
         domain_url = os.getenv('VITE_SITE_URL', 'http://localhost:5173')
         
-        # Determine price based on amount (Simple logic for now)
-        # In production, use real Stripe Price IDs
-        # Here we use 'price_data' for custom amounts or pre-defined logic
+        # Pricing Tier Definition (GBP)
+        PRICING_TIERS = {
+            10:  500,   # £5.00
+            30:  1000,  # £10.00
+            50:  1500,  # £15.00
+            100: 2500   # £25.00
+        }
         
-        # Hardcoded for Demo: 10 Credits = $50.00
-        unit_amount = 5000 
+        if req.amount not in PRICING_TIERS:
+             return JSONResponse(status_code=400, content={"error": "Invalid credit package selected."})
+             
+        unit_amount = PRICING_TIERS[req.amount]
         
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[
                 {
                     'price_data': {
-                        'currency': 'usd',
+                        'currency': 'gbp',
                         'product_data': {
                             'name': f'{req.amount} AgencyMatch Credits',
-                            'description': 'credits to scan and submit models',
+                            'description': 'Credits to scan and submit models',
                             'images': ['https://agencymatch.vercel.app/logo.png'], 
                         },
                         'unit_amount': unit_amount,
