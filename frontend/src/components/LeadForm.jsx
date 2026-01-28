@@ -172,10 +172,22 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
 
         } catch (err) {
             console.error(err);
-            if (err.message === "Invalid Postcode") {
+            const errorMessage = err.message || "";
+
+            if (errorMessage === "Invalid Postcode") {
                 setError("Invalid Postcode. Please enter a valid UK Postcode.");
+            } else if (errorMessage.includes("User already registered") || errorMessage.includes("unique constraint")) {
+                // Return a React Node with a link for better UX, or just text if preferred.
+                // Since setError expects string in current usage, we'll keep it simple or upgrade setError/display.
+                // Let's stick to text for the <p> tag, unless we change the rendering.
+                // Changing rendering to support Link:
+                setError(
+                    <span>
+                        Account already exists. <a href="/login" className="underline text-studio-gold hover:text-white">Log in here</a>.
+                    </span>
+                );
             } else {
-                setError(err.message || "Something went wrong. Please try again.");
+                setError(errorMessage || "Something went wrong. Please try again.");
             }
         } finally {
             setLoading(false);
