@@ -28,9 +28,12 @@ const AdminDashboard = () => {
         }
 
         // Check Admin Status Locally first (for UI speed), backend verifies safely
-        const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
+        const { data: profile, error } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
 
-        if (!profile || !profile.is_admin) {
+        console.log("Admin Check:", { user: user.id, profile, error });
+
+        if (error || !profile || !profile.is_admin) {
+            console.warn("Access Denied: Not an admin", profile);
             navigate('/dashboard'); // Kick non-admins out
             return;
         }
