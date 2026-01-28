@@ -11,7 +11,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
         email: '',
         phone: '',
         city: '',
-        zip_code: '',
+        zip_code: '', // Keeping key as zip_code for backend compatibility, but treating as Postcode
         wants_assessment: false
     });
     const [loading, setLoading] = useState(false);
@@ -25,23 +25,19 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
             return false;
         }
 
-        // Phone validation
+        // UK Phone validation (Simple check for 10-11 digits, usually starting with 07 or +44)
         const cleanPhone = formData.phone.replace(/\D/g, '');
 
-        if (cleanPhone.length !== 10) {
-            setError("Phone number must be exactly 10 digits.");
+        if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+            setError("Please enter a valid UK phone number.");
             return false;
         }
 
-        if (cleanPhone.startsWith('1')) {
-            setError("Phone number cannot start with 1.");
-            return false;
-        }
-
-        // Zip Code Format Validation
-        const zipRegex = /^\d{5}$/;
-        if (!zipRegex.test(formData.zip_code)) {
-            setError("Zip Code must be exactly 5 digits.");
+        // Postcode Validation (UK)
+        // Basic regex for UK postcodes
+        const postcodeRegex = /^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$/i;
+        if (!postcodeRegex.test(formData.zip_code)) {
+            setError("Please enter a valid UK Postcode.");
             return false;
         }
 
@@ -50,13 +46,11 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
 
     // Campaign Code Logic
     const TARGET_CITIES = {
-        'Boston': { code: '#BOFB3', lat: 42.3601, lon: -71.0589 },
-        'New York': { code: '#NYFB3', lat: 40.7128, lon: -74.0060 },
-        'Dallas': { code: '#DALFB3', lat: 32.7767, lon: -96.7970 },
-        'Houston': { code: '#HOUFB3', lat: 29.7604, lon: -95.3698 },
-        'Nashville': { code: '#NAFB3', lat: 36.1627, lon: -86.7816 },
-        'Miami': { code: '#FLFB3', lat: 25.7617, lon: -80.1918 },
-        'Chicago': { code: '#CHIFB3', lat: 41.8781, lon: -87.6298 }
+        'London': { code: '#LONFB3', lat: 51.5074, lon: -0.1278 },
+        'Manchester': { code: '#MANFB3', lat: 53.4808, lon: -2.2426 },
+        'Birmingham': { code: '#BIRFB3', lat: 52.4862, lon: -1.8904 },
+        'Glasgow': { code: '#GLAFB3', lat: 55.8642, lon: -4.2518 },
+        'Bristol': { code: '#BRIFB3', lat: 51.4545, lon: -2.5879 }
     };
 
     const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
@@ -71,14 +65,15 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
         return R * c;
     }
 
-    const calculateCampaignCode = async (zip, age, gender) => {
+    const calculateCampaignCode = async (postcode, age, gender) => {
         try {
-            // 1. Get Lat/Lon and City from Zip
-            const response = await axios.get(`https://api.zippopotam.us/us/${zip}`);
-            const place = response.data.places[0];
-            const userLat = parseFloat(place.latitude);
-            const userLon = parseFloat(place.longitude);
-            const cityName = place['place name'];
+            // 1. Get Lat/Lon and City from UK Postcode
+            // using postcodes.io (Free, no auth needed)
+            const response = await axios.get(`https://api.postcodes.io/postcodes/${postcode}`);
+            const result = response.data.result;
+            const userLat = result.latitude;
+            const userLon = result.longitude;
+            const cityName = result.admin_district || result.parliamentary_constituency || "UK";
 
             // 2. Find Nearest City
             let nearestCity = null;
@@ -93,7 +88,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
             }
 
             // Fallback
-            const cityCode = nearestCity || '#NYFB3';
+            const cityCode = nearestCity || '#LONFB3';
 
             // 3. Age Code
             const ageNum = parseInt(age);
@@ -109,7 +104,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
         } catch (error) {
             console.error("Error calculating campaign code:", error);
             // Throw error to be caught by handleSubmit
-            throw new Error("Invalid Zip Code");
+            throw new Error("Invalid Postcode");
         }
     };
 
@@ -182,8 +177,8 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
             }
         } catch (err) {
             console.error(err);
-            if (err.message === "Invalid Zip Code") {
-                setError("Invalid Zip Code. Please enter a valid US Zip Code.");
+            if (err.message === "Invalid Postcode") {
+                setError("Invalid Postcode. Please enter a valid UK Postcode.");
             } else if (err.response && err.response.data && err.response.data.message) {
                 setError(err.response.data.message);
             } else {
@@ -297,7 +292,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                                     type="tel"
                                     required
                                     className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 pl-10 pr-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
-                                    placeholder="(555) 000-0000"
+                                    placeholder="07700 900000"
                                     value={formData.phone}
                                     onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                 />
@@ -305,21 +300,16 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Zip Code *</label>
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Postcode *</label>
                             <input
                                 type="text"
                                 required
                                 className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
-                                placeholder="10001"
+                                placeholder="SW1A 1AA"
                                 value={formData.zip_code}
                                 onChange={e => setFormData({ ...formData, zip_code: e.target.value })}
                             />
                         </div>
-
-                        {/* Checkbox Removed as per request
-                    <div className="flex items-start space-x-3 pt-2">
-                         ...
-                    </div> */}
 
                         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
