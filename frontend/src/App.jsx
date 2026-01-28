@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Scanner from './components/Scanner';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
+import PhotoLab from './pages/PhotoLab';
+import ClientDashboard from './pages/ClientDashboard';
 
 
 import './index.css';
@@ -20,6 +22,8 @@ function App() {
           } />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/photo-lab" element={<PhotoLab />} />
+          <Route path="/dashboard" element={<ClientDashboard />} />
         </Routes>
 
         {/* Footer */}

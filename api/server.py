@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 import json
 import os
 import time
+import stripe
 from typing import Optional
 from pydantic import BaseModel
 from supabase import create_client, Client
@@ -11,6 +12,7 @@ from dotenv import load_dotenv
 
 # Load valid environment
 load_dotenv()
+stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 # Fix path for Vercel import resolution
 import sys
@@ -406,3 +408,122 @@ async def test_webhook_connection():
         "error": error_details,
         "message": "Failed to connect to CRM server from Vercel"
     }
+
+# ==========================================
+# CREDIT SYSTEM & STRIPE WEBHOOKS
+# ==========================================
+
+@app.post("/api/webhooks/stripe")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig_header = request.headers.get('stripe-signature')
+    endpoint_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail="Invalid payload")
+    except stripe.error.SignatureVerificationError as e:
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        
+        # Get user identifier (client_reference_id should be the Supabase User ID)
+        user_id = session.get('client_reference_id')
+        customer_email = session.get('customer_details', {}).get('email')
+        
+        # Determine credits to add (logic can be customized)
+        # Default: 10 credits for any purchase for now, or assume metadata
+        credits_to_add = int(session.get('metadata', {}).get('credits', 10))
+        
+        if user_id:
+            supabase = get_supabase()
+            
+            # 1. Update Profile Logic (Atomic increment via SQL preferred, but Python for now)
+            # Fetch current
+            profile = supabase.table('profiles').select('credits').eq('id', user_id).execute()
+            current_credits = profile.data[0]['credits'] if profile.data else 0
+            new_credits = current_credits + credits_to_add
+            
+            supabase.table('profiles').upsert({
+                'id': user_id, 
+                'email': customer_email,
+                'credits': new_credits,
+                'stripe_customer_id': session.get('customer')
+            }).execute()
+
+            # 2. Log Transaction
+            supabase.table('transactions').insert({
+                'user_id': user_id,
+                'amount': credits_to_add,
+                'type': 'deposit',
+                'description': f"Stripe Checkout {session.get('id')}",
+                'stripe_session_id': session.get('id')
+            }).execute()
+            
+            print(f"Funded {credits_to_add} credits to user {user_id}")
+
+    return {"status": "success"}
+
+@app.get("/api/credits/balance")
+async def get_credit_balance(user_id: str):
+    """Check user credit balance"""
+    try:
+        supabase = get_supabase()
+        resp = supabase.table('profiles').select('credits').eq('id', user_id).execute()
+        if resp.data:
+            return {"credits": resp.data[0]['credits']}
+        return {"credits": 0}
+    except Exception as e:
+         return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.post("/api/generate-portfolio")
+async def generate_portfolio(request: Request):
+    """
+    Deducts 1 credit and triggers Gemini generation.
+    (Stub for Phase 2)
+    """
+    try:
+        body = await request.json()
+        user_id = body.get('user_id')
+        if not user_id:
+             raise HTTPException(status_code=400, detail="Missing user_id")
+             
+        supabase = get_supabase()
+        
+        # 1. Check Balance
+        profile_resp = supabase.table('profiles').select('credits').eq('id', user_id).execute()
+        if not profile_resp.data:
+             raise HTTPException(status_code=404, detail="User profile not found")
+             
+        current_credits = profile_resp.data[0]['credits']
+        if current_credits < 1:
+             raise HTTPException(status_code=402, detail="Insufficient credits")
+        
+        # 2. Deduct Credit
+        new_credits = current_credits - 1
+        supabase.table('profiles').update({'credits': new_credits}).eq('id', user_id).execute()
+        
+        # 3. Log Transaction
+        supabase.table('transactions').insert({
+            'user_id': user_id,
+            'amount': -1,
+            'type': 'spend',
+            'description': 'Portfolio Generation'
+        }).execute()
+        
+        # 4. Trigger Generation (TODO: Integrate Vision/Generative logic)
+        # For now, return mock success
+        return {
+            "status": "success",
+            "message": "Generation started",
+            "remaining_credits": new_credits,
+            "mock_image_url": "https://placehold.co/600x400/png"
+        }
+
+    except Exception as e:
+        print(f"Gen Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
