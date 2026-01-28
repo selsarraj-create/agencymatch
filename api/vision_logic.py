@@ -1,6 +1,8 @@
-import google.generativeai as genai
+
 import os
 import json
+import base64
+import requests
 import typing_extensions as typing
 from dotenv import load_dotenv
 from PIL import Image
@@ -8,20 +10,8 @@ import io
 
 load_dotenv()
 
-# Configure Gemini API with API key
-API_KEY = os.getenv("GOOGLE_API_KEY")
-if not API_KEY:
-    print("WARNING: GOOGLE_API_KEY not found in environment.")
-else:
-    genai.configure(api_key=API_KEY)
-
-# Helper for image optimization
+# Helper for image optimization (Retained)
 def optimize_image(image_bytes, max_size=800, quality=80):
-    """
-    Resizes image if larger than max_size and compresses it.
-    Returns optimized bytes (JPEG).
-    Reduced size for faster API processing.
-    """
     try:
         if not image_bytes:
             return image_bytes
@@ -29,13 +19,10 @@ def optimize_image(image_bytes, max_size=800, quality=80):
         print(f"Optimizing image. Original size: {len(image_bytes)} bytes")
         img = Image.open(io.BytesIO(image_bytes))
         
-        # Check dimensions
         if img.width > max_size or img.height > max_size:
             print(f"Resizing from {img.width}x{img.height}")
             img.thumbnail((max_size, max_size))
-            print(f"Resized to {img.width}x{img.height}")
             
-        # Convert to RGB if RGBA (needed for JPEG)
         if img.mode in ('RGBA', 'P'):
             img = img.convert('RGB')
             
@@ -46,66 +33,27 @@ def optimize_image(image_bytes, max_size=800, quality=80):
         return optimized_bytes
     except Exception as e:
         print(f"Image optimization warning: {e}")
-        return image_bytes # Fallback to original
-
-# Define the response schema explicitly for Gemini 1.5 strict output
-class FaceGeometry(typing.TypedDict):
-    primary_shape: str
-    jawline_definition: str
-    structural_note: str
-
-class MarketCategorization(typing.TypedDict):
-    primary: str
-    rationale: str
-
-class AestheticAudit(typing.TypedDict):
-    lighting_quality: str
-    professional_readiness: str
-    technical_flaw: str
-
-class AnalysisResult(typing.TypedDict):
-    face_geometry: FaceGeometry
-    market_categorization: MarketCategorization
-    aesthetic_audit: AestheticAudit
-    suitability_score: int
-    scout_feedback: str
-
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
-
-# Config for balanced creativity and JSON format
-generation_config = {
-    "temperature": 0.4,
-    "response_mime_type": "application/json",
-    "response_schema": AnalysisResult
-}
-
-# Safety settings to allow model analysis (BLOCK_NONE)
-safety_settings = {
-    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-}
-
-# Update to gemini-3-flash-preview
-model = genai.GenerativeModel(
-    'gemini-3-flash-preview',
-    generation_config=generation_config,
-    safety_settings=safety_settings
-)
+        return image_bytes
 
 def analyze_image(image_bytes, mime_type="image/jpeg"):
     """
-    Analyzes an image using Gemini 1.5 Flash to extract technical industry markers.
+    Analyzes an image using Gemini 1.5 Flash via REST API (requests)
+    to avoid heavy google-generativeai SDK + grpcio dependencies.
     """
     try:
-        # Optimize image first (resize & compress)
-        # We always convert to JPEG for uniformity and compression
-        optimized_bytes = optimize_image(image_bytes)
-        processing_mime_type = "image/jpeg" # We convert to JPEG
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY not found")
 
-        # Prompt Pivot: Professional Technical Audit
-        prompt = """
+        # 1. Optimize Image
+        optimized_bytes = optimize_image(image_bytes)
+        b64_image = base64.b64encode(optimized_bytes).decode('utf-8')
+
+        # 2. REST API Config
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        
+        # 3. Payload Construction
+        prompt_text = """
         Analyze this image for modeling potential. Return JSON:
         {
           "face_geometry": {
@@ -125,66 +73,71 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
           "suitability_score": 75-85,
           "scout_feedback": "One sentence professional assessment."
         }
-        
-        Score 75-85 for most people. Focus on natural features, not photo quality.
+        Score 75-85 for most people.
         """
+
+        payload = {
+            "contents": [{
+                "parts": [
+                    {"text": prompt_text},
+                    {
+                        "inline_data": {
+                            "mime_type": "image/jpeg",
+                            "data": b64_image
+                        }
+                    }
+                ]
+            }],
+            "generationConfig": {
+                "temperature": 0.4,
+                "response_mime_type": "application/json"
+            }
+        }
+
+        # 4. Make Request
+        print("Sending REST request to Gemini API...")
+        response = requests.post(url, json=payload, timeout=25)
+        response.raise_for_status()
         
-        # Validating input type
-        if not optimized_bytes:
-            raise ValueError("No image data provided")
+        resp_json = response.json()
         
-        # Ensure image_bytes is passed correctly
-        # The SDK handles bytes directly if passed as a Part with mime_type
-        # Add timeout to prevent hanging (25 seconds max)
-        print("Sending request to Gemini API...")
-        response = model.generate_content(
-            [
-                {"mime_type": processing_mime_type, "data": optimized_bytes}, 
-                prompt
-            ],
-            request_options={"timeout": 25}  # 25 second timeout
-        )
-        print("Received response from Gemini API")
-        
-        # Check validation
-        print(f"Candidates generated: {len(response.candidates)}")
-        if not response.parts:
-             # If blocked despite safety settings, log it
-             print(f"Prompt FeedBack: {response.prompt_feedback}")
-             
-        result = json.loads(response.text)
-        
-        # Enforce minimum score of 70 as requested
+        # 5. Parse Result
+        # API Response structure: candidates[0].content.parts[0].text
+        try:
+            text_content = resp_json['candidates'][0]['content']['parts'][0]['text']
+            result = json.loads(text_content)
+        except (KeyError, IndexError, json.JSONDecodeError) as e:
+            print(f"Failed to parse Gemini response: {resp_json}")
+            raise ValueError("Invalid API response format")
+
+        # 6. Post-process Score
         if 'suitability_score' in result:
             try:
                 score = int(result['suitability_score'])
-                print(f"Raw Score: {score}")
                 result['suitability_score'] = max(score, 70)
             except:
                 result['suitability_score'] = 70
         else:
             result['suitability_score'] = 70
-        
-        # Add fallback values for fields that AI sometimes skips
+            
+        # Fallbacks
         if 'face_geometry' in result:
             if not result['face_geometry'].get('jawline_definition'):
                 result['face_geometry']['jawline_definition'] = 'Defined'
         
         if not result.get('scout_feedback'):
             result['scout_feedback'] = 'Strong commercial potential with natural appeal.'
-                
+
         return result
 
     except Exception as e:
         import traceback
         traceback.print_exc()
-        print(f"Error in Gemini analysis: {e}")
-        # Return a mock response if API fails (for development safety) or re-raise
-        # For now, returning minimal error structure
+        print(f"Error in Gemini REST analysis: {e}")
         return {
             "error": f"{str(e)}",
             "suitability_score": 70,
-            "market_categorization": {"primary": "Unknown", "rationale": "Analysis failed."},
+            "market_categorization": {"primary": "Error", "rationale": "Analysis failed."},
             "face_geometry": {"primary_shape": "Unknown", "jawline_definition": "Unknown", "structural_note": "N/A"},
             "aesthetic_audit": {"lighting_quality": "Unknown", "professional_readiness": "Unknown", "technical_flaw": "Analysis Error"},
             "scout_feedback": f"Analysis failed: {str(e)}"

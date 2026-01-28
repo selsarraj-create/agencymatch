@@ -4,7 +4,8 @@ python-multipart
 python-dotenv
 pydantic
 supabase
-google-generativeai
+requests
+typing_extensions
 # Force cache bust v10 - remove debug logging
 Pillow
 stripe
