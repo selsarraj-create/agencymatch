@@ -167,8 +167,19 @@ const AdminDashboard = () => {
                     <h1 className="text-3xl font-bold text-white flex items-center gap-2">
                         <Shield className="text-red-500" /> Admin Console
                     </h1>
-                    <div className="bg-red-500/10 border border-red-500/20 px-4 py-2 rounded-full text-red-400 text-xs font-mono flex items-center gap-2">
-                        <Lock size={12} /> SECURE AREA
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={async () => {
+                                await supabase.auth.signOut();
+                                navigate('/login');
+                            }}
+                            className="text-sm text-gray-400 hover:text-white border border-white/10 px-4 py-2 rounded-lg hover:bg-white/5"
+                        >
+                            Logout
+                        </button>
+                        <div className="bg-red-500/10 border border-red-500/20 px-4 py-2 rounded-full text-red-400 text-xs font-mono flex items-center gap-2">
+                            <Lock size={12} /> SECURE AREA
+                        </div>
                     </div>
                 </div>
 

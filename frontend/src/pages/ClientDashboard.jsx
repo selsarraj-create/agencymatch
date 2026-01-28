@@ -150,8 +150,8 @@ const ClientDashboard = () => {
                                     onClick={() => handleBuyCredits(pkg.id)}
                                     disabled={!!processingPkg}
                                     className={`relative group flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all ${pkg.popular
-                                            ? 'border-studio-gold bg-studio-gold/10 hover:bg-studio-gold/20'
-                                            : 'border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10'
+                                        ? 'border-studio-gold bg-studio-gold/10 hover:bg-studio-gold/20'
+                                        : 'border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10'
                                         }`}
                                 >
                                     {pkg.popular && (
@@ -196,12 +196,23 @@ const ClientDashboard = () => {
                             <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Available Credits</p>
                             <p className="text-2xl font-bold text-white leading-none">{credits}</p>
                         </div>
-                        <button
-                            onClick={() => setShowBuyModal(true)}
-                            className="ml-4 px-4 py-2 bg-studio-gold text-black text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-white transition-colors"
-                        >
-                            Buy More
-                        </button>
+                        <div className="flex flex-col gap-2 ml-4">
+                            <button
+                                onClick={() => setShowBuyModal(true)}
+                                className="px-4 py-2 bg-studio-gold text-black text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-white transition-colors"
+                            >
+                                Buy More
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    await supabase.auth.signOut();
+                                    navigate('/login');
+                                }}
+                                className="text-xs text-gray-400 hover:text-white underline"
+                            >
+                                Logout
+                            </button>
+                        </div>
                     </div>
                 </div>
 
