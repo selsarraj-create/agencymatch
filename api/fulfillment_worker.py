@@ -16,10 +16,7 @@ if not url or not key:
 
 supabase = create_client(url, key)
 
-# Browserless Config
-BROWSERLESS_KEY = os.getenv('BROWSERLESS_KEY', 'YOUR_TOKEN_HERE')
-# Updated Endpoint for Stability (SFO)
-BROWSERLESS_URL = f"wss://production-sfo.browserless.io/playwright?token={BROWSERLESS_KEY}&proxy=residential"
+# Browserless Config (Loaded in process_submission)
 
 async def process_submission(submission_id, lead_data, agency_url):
     """
@@ -32,15 +29,17 @@ async def process_submission(submission_id, lead_data, agency_url):
 
     try:
         async with async_playwright() as p:
-            # Connect to Browserless
-            if os.getenv('BROWSERLESS_KEY'):
-                print("Connecting to Browserless...")
-                browser = await p.chromium.connect_over_cdp(BROWSERLESS_URL)
-            else:
-                print("Using local browser (Dev Mode Only)...")
-                if os.getenv('VERCEL'):
-                     raise Exception("Cannot launch local browser in Vercel. Set BROWSERLESS_KEY.")
-                browser = await p.chromium.launch(headless=True)
+    try:
+        async with async_playwright() as p:
+            # Connect to Browserless - STRICT MODE (No local fallback)
+            token = os.getenv('BROWSERLESS_TOKEN')
+            if not token:
+                 raise ValueError("Missing BROWSERLESS_TOKEN env var")
+                 
+            print(f"Connecting to Browserless (SFO)...")
+            # Using specific pattern requested by user
+            browserless_ws = f"wss://production-sfo.browserless.io/playwright?token={token}&proxy=residential"
+            browser = await p.chromium.connect_over_cdp(browserless_ws)
             
             context = await browser.new_context()
             page = await context.new_page()
