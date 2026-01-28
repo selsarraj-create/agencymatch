@@ -176,6 +176,8 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
 
             if (errorMessage === "Invalid Postcode") {
                 setError("Invalid Postcode. Please enter a valid UK Postcode.");
+            } else if (errorMessage.includes("rate limit exceeded")) {
+                setError("Too many signup attempts. Please wait a while or try a different email.");
             } else if (errorMessage.includes("User already registered") || errorMessage.includes("unique constraint")) {
                 // Return a React Node with a link for better UX, or just text if preferred.
                 // Since setError expects string in current usage, we'll keep it simple or upgrade setError/display.
