@@ -30,17 +30,17 @@ async def process_submission(submission_id, lead_data, agency_url):
     # Update status to processing
     supabase.table('agency_submissions').update({'status': 'processing'}).eq('id', submission_id).execute()
 
-    browser = None
     try:
         async with async_playwright() as p:
             # Connect to Browserless
-            # Note: For local dev without browserless key, fallback to local launch
-            if 'YOUR_TOKEN' in BROWSERLESS_URL or not os.getenv('BROWSERLESS_KEY'):
-                print("Using local browser (Dev Mode)...")
-                browser = await p.chromium.launch(headless=True)
-            else:
+            if os.getenv('BROWSERLESS_KEY'):
                 print("Connecting to Browserless...")
                 browser = await p.chromium.connect_over_cdp(BROWSERLESS_URL)
+            else:
+                print("Using local browser (Dev Mode Only)...")
+                if os.getenv('VERCEL'):
+                     raise Exception("Cannot launch local browser in Vercel. Set BROWSERLESS_KEY.")
+                browser = await p.chromium.launch(headless=True)
             
             context = await browser.new_context()
             page = await context.new_page()

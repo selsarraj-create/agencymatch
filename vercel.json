@@ -6,9 +6,12 @@
   "framework": null,
   "functions": {
     "api/**/*.py": {
-      "excludeFiles": "{**/__pycache__/**,**/tests/**,**/static/**,**/assets/**,**/*.exe,**/*.msi,**/*.zip}",
+      "excludeFiles": "{**/__pycache__/**,**/node_modules/**,**/dist/**,**/tests/**,**/static/**,**/assets/**,**/*.exe,**/*.msi,**/*.zip}",
       "maxDuration": 60
     }
+  },
+  "env": {
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
   },
   "rewrites": [
     {
