@@ -162,13 +162,16 @@ async def create_lead(
     try:
         supabase = get_supabase()
         
-        # 1. Duplicate Check
+        # 1. Duplicate/Update Check
         existing = supabase.table('leads').select('id').or_(f"email.eq.{email},phone.eq.{phone}").execute()
+        existing_id = None
         if existing.data and len(existing.data) > 0:
-            return JSONResponse(
-                status_code=400,
-                content={"status": "error", "message": "This email or phone number has already been submitted."}
-            )
+            existing_id = existing.data[0]['id']
+            print(f"Lead exists ({existing_id}), will update instead of create.")
+            # return JSONResponse(
+            #     status_code=400,
+            #     content={"status": "error", "message": "This email or phone number has already been submitted."}
+            # )
 
         # 2. Image Upload
         image_url = None
@@ -210,10 +213,10 @@ async def create_lead(
             except Exception as e:
                 print(f"Upload failed: {e}")
                 # Save error to database to view in admin
-                supabase.table('leads').update({
-                    'webhook_status': 'upload_failed',
-                    'webhook_response': f"Image Upload Error: {str(e)}"
-                }).eq('id', lead_id).execute()
+                # supabase.table('leads').update({
+                #     'webhook_status': 'upload_failed',
+                #     'webhook_response': f"Image Upload Error: {str(e)}"
+                # }).eq('id', lead_id).execute()
                 # Stop processing to prevent sending incomplete data
                 return {
                     "status": "error",
@@ -245,18 +248,31 @@ async def create_lead(
             'score': score,
             'category': category,
             'analysis_json': analysis_json,
-            'image_url': image_url,
             'webhook_sent': False,
             'webhook_status': 'pending',
             'webhook_response': None
         }
+
+        # Only update image_url if a new one was uploaded
+        if image_url:
+            lead_record['image_url'] = image_url
         
-        result = supabase.table('leads').insert(lead_record).execute()
+        if existing_id:
+            # UPDATE existing
+            result = supabase.table('leads').update(lead_record).eq('id', existing_id).execute()
+            lead_id = existing_id
+        else:
+            # INSERT new
+            # Ensure image_url is set (might be None)
+            lead_record['image_url'] = image_url 
+            result = supabase.table('leads').insert(lead_record).execute()
         
         if not result.data:
-            raise Exception("Insert failed")
-            
-        lead_id = result.data[0]['id']
+            # Fallback if update returned no data (unlikely)
+            if existing_id: lead_id = existing_id
+            else: raise Exception("Insert/Update failed")
+        elif len(result.data) > 0:
+            lead_id = result.data[0]['id']
         
         # 4. Offload webhook and email processing to background
         webhook_url = os.getenv('CRM_WEBHOOK_URL')
