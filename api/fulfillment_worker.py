@@ -18,8 +18,8 @@ supabase = create_client(url, key)
 
 # Browserless Config
 BROWSERLESS_KEY = os.getenv('BROWSERLESS_KEY', 'YOUR_TOKEN_HERE')
-# Using residential proxy UK as requested
-BROWSERLESS_URL = f"wss://chrome.browserless.io?token={BROWSERLESS_KEY}&proxy=residential&proxyCountry=gb"
+# Updated Endpoint for Stability (SFO)
+BROWSERLESS_URL = f"wss://production-sfo.browserless.io/playwright?token={BROWSERLESS_KEY}&proxy=residential"
 
 async def process_submission(submission_id, lead_data, agency_url):
     """
@@ -30,8 +30,9 @@ async def process_submission(submission_id, lead_data, agency_url):
     # Update status to processing
     supabase.table('agency_submissions').update({'status': 'processing'}).eq('id', submission_id).execute()
 
-    async with async_playwright() as p:
-        try:
+    browser = None
+    try:
+        async with async_playwright() as p:
             # Connect to Browserless
             # Note: For local dev without browserless key, fallback to local launch
             if 'YOUR_TOKEN' in BROWSERLESS_URL or not os.getenv('BROWSERLESS_KEY'):
@@ -80,16 +81,15 @@ async def process_submission(submission_id, lead_data, agency_url):
             }).eq('id', submission_id).execute()
             
             print(f"Submission {submission_id} Success!")
-
-            await browser.close()
             return True
 
-        except Exception as e:
-            print(f"Submission Failed: {e}")
-            await capture_failure(submission_id, str(e))
-            if 'browser' in locals():
-                await browser.close()
-            return False
+    except Exception as e:
+        print(f"Submission Failed: {e}")
+        await capture_failure(submission_id, str(e))
+        return False
+    finally:
+        if browser:
+            await browser.close()
 
 async def capture_failure(submission_id, error_msg):
     """

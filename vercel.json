@@ -5,7 +5,8 @@
   "devCommand": "cd frontend && npm run dev",
   "framework": null,
   "functions": {
-    "api/server.py": {
+    "api/**/*.py": {
+      "excludeFiles": "{**/__pycache__/**,**/tests/**,**/static/**,**/assets/**,**/*.exe,**/*.msi,**/*.zip}",
       "maxDuration": 60
     }
   },

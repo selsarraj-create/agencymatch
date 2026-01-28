@@ -9,4 +9,4 @@ google-generativeai
 # Force cache bust v10 - remove debug logging
 Pillow
 stripe
-playwright
+playwright-core
