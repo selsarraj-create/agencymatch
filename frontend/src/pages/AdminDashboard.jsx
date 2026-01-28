@@ -27,14 +27,14 @@ const AdminDashboard = () => {
             return;
         }
 
-        // Check Admin Status Locally first (for UI speed), backend verifies safely
-        const { data: profile, error } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
+        // Check Admin Status using robust RPC call (bypasses RLS)
+        const { data: isAdmin, error } = await supabase.rpc('am_i_admin');
 
-        console.log("Admin Check:", { user: user.id, profile, error });
+        console.log("Admin Check RPC:", { user: user.id, isAdmin, error });
 
-        if (error || !profile || !profile.is_admin) {
-            console.warn("Access Denied: Not an admin", profile);
-            navigate('/dashboard'); // Kick non-admins out
+        if (error || !isAdmin) {
+            console.warn("Access Denied: Not an admin", isAdmin);
+            navigate('/dashboard');
             return;
         }
 
