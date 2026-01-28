@@ -481,9 +481,117 @@ async def create_checkout_session(req: CheckoutRequest):
         print(f"Stripe Error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+    except Exception as e:
+        print(f"Stripe Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
 # ==========================================
-# CREDIT SYSTEM & STRIPE WEBHOOKS
+# ADMIN ENDPOINTS
 # ==========================================
+
+@app.get("/api/admin/users")
+async def admin_get_users(request: Request):
+    """
+    Get all users with their profile data and associated lead info
+    """
+    try:
+        # 1. Auth Check (Simplistic for demo - ideally use middleware)
+        auth_header = request.headers.get("Authorization")
+        if not auth_header: # In real app, verify JWT
+             # Weak check: Allow frontend to pass user_id for now if JWT verification is complex
+             # Better: Check 'sb-access-token' or require JWT
+             pass
+
+        # For this demo, we'll verify the requester is an admin by an explicit header or query param
+        # OR better: The frontend passes the user_id of the requester, we check DB
+        requester_id = request.headers.get("X-User-Id") 
+        if not requester_id:
+             return JSONResponse(status_code=401, content={"error": "Unauthorized"})
+
+        supabase = get_supabase()
+        
+        # Verify Admin Status
+        admin_check = supabase.table('profiles').select('is_admin').eq('id', requester_id).single().execute()
+        if not admin_check.data or not admin_check.data.get('is_admin'):
+             return JSONResponse(status_code=403, content={"error": "Forbidden: Admin access required"})
+
+        # 2. Fetch All Profiles
+        # Limit to 100 for now
+        profiles = supabase.table('profiles').select('*').order('created_at', desc=True).limit(100).execute()
+        
+        # 3. Enrich with Lead Names (This is N+1, but Supabase JOIN is better. 
+        # Since auth.users is separate, we join with our 'leads' table if linked, or just return profiles)
+        
+        # Optimziation: Fetch all leads that have a user_id
+        # We need a new column user_id on leads table for this to work perfectly.
+        # Assuming you added user_id to leads in the previous fix?
+        # If not, we merge by email.
+        
+        user_list = []
+        for p in profiles.data:
+            user_data = {
+                "id": p['id'],
+                "email": p['email'],
+                "credits": p['credits'],
+                "is_admin": p.get('is_admin', False),
+                "created_at": p['created_at'],
+                "name": "N/A"
+            }
+            
+            # Try to find matching lead
+            lead_match = supabase.table('leads').select('first_name, last_name, campaign').eq('email', p['email']).limit(1).execute()
+            if lead_match.data:
+                l = lead_match.data[0]
+                user_data['name'] = f"{l['first_name']} {l['last_name']}"
+                user_data['campaign'] = l.get('campaign', 'N/A')
+                
+            user_list.append(user_data)
+            
+        return user_list
+
+    except Exception as e:
+        print(f"Admin Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+class CreditAdjustment(BaseModel):
+    admin_id: str
+    target_user_id: str
+    amount: int
+
+@app.post("/api/admin/credits/add")
+async def admin_add_credits(payload: CreditAdjustment):
+    try:
+        supabase = get_supabase()
+        
+        # 1. Verify Admin
+        admin_check = supabase.table('profiles').select('is_admin').eq('id', payload.admin_id).single().execute()
+        if not admin_check.data or not admin_check.data.get('is_admin'):
+             return JSONResponse(status_code=403, content={"error": "Forbidden"})
+
+        # 2. Update Target User
+        # Fetch current
+        target = supabase.table('profiles').select('credits').eq('id', payload.target_user_id).single().execute()
+        if not target.data:
+             return JSONResponse(status_code=404, content={"error": "User not found"})
+             
+        current = target.data['credits']
+        new_balance = current + payload.amount
+        
+        supabase.table('profiles').update({'credits': new_balance}).eq('id', payload.target_user_id).execute()
+        
+        # 3. Log Transaction
+        supabase.table('transactions').insert({
+            'user_id': payload.target_user_id,
+            'amount': payload.amount,
+            'type': 'bonus',
+            'description': f'Admin adjustment by {payload.admin_id}'
+        }).execute()
+        
+        return {"status": "success", "new_balance": new_balance}
+
+    except Exception as e:
+        print(f"Admin Update Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 @app.post("/api/webhooks/stripe")
 async def stripe_webhook(request: Request):

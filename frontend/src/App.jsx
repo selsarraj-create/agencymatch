@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Scanner from './components/Scanner';
 import Login from './pages/Login';
-import Admin from './pages/Admin';
+import AdminDashboard from './pages/AdminDashboard';
 import PhotoLab from './pages/PhotoLab';
 import ClientDashboard from './pages/ClientDashboard';
 
@@ -21,7 +21,7 @@ function App() {
             </div>
           } />
           <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/photo-lab" element={<PhotoLab />} />
           <Route path="/dashboard" element={<ClientDashboard />} />
         </Routes>
