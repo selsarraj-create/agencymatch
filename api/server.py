@@ -522,9 +522,9 @@ async def admin_get_users(request: Request):
 
         supabase = get_supabase()
         
-        # Verify Admin Status
-        admin_check = supabase.table('profiles').select('is_admin').eq('id', requester_id).single().execute()
-        if not admin_check.data or not admin_check.data.get('is_admin'):
+        # Verify Admin Status (via RPC to avoid RLS recursion)
+        admin_check = supabase.rpc('is_user_admin', {'check_id': requester_id}).execute()
+        if not admin_check.data:
              return JSONResponse(status_code=403, content={"error": "Forbidden: Admin access required"})
 
         # 2. Fetch All Profiles
@@ -575,9 +575,9 @@ async def admin_add_credits(payload: CreditAdjustment):
     try:
         supabase = get_supabase()
         
-        # 1. Verify Admin
-        admin_check = supabase.table('profiles').select('is_admin').eq('id', payload.admin_id).single().execute()
-        if not admin_check.data or not admin_check.data.get('is_admin'):
+        # 1. Verify Admin (via RPC)
+        admin_check = supabase.rpc('is_user_admin', {'check_id': payload.admin_id}).execute()
+        if not admin_check.data:
              return JSONResponse(status_code=403, content={"error": "Forbidden"})
 
         # 2. Update Target User
