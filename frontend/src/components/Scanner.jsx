@@ -268,7 +268,7 @@ const Scanner = () => {
                                                     onClick={() => setShowApplyForm(true)}
                                                     className="bg-studio-gold hover:bg-yellow-600 text-black font-bold py-3 px-8 rounded-full text-lg transition-transform hover:scale-105 active:scale-95 shadow-lg shadow-studio-gold/20"
                                                 >
-                                                    Apply Now
+                                                    Create Account
                                                 </button>
                                                 <p className="text-xs text-gray-400 mt-4">
                                                     Unlock your full scout report
