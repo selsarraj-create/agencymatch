@@ -436,7 +436,19 @@ class CheckoutRequest(BaseModel):
 @app.post("/api/create-checkout-session")
 async def create_checkout_session(req: CheckoutRequest):
     try:
-        domain_url = os.getenv('VITE_SITE_URL', 'http://localhost:5173')
+        # Get correct domain
+        # Vercel automatically sets VERCEL_URL, but it lacks 'https://'
+        vercel_url = os.getenv('VERCEL_URL')
+        site_url = os.getenv('VITE_SITE_URL')
+        
+        if site_url:
+            domain_url = site_url
+        elif vercel_url:
+            domain_url = f"https://{vercel_url}"
+        else:
+            domain_url = 'http://localhost:5173'
+            
+        print(f"Using Stripe Domain: {domain_url}")
         
         # Pricing Tier Definition (GBP)
         PRICING_TIERS = {
