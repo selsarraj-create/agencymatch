@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { LayoutDashboard, ExternalLink, CheckCircle, XCircle, Clock, Loader2, Coins } from 'lucide-react';
 
 const ClientDashboard = () => {
@@ -8,6 +9,26 @@ const ClientDashboard = () => {
     const [credits, setCredits] = useState(0);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+
+    // Handle Buy Credits
+    const handleBuyCredits = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
+            const response = await axios.post(`${API_URL}/create-checkout-session`, {
+                user_id: user.id
+            });
+
+            if (response.data.url) {
+                window.location.href = response.data.url;
+            }
+        } catch (error) {
+            console.error("Checkout Error:", error);
+            alert("Failed to start checkout. Please try again.");
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -113,7 +134,10 @@ const ClientDashboard = () => {
                             <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Available Credits</p>
                             <p className="text-2xl font-bold text-white leading-none">{credits}</p>
                         </div>
-                        <button className="ml-4 px-4 py-2 bg-studio-gold text-black text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-white transition-colors">
+                        <button
+                            onClick={handleBuyCredits}
+                            className="ml-4 px-4 py-2 bg-studio-gold text-black text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-white transition-colors"
+                        >
                             Buy More
                         </button>
                     </div>

@@ -426,6 +426,56 @@ async def test_webhook_connection():
     }
 
 # ==========================================
+# PAYMENT ENDPOINTS
+# ==========================================
+
+class CheckoutRequest(BaseModel):
+    user_id: str
+    amount: int = 10 # Default to 10 credits
+
+@app.post("/api/create-checkout-session")
+async def create_checkout_session(req: CheckoutRequest):
+    try:
+        domain_url = os.getenv('VITE_SITE_URL', 'http://localhost:5173')
+        
+        # Determine price based on amount (Simple logic for now)
+        # In production, use real Stripe Price IDs
+        # Here we use 'price_data' for custom amounts or pre-defined logic
+        
+        # Hardcoded for Demo: 10 Credits = $50.00
+        unit_amount = 5000 
+        
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {
+                            'name': f'{req.amount} AgencyMatch Credits',
+                            'description': 'credits to scan and submit models',
+                            'images': ['https://agencymatch.vercel.app/logo.png'], 
+                        },
+                        'unit_amount': unit_amount,
+                    },
+                    'quantity': 1,
+                },
+            ],
+            mode='payment',
+            success_url=domain_url + '/dashboard?success=true',
+            cancel_url=domain_url + '/dashboard?canceled=true',
+            client_reference_id=req.user_id,
+            metadata={
+                'credits': req.amount,
+                'user_id': req.user_id
+            }
+        )
+        return {"url": checkout_session.url}
+    except Exception as e:
+        print(f"Stripe Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+# ==========================================
 # CREDIT SYSTEM & STRIPE WEBHOOKS
 # ==========================================
 
