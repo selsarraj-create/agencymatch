@@ -50,7 +50,8 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
         b64_image = base64.b64encode(optimized_bytes).decode('utf-8')
 
         # 2. REST API Config
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        # Using gemini-3-flash-preview as strictly requested by user
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key={api_key}"
         
         # 3. Payload Construction
         prompt_text = """
