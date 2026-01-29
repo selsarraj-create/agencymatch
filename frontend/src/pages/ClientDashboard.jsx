@@ -10,6 +10,10 @@ const ClientDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [processingPkg, setProcessingPkg] = useState(null);
+    const [agencies, setAgencies] = useState([]);
+    const [selectedAgencies, setSelectedAgencies] = useState(new Set());
+    const [applying, setApplying] = useState(false);
+
     const navigate = useNavigate();
 
     const PACKAGES = [
@@ -67,9 +71,19 @@ const ClientDashboard = () => {
                 .order('created_at', { ascending: false });
 
             if (data) setSubmissions(data);
+
+            // 3. Fetch Agencies
+            try {
+                const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
+                const agencyResp = await axios.get(`${API_URL}/agencies`);
+                if (agencyResp.data) setAgencies(agencyResp.data);
+            } catch (e) {
+                console.error("Failed to load agencies", e);
+            }
+
             setLoading(false);
 
-            // 3. Realtime Subscriptions
+            // 4. Realtime Subscriptions
             const channel = supabase.channel('dashboard_realtime')
                 // Listen for Submissions
                 .on('postgres_changes', {
@@ -108,6 +122,49 @@ const ClientDashboard = () => {
             setSubmissions(prev => prev.map(item =>
                 item.id === payload.new.id ? payload.new : item
             ));
+        }
+    };
+
+    const toggleAgency = (id) => {
+        const newSelected = new Set(selectedAgencies);
+        if (newSelected.has(id)) newSelected.delete(id);
+        else newSelected.add(id);
+        setSelectedAgencies(newSelected);
+    };
+
+    const handleBulkApply = async () => {
+        if (selectedAgencies.size === 0) return;
+
+        const cost = selectedAgencies.size;
+        if (credits < cost) {
+            alert(`Insufficient credits. You need ${cost} credits.`);
+            setShowBuyModal(true);
+            return;
+        }
+
+        if (!window.confirm(`Apply to ${selectedAgencies.size} agencies for ${cost} credits?`)) return;
+
+        setApplying(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
+
+            const response = await axios.post(`${API_URL}/apply-bulk`, {
+                user_id: user.id,
+                agency_ids: Array.from(selectedAgencies)
+            });
+
+            if (response.data.status === 'success') {
+                alert(response.data.message);
+                setCredits(response.data.new_balance); // Optimistic update
+                setSelectedAgencies(new Set()); // Clear selection
+                // Submissions will update via Realtime automatically
+            }
+        } catch (error) {
+            console.error("Apply Failed:", error);
+            alert(error.response?.data?.error || "Application failed");
+        } finally {
+            setApplying(false);
         }
     };
 
@@ -150,8 +207,8 @@ const ClientDashboard = () => {
                                     onClick={() => handleBuyCredits(pkg.id)}
                                     disabled={!!processingPkg}
                                     className={`relative group flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all ${pkg.popular
-                                        ? 'border-studio-gold bg-studio-gold/10 hover:bg-studio-gold/20'
-                                        : 'border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10'
+                                            ? 'border-studio-gold bg-studio-gold/10 hover:bg-studio-gold/20'
+                                            : 'border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10'
                                         }`}
                                 >
                                     {pkg.popular && (
@@ -213,6 +270,55 @@ const ClientDashboard = () => {
                                 Logout
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                {/* NEW: Agency Application Section */}
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-semibold text-white">Agency Directory ({agencies.length})</h2>
+                        {selectedAgencies.size > 0 && (
+                            <button
+                                onClick={handleBulkApply}
+                                disabled={applying}
+                                className="bg-studio-gold text-black px-6 py-2 rounded-full font-bold hover:bg-white transition-colors flex items-center gap-2"
+                            >
+                                {applying ? <Loader2 className="animate-spin" /> : '🚀 Apply Selected'}
+                                <span className="text-xs bg-black/10 px-2 py-1 rounded-full">
+                                    {selectedAgencies.size} Credits
+                                </span>
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto glass-panel p-4 rounded-xl border border-white/10">
+                        {agencies.length === 0 ? (
+                            <div className="col-span-full text-center text-gray-500 py-8">
+                                Loading agencies or no agencies found...
+                            </div>
+                        ) : (
+                            agencies.map(agency => (
+                                <div
+                                    key={agency.id}
+                                    onClick={() => toggleAgency(agency.id)}
+                                    className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedAgencies.has(agency.id)
+                                            ? 'bg-studio-gold/20 border-studio-gold'
+                                            : 'bg-white/5 border-white/5 hover:bg-white/10'
+                                        }`}
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h3 className="font-bold text-white text-sm">{agency.name}</h3>
+                                            <p className="text-xs text-gray-400">{agency.location}</p>
+                                        </div>
+                                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${selectedAgencies.has(agency.id) ? 'bg-studio-gold border-studio-gold' : 'border-gray-500'
+                                            }`}>
+                                            {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-black" />}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 

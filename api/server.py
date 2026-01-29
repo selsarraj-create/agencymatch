@@ -719,3 +719,76 @@ async def generate_portfolio(request: Request):
     except Exception as e:
         print(f"Gen Error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+# ==========================================
+# AGENCY APPLICATION & AUTOMATION
+# ==========================================
+
+@app.get("/api/agencies")
+async def get_agencies():
+    try:
+        supabase = get_supabase()
+        response = supabase.table('agencies').select('*').eq('status', 'active').order('name').execute()
+        return response.data
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+class BulkApplyRequest(BaseModel):
+    user_id: str
+    agency_ids: list[str]
+
+@app.post("/api/apply-bulk")
+async def apply_bulk(req: BulkApplyRequest):
+    try:
+        supabase = get_supabase()
+        
+        count = len(req.agency_ids)
+        if count == 0:
+            return {"status": "error", "message": "No agencies selected"}
+            
+        cost = count * 1 # 1 Credit per agency
+        
+        # 1. Check Balance
+        profile_resp = supabase.table('profiles').select('credits').eq('id', req.user_id).single().execute()
+        if not profile_resp.data:
+             return JSONResponse(status_code=404, content={"error": "User profile not found"})
+             
+        current_credits = profile_resp.data['credits']
+        if current_credits < cost:
+             return JSONResponse(status_code=402, content={"error": f"Insufficient credits. Need {cost}, have {current_credits}."})
+        
+        # 2. Deduct Credits
+        new_balance = current_credits - cost
+        supabase.table('profiles').update({'credits': new_balance}).eq('id', req.user_id).execute()
+        
+        # 3. Log Transaction
+        supabase.table('transactions').insert({
+            'user_id': req.user_id,
+            'amount': -cost,
+            'type': 'spend',
+            'description': f'Applied to {count} agencies'
+        }).execute()
+        
+        # 4. Create Submissions (Mock Browserless)
+        # In a real scenario, this would queue a job for the worker. 
+        # Here we just insert the record as 'pending' -> 'success'
+        submissions = []
+        for agency_id in req.agency_ids:
+            submissions.append({
+                'user_id': req.user_id,
+                'status': 'success', # Instant success for demo
+                'agency_url': f"Agency ID: {agency_id}", # Placeholder connection
+                'proof_screenshot_url': "https://placehold.co/600x400/png?text=Application+Sent"
+            })
+            
+        supabase.table('agency_submissions').insert(submissions).execute()
+        
+        return {
+            "status": "success", 
+            "message": f"Successfully applied to {count} agencies!",
+            "new_balance": new_balance
+        }
+
+    except Exception as e:
+        print(f"Apply Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
