@@ -164,7 +164,7 @@ const LandingPage = () => {
 
             {/* How It Works Steps */}
             <section className="py-20 px-4 relative overflow-hidden">
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-4xl mx-auto mb-20">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
                         {steps.map((step, i) => (
                             <div key={i} className="flex flex-col items-center text-center max-w-[200px]">
@@ -176,6 +176,46 @@ const LandingPage = () => {
                         ))}
                         {/* Connecting Line (Desktop) */}
                         <div className="absolute top-6 left-20 right-20 h-0.5 bg-gradient-to-r from-transparent via-studio-gold/30 to-transparent -z-10 hidden md:block" />
+                    </div>
+                </div>
+
+                {/* Testimonial Ticker */}
+                <div className="relative w-full overflow-hidden border-y border-white/5 bg-white/5 py-10">
+                    <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-studio-black to-transparent z-10 pointer-events-none" />
+                    <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-studio-black to-transparent z-10 pointer-events-none" />
+
+                    <div className="flex gap-8 overflow-hidden">
+                        <motion.div
+                            className="flex gap-8 min-w-max"
+                            animate={{ x: "-50%" }}
+                            transition={{ repeat: Infinity, ease: "linear", duration: 30 }}
+                        >
+                            {[...Array(2)].map((_, setIndex) => (
+                                <React.Fragment key={setIndex}>
+                                    {[
+                                        { name: "Sarah J.", city: "London", img: "/assets/avatar_user_1.png", quote: "I never thought I'd get signed. AgencyMatch matched me in 24 hours!" },
+                                        { name: "Kenji T.", city: "Manchester", img: "/assets/avatar_user_2.png", quote: "The AI analysis was spot on. Found a commercial agency that loves my look." },
+                                        { name: "Maria G.", city: "Bristol", img: "/assets/avatar_user_3.png", quote: "Finally, a platform that doesn't just take your money. Real results." },
+                                        { name: "Chloe D.", city: "Brighton", img: "/assets/avatar_user_4.png", quote: "From uploading a selfie to my first casting in 3 days. Insane." },
+                                        { name: "James P.", city: "London", img: "/assets/avatar_user_2.png", quote: "Super easy to use. The portfolio lab saved me hundreds on photos." },
+                                    ].map((user, i) => (
+                                        <div key={i} className="w-[300px] bg-studio-black border border-white/10 p-6 rounded-xl flex flex-col gap-4 hover:border-studio-gold/30 transition-colors">
+                                            <div className="flex items-center gap-4">
+                                                <img src={user.img} alt={user.name} className="w-12 h-12 rounded-full object-cover border border-white/20" />
+                                                <div>
+                                                    <p className="font-bold text-white text-sm">{user.name}</p>
+                                                    <p className="text-xs text-gray-500">{user.city}</p>
+                                                </div>
+                                            </div>
+                                            <p className="text-gray-300 text-sm italic">"{user.quote}"</p>
+                                            <div className="flex text-studio-gold">
+                                                {[...Array(5)].map((_, s) => <Star key={s} size={12} fill="currentColor" />)}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </React.Fragment>
+                            ))}
+                        </motion.div>
                     </div>
                 </div>
             </section>
