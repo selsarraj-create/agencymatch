@@ -150,10 +150,7 @@ const Scanner = () => {
                     <>
                         <img src={previewUrl} className="absolute inset-0 w-full h-full object-cover opacity-30 blur-sm" alt="Scanning" />
                         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
-                            {/* Reusing existing animation component but ensuring it looks good on light/dark */}
-                            <div className="bg-black/80 backdrop-blur-md p-8 rounded-3xl border border-white/10 shadow-2xl">
-                                <ProcessingAnimation onComplete={onAnimationComplete} hasResult={!!analysisResult} />
-                            </div>
+                            <ProcessingAnimation onComplete={onAnimationComplete} hasResult={!!analysisResult} />
                         </div>
                         {state === 'WAITING_FOR_RESULT' && (
                             <div className="absolute bottom-10 left-0 right-0 text-center z-50">

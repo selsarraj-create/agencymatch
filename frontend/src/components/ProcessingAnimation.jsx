@@ -20,18 +20,11 @@ const ProcessingAnimation = ({ onComplete, hasResult }) => {
     }, []);
 
     useEffect(() => {
-        // Evaluate completion based on result availability
-        // Ensure at least a small delay (e.g. 2s) so it doesn't flash instantly if API is fast
-        // But since we want it "natural", if hasResult is true, we can just finish.
-        // Let's give it a minimum of 2 seconds to show at least partly.
-
         if (hasResult) {
             onComplete();
             return;
         }
 
-        // Safety failsafe: If API hangs, finish animation after 15 seconds anyway
-        // This moves user to "Finalizing Analysis" state instead of infinite scanning
         const timeout = setTimeout(() => {
             if (!hasResult) {
                 console.warn("ProcessingAnimation timed out without result");
@@ -43,30 +36,29 @@ const ProcessingAnimation = ({ onComplete, hasResult }) => {
     }, [hasResult, onComplete]);
 
     return (
-        <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden rounded-xl">
+        <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden rounded-3xl">
             {/* Laser Line */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-studio-gold shadow-[0_0_15px_rgba(212,175,55,0.8)] animate-scan z-20"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-brand-start shadow-[0_0_20px_rgba(59,130,246,0.8)] animate-scan z-20"></div>
 
             {/* Overlay/Grid effect */}
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 z-10 mix-blend-overlay"></div>
-            <div className="absolute inset-0 z-10 border border-studio-gold/30 rounded-xl">
-                <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-studio-gold"></div>
-                <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-studio-gold"></div>
-                <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-studio-gold"></div>
-                <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-studio-gold"></div>
+            <div className="absolute inset-0 z-10 border-4 border-brand-start/50 rounded-3xl box-border m-4">
+                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-brand-start -mt-1 -ml-1"></div>
+                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-brand-start -mt-1 -mr-1"></div>
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-brand-start -mb-1 -ml-1"></div>
+                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-brand-start -mb-1 -mr-1"></div>
             </div>
 
             {/* Text Animation */}
-            <div className="z-30 mt-32 md:mt-48 text-center bg-black/60 px-6 py-2 rounded-full backdrop-blur-md border border-white/10">
+            <div className="z-30 absolute bottom-12 text-center bg-black/80 px-8 py-3 rounded-full backdrop-blur-md border border-white/20 shadow-2xl">
                 <AnimatePresence mode="wait">
                     <motion.p
                         key={textIndex}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="text-studio-gold font-mono text-sm tracking-widest uppercas"
+                        className="text-brand-start font-black text-sm tracking-widest uppercase flex items-center gap-2"
                     >
-                        {messages[textIndex]}
+                        <span className="w-2 h-2 rounded-full bg-brand-start animate-ping" /> {messages[textIndex]}
                     </motion.p>
                 </AnimatePresence>
             </div>
