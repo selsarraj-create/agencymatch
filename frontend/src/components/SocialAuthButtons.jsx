@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Apple, Smartphone, Facebook } from 'lucide-react'; // Lucide doesn't have Google/TikTok icons perfectly, using substitutes or SVGs would be better.
+import { Apple, CheckCircle2, Facebook, Smartphone } from 'lucide-react';
 
-// Custom TikTok and Google Icons for better branding
 const GoogleIcon = () => (
     <svg className="w-5 h-5" viewBox="0 0 24 24">
         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -18,7 +17,6 @@ const TikTokIcon = () => (
     </svg>
 );
 
-
 const SocialAuthButtons = () => {
     const [loading, setLoading] = useState(false);
 
@@ -27,60 +25,86 @@ const SocialAuthButtons = () => {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: provider,
             options: {
-                redirectTo: `${window.location.origin}/dashboard` // Or /onboarding/identity, middleware will handle it
+                redirectTo: `${window.location.origin}/dashboard`
             }
         });
         if (error) {
-            console.error('Error logging in with social provider:', error.message);
+            console.error('Error:', error.message);
             setLoading(false);
         }
     };
 
+    const ButtonBase = ({ onClick, icon, label, bgColor, textColor, borderColor, badge }) => (
+        <button
+            onClick={onClick}
+            disabled={loading}
+            className={`
+                group relative flex items-center justify-between w-full 
+                ${bgColor} ${textColor} ${borderColor} border
+                font-bold py-4 px-6 rounded-2xl 
+                active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md
+                disabled:opacity-50 disabled:pointer-events-none
+            `}
+        >
+            <div className="flex items-center gap-3">
+                {icon}
+                <span className="tracking-tight">{label}</span>
+            </div>
+            {badge && (
+                <div className="bg-brand-start/10 text-brand-start p-1 rounded-full">
+                    <CheckCircle2 size={16} className="fill-brand-end text-white" />
+                </div>
+            )}
+        </button>
+    );
+
     return (
         <div className="flex flex-col gap-3 w-full max-w-sm mx-auto">
-            {/* Primary Group */}
-            <button
+            {/* Apple - Primary */}
+            <ButtonBase
                 onClick={() => handleSocialLogin('apple')}
-                disabled={loading}
-                className="flex items-center justify-center gap-3 w-full bg-black text-white hover:bg-gray-900 font-semibold py-3 px-4 rounded-lg border border-white/10 transition-all transform active:scale-[0.98] disabled:opacity-50"
-            >
-                <Apple size={20} className="fill-current" />
-                <span>Continue with Apple</span>
-            </button>
+                icon={<Apple size={22} className="fill-current" />}
+                label="Continue with Apple"
+                bgColor="bg-text-primary-light dark:bg-white"
+                textColor="text-white dark:text-black"
+                borderColor="border-transparent"
+            />
 
-            <button
+            {/* Google - Clean */}
+            <ButtonBase
                 onClick={() => handleSocialLogin('google')}
-                disabled={loading}
-                className="flex items-center justify-center gap-3 w-full bg-white text-gray-800 hover:bg-gray-100 font-semibold py-3 px-4 rounded-lg border border-gray-200 transition-all transform active:scale-[0.98] disabled:opacity-50"
-            >
-                <GoogleIcon />
-                <span>Continue with Google</span>
-            </button>
+                icon={<GoogleIcon />}
+                label="Continue with Google"
+                bgColor="bg-card-light dark:bg-card-dark"
+                textColor="text-text-primary-light dark:text-white"
+                borderColor="border-gray-200 dark:border-white/10"
+            />
 
             <div className="relative my-2">
-                <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/10"></span></div>
-                <div className="relative flex justify-center text-xs uppercase"><span className="bg-studio-black px-2 text-gray-500">More Options</span></div>
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-200 dark:border-white/10"></span></div>
+                <div className="relative flex justify-center text-xs uppercase font-bold tracking-widest"><span className="bg-white dark:bg-black px-2 text-text-secondary-light dark:text-text-secondary-dark font-sans">More Options</span></div>
             </div>
 
-            {/* Secondary Group */}
-            <button
+            {/* TikTok - Brand Highlight */}
+            <ButtonBase
                 onClick={() => handleSocialLogin('tiktok')}
-                disabled={loading}
-                className="flex items-center justify-center gap-3 w-full bg-[#00f2ea]/10 text-[#00f2ea] hover:bg-[#00f2ea]/20 font-semibold py-3 px-4 rounded-lg border border-[#00f2ea]/20 transition-all transform active:scale-[0.98] disabled:opacity-50"
-            >
-                <TikTokIcon />
-                <span>Continue with TikTok</span>
-            </button>
+                icon={<TikTokIcon />}
+                label="Continue with TikTok"
+                badge={true}
+                bgColor="bg-black dark:bg-[#111]"
+                textColor="text-white"
+                borderColor="border-white/10"
+            />
 
-            <button
+            {/* Facebook */}
+            <ButtonBase
                 onClick={() => handleSocialLogin('facebook')}
-                disabled={loading}
-                className="flex items-center justify-center gap-3 w-full bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2]/20 font-semibold py-3 px-4 rounded-lg border border-[#1877F2]/20 transition-all transform active:scale-[0.98] disabled:opacity-50"
-            >
-                <Facebook size={20} className="fill-current" />
-                <span>Continue with Facebook</span>
-            </button>
-
+                icon={<Facebook size={22} className="fill-current" />}
+                label="Continue with Facebook"
+                bgColor="bg-[#1877F2]/5 dark:bg-[#1877F2]/10"
+                textColor="text-[#1877F2]"
+                borderColor="border-[#1877F2]/20"
+            />
         </div>
     );
 };
