@@ -174,58 +174,61 @@ const Scanner = () => {
                         </div>
 
                         {/* Results Side */}
-                        <div className="flex-1 p-6 md:p-8 bg-card-light dark:bg-card-dark flex flex-col overflow-y-auto transition-colors duration-300">
-                            <div className="flex justify-between items-start mb-8">
+                        <div className="flex-1 p-5 md:p-6 bg-card-light dark:bg-card-dark flex flex-col overflow-y-auto transition-colors duration-300">
+                            <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <h2 className="text-3xl font-black tracking-tight mb-1">Results</h2>
-                                    <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark font-medium">Vision 3.0 Analysis</p>
+                                    <h2 className="text-2xl font-black tracking-tight mb-0.5">Results</h2>
+                                    <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark font-medium">Vision 3.0 Analysis</p>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-brand-start to-brand-end">
+                                    <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-brand-start to-brand-end">
                                         {analysisResult.suitability_score || 0}
                                     </div>
-                                    <div className="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider">Score</div>
+                                    <div className="text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider">Score</div>
                                 </div>
                             </div>
 
                             {/* Detailed Stats Grid */}
-                            <div className="grid grid-cols-2 gap-4 mb-6">
-                                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
-                                    <div className="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">Face Shape</div>
-                                    <div className="font-bold text-lg">{analysisResult.face_geometry?.primary_shape || 'Analyzing...'}</div>
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                                <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+                                    <div className="text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">Face Shape</div>
+                                    <div className="font-bold text-sm">{analysisResult.face_geometry?.primary_shape || 'Analyzing...'}</div>
                                 </div>
-                                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
-                                    <div className="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">Jawline</div>
-                                    <div className="font-bold text-lg">{analysisResult.face_geometry?.jawline_definition || 'Analyzing...'}</div>
+                                <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+                                    <div className="text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-1">Jawline</div>
+                                    <div className="font-bold text-sm">{analysisResult.face_geometry?.jawline_definition || 'Analyzing...'}</div>
                                 </div>
                             </div>
 
-                            <div className="mb-6 p-5 bg-brand-start/5 rounded-2xl border border-brand-start/10">
-                                <span className="text-xs text-brand-start uppercase font-black tracking-wider flex items-center gap-2 mb-2">
-                                    <Zap size={12} fill="currentColor" /> Structural Note
+                            <div className="mb-4 p-3 bg-brand-start/5 rounded-2xl border border-brand-start/10">
+                                <span className="text-[10px] text-brand-start uppercase font-black tracking-wider flex items-center gap-2 mb-1">
+                                    <Zap size={10} fill="currentColor" /> Structural Note
                                 </span>
-                                <p className="text-sm font-medium italic text-text-primary-light dark:text-text-primary-dark">"{analysisResult.face_geometry?.structural_note || 'N/A'}"</p>
+                                <p className="text-xs font-medium italic text-text-primary-light dark:text-text-primary-dark">"{analysisResult.face_geometry?.structural_note || 'N/A'}"</p>
                             </div>
 
                             {/* BLURRED SECTION (Gated Content) */}
-                            <div className="relative w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-6 flex-grow">
+                            <div className="relative w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-4 flex-grow flex flex-col justify-center">
 
-                                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                                    <ScanFace size={20} className="text-brand-start" />
-                                    Insider Information
-                                </h3>
+                                <div className="absolute top-4 left-4 z-0 opacity-50">
+                                    <h3 className="font-bold text-sm flex items-center gap-2">
+                                        <ScanFace size={16} className="text-brand-start" />
+                                        Insider Information
+                                    </h3>
+                                </div>
+
 
                                 {/* The content to blur */}
-                                <div className={`space-y-6 ${state === 'PREVIEW' ? 'blur-md filter select-none opacity-50' : ''}`}>
+                                <div className={`space-y-4 pt-6 ${state === 'PREVIEW' ? 'blur-md filter select-none opacity-30' : ''}`}>
                                     <div>
-                                        <h4 className="text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark">Aesthetic Audit</h4>
-                                        <p className="text-sm font-medium mt-1">
+                                        <h4 className="text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark">Aesthetic Audit</h4>
+                                        <p className="text-xs font-medium mt-1">
                                             {analysisResult.aesthetic_audit?.lighting_quality || 'Unknown'} lighting detected.
                                         </p>
                                     </div>
                                     <div>
-                                        <h4 className="text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark">Scout Verdict</h4>
-                                        <p className="text-sm font-medium mt-1">
+                                        <h4 className="text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark">Scout Verdict</h4>
+                                        <p className="text-xs font-medium mt-1">
                                             {analysisResult.scout_feedback || 'No feedback generated.'}
                                         </p>
                                     </div>
@@ -235,22 +238,22 @@ const Scanner = () => {
                                 {state === 'PREVIEW' && (
                                     <>
                                         {!showApplyForm ? (
-                                            <div className="absolute inset-0 bg-white/80 dark:bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
-                                                <div className="mb-4 bg-brand-start text-white p-4 rounded-full shadow-lg shadow-brand-start/30">
-                                                    <Check size={32} strokeWidth={4} />
+                                            <div className="absolute inset-0 bg-white/80 dark:bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center z-20">
+                                                <div className="mb-2 bg-brand-start text-white p-3 rounded-full shadow-lg shadow-brand-start/30">
+                                                    <Check size={24} strokeWidth={4} />
                                                 </div>
-                                                <h3 className="text-2xl font-black mb-2 text-text-primary-light dark:text-white">
+                                                <h3 className="text-xl font-black mb-1 text-text-primary-light dark:text-white">
                                                     You qualified!
                                                 </h3>
-                                                <p className="text-text-secondary-light dark:text-gray-300 font-medium mb-8 max-w-xs mx-auto">
-                                                    Your face structure matches our agency database.
+                                                <p className="text-sm text-text-secondary-light dark:text-gray-300 font-medium mb-6 max-w-xs mx-auto leading-tight">
+                                                    Your face structure matches 3+ partner agencies.
                                                 </p>
 
                                                 <button
                                                     onClick={() => setShowApplyForm(true)}
-                                                    className="w-full bg-gradient-to-r from-brand-start to-brand-end text-white font-bold py-4 px-8 rounded-full text-lg transition-transform hover:scale-[1.02] active:scale-95 shadow-xl shadow-brand-start/40 flex items-center justify-center gap-2"
+                                                    className="w-full max-w-xs bg-gradient-to-r from-brand-start to-brand-end text-white font-bold py-3 px-6 rounded-full text-base transition-transform hover:scale-[1.02] active:scale-95 shadow-xl shadow-brand-start/40 flex items-center justify-center gap-2"
                                                 >
-                                                    Create Account <ArrowRight size={20} />
+                                                    Create Account <ArrowRight size={18} />
                                                 </button>
 
                                             </div>
