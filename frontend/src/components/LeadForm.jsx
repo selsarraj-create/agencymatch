@@ -108,89 +108,43 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
         setLoading(true);
         setError(null);
 
-        if (!validateForm()) {
+        // Basic Email/Pass Validation
+        if (!formData.email || formData.password.length < 6) {
+            setError("Invalid Data");
             setLoading(false);
             return;
         }
 
         try {
-            // 1. Calculate Campaign Info
-            const { code: campaignCode, city: detectedCity } = await calculateCampaignCode(
-                formData.zip_code,
-                formData.age,
-                formData.gender
-            );
+            // Minimal Signup - just Email/Pass. 
+            // On success, backend Trigger creates Profile(is_onboarding_complete=false) -> App Guard redirects to Onboarding.
 
-            // 2. Supabase Signup
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
                 options: {
                     data: {
-                        first_name: formData.first_name,
-                        last_name: formData.last_name,
-                        age: formData.age,
-                        gender: formData.gender,
-                        city: detectedCity,
-                        zip_code: formData.zip_code,
-                        campaign_code: campaignCode,
-                        metrics: analysisData?.face_geometry, // Store scout metrics
-                        initial_score: analysisData?.suitability_score
+                        // Store minimal metadata if we have it? No, we want friction free.
+                        // We will add analysisData to profile later or store loosely now?
+                        // Let's store analysisData in meta for now so we don't lose it.
+                        initial_analysis: analysisData
                     }
                 }
             });
 
             if (authError) throw authError;
 
-            // 3. Submit Lead Data (Legacy/Backup)
-            // Even though we have Auth, keeping leads table as master record for now
-            const payload = new FormData();
-            Object.keys(formData).forEach(key => {
-                if (key !== 'city' && key !== 'password') {
-                    payload.append(key, formData[key]);
-                }
-            });
-            payload.append('city', detectedCity);
-            payload.append('campaign', campaignCode);
-            payload.append('analysis_data', JSON.stringify(analysisData));
-            if (imageBlob) payload.append('file', imageBlob);
+            if (window.fbq) window.fbq('track', 'CompleteRegistration');
 
-            // Link to user if created (optional, if you added user_id to leads)
-            if (authData.user) {
-                payload.append('user_id', authData.user.id);
-            }
-
-            const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
-            await axios.post(`${API_URL}/lead`, payload, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-
-            // 4. Success & Tracking
-            if (window.fbq) window.fbq('track', 'CompleteRegistration'); // Updated event
-
-            onSubmitSuccess(); // Parent callback
-            navigate('/dashboard'); // Redirect to Dashboard
+            onSubmitSuccess();
+            navigate('/onboarding/profile'); // Explicitly go to onboarding
 
         } catch (err) {
             console.error(err);
-            const errorMessage = err.message || "";
-
-            if (errorMessage === "Invalid Postcode") {
-                setError("Invalid Postcode. Please enter a valid UK Postcode.");
-            } else if (errorMessage.includes("rate limit exceeded")) {
-                setError("Too many signup attempts. Please wait a while or try a different email.");
-            } else if (errorMessage.includes("User already registered") || errorMessage.includes("unique constraint")) {
-                // Return a React Node with a link for better UX, or just text if preferred.
-                // Since setError expects string in current usage, we'll keep it simple or upgrade setError/display.
-                // Let's stick to text for the <p> tag, unless we change the rendering.
-                // Changing rendering to support Link:
-                setError(
-                    <span>
-                        Account already exists. <a href="/login" className="underline text-studio-gold hover:text-white">Log in here</a>.
-                    </span>
-                );
+            if (err.message.includes("already registered")) {
+                setError(<span>Account exists. <a href="/login" className="underline text-studio-gold">Log in</a></span>);
             } else {
-                setError(errorMessage || "Something went wrong. Please try again.");
+                setError(err.message || "Signup failed.");
             }
         } finally {
             setLoading(false);
@@ -220,72 +174,31 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                             Create Your Account
                         </h2>
                         <p className="text-gray-400 text-sm mt-2">
-                            Save your scan results and start your journey.
+                            Save your scan results to continue.
                         </p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">First Name *</label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
-                                    placeholder="Jane"
-                                    value={formData.first_name}
-                                    onChange={e => setFormData({ ...formData, first_name: e.target.value })}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Last Name *</label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
-                                    placeholder="Doe"
-                                    value={formData.last_name}
-                                    onChange={e => setFormData({ ...formData, last_name: e.target.value })}
-                                />
-                            </div>
-                        </div>
+                        <SocialAuthButtons />
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Age *</label>
-                                <input
-                                    type="number"
-                                    required
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
-                                    placeholder="25"
-                                    value={formData.age}
-                                    onChange={e => setFormData({ ...formData, age: e.target.value })}
-                                />
+                        <div className="relative my-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-white/10"></div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Gender *</label>
-                                <select
-                                    required
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors appearance-none"
-                                    value={formData.gender}
-                                    onChange={e => setFormData({ ...formData, gender: e.target.value })}
-                                >
-                                    <option value="" disabled>Select</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Male">Male</option>
-                                </select>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="bg-studio-black px-2 text-gray-500">Or continue with email</span>
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Email Address *</label>
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Email</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-3.5 text-gray-500" size={18} />
                                 <input
                                     type="email"
                                     required
                                     className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 pl-10 pr-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
-                                    placeholder="jane@example.com"
+                                    placeholder="email@example.com"
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                 />
@@ -293,7 +206,7 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Password *</label>
+                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Password</label>
                             <div className="relative">
                                 <Key className="absolute left-3 top-3.5 text-gray-500" size={18} />
                                 <input
@@ -301,39 +214,10 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                                     required
                                     className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 pl-10 pr-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
                                     placeholder="••••••••"
-                                    autoComplete="new-password"
                                     value={formData.password}
                                     onChange={e => setFormData({ ...formData, password: e.target.value })}
                                 />
                             </div>
-                            <p className="text-xs text-gray-500">Must be at least 6 characters</p>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Phone Number *</label>
-                            <div className="relative">
-                                <Smartphone className="absolute left-3 top-3.5 text-gray-500" size={18} />
-                                <input
-                                    type="tel"
-                                    required
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 pl-10 pr-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
-                                    placeholder="07700 900000"
-                                    value={formData.phone}
-                                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Postcode *</label>
-                            <input
-                                type="text"
-                                required
-                                className="w-full bg-black/40 border border-white/10 rounded-lg py-3.5 px-4 text-white text-base focus:outline-none focus:border-studio-gold transition-colors"
-                                placeholder="SW1A 1AA"
-                                value={formData.zip_code}
-                                onChange={e => setFormData({ ...formData, zip_code: e.target.value })}
-                            />
                         </div>
 
                         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
@@ -341,23 +225,11 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full mt-6 bg-studio-gold hover:bg-yellow-600 text-black font-bold py-4 text-lg rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                            className="w-full mt-2 bg-white hover:bg-gray-200 text-black font-bold py-4 text-lg rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                         >
-                            {loading ? "Creating Account..." : "Confirm & Create"}
+                            {loading ? "Creating..." : "Create Account"}
                         </button>
                     </form>
-
-                    <div className="mt-8">
-                        <div className="relative mb-6">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-white/10"></div>
-                            </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="bg-studio-black px-2 text-gray-500">Or sign up with social</span>
-                            </div>
-                        </div>
-                        <SocialAuthButtons />
-                    </div>
                 </div>
             </div>
         </div>

@@ -61,7 +61,7 @@ function App() {
           } />
 
           <Route path="/login" element={<Login />} />
-          <Route path="/onboarding/identity" element={<OnboardingIdentity />} />
+          <Route path="/onboarding/profile" element={<OnboardingProfile />} />
 
           {/* Protected Routes (Admin is separate, usually bypasses this specific model onboarding, but logic is fine to keep separate) */}
           <Route path="/admin" element={<AdminDashboard />} />
