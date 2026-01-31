@@ -18,21 +18,15 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
         setLoading(true);
         setError(null);
 
-        if (!formData.email || formData.password.length < 6) {
-            setError("Invalid Data");
-            setLoading(false);
-            return;
+        // Save to LocalStorage for "Handoff" mechanism (works for Social Login redirects too)
+        if (analysisData) {
+            localStorage.setItem('pending_analysis', JSON.stringify(analysisData));
         }
 
         try {
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
-                options: {
-                    data: {
-                        initial_analysis: analysisData
-                    }
-                }
             });
 
             if (authError) throw authError;
