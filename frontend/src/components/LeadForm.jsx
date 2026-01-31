@@ -3,6 +3,7 @@ import { Lock, CheckCircle, Smartphone, Mail, User, X, Key } from 'lucide-react'
 import axios from 'axios';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import SocialAuthButtons from './SocialAuthButtons';
 
 const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
     const navigate = useNavigate();
@@ -345,6 +346,18 @@ const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
                             {loading ? "Creating Account..." : "Confirm & Create"}
                         </button>
                     </form>
+
+                    <div className="mt-8">
+                        <div className="relative mb-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-white/10"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="bg-studio-black px-2 text-gray-500">Or sign up with social</span>
+                            </div>
+                        </div>
+                        <SocialAuthButtons />
+                    </div>
                 </div>
             </div>
         </div>
