@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
+import SocialAuthButtons from '../components/SocialAuthButtons';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -76,6 +77,19 @@ const Login = () => {
                         {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                 </form>
+
+                <div className="mt-8">
+                    <div className="relative mb-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-white/10"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="bg-studio-black px-2 text-gray-500">Or continue with social</span>
+                        </div>
+                    </div>
+                    {/* Lazy Import or direct usage. We assume import at top */}
+                    <SocialAuthButtons />
+                </div>
             </div>
         </div>
     );
