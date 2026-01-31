@@ -7,7 +7,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import PhotoLab from './pages/PhotoLab';
 import ClientDashboard from './pages/ClientDashboard';
 import LandingPage from './pages/LandingPage';
-import OnboardingIdentity from './pages/OnboardingIdentity'; // New Page
+import LandingPage from './pages/LandingPage';
+import OnboardingProfile from './pages/OnboardingProfile';
 
 import './index.css';
 
@@ -35,8 +36,8 @@ const RequireOnboarding = ({ children }) => {
 
       // Critical Safety Patch: Prevent loop if already on onboarding
       if (profile && !profile.is_onboarding_complete) {
-        if (location.pathname !== '/onboarding/identity') {
-          navigate('/onboarding/identity');
+        if (location.pathname !== '/onboarding/profile') {
+          navigate('/onboarding/profile');
         }
       }
       setLoading(false);
