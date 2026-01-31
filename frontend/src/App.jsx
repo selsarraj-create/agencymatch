@@ -7,7 +7,6 @@ import AdminDashboard from './pages/AdminDashboard';
 import PhotoLab from './pages/PhotoLab';
 import ClientDashboard from './pages/ClientDashboard';
 import LandingPage from './pages/LandingPage';
-import LandingPage from './pages/LandingPage';
 import OnboardingProfile from './pages/OnboardingProfile';
 
 import './index.css';
