@@ -7,6 +7,7 @@ import PhotoLab from './pages/PhotoLab';
 import ClientDashboard from './pages/ClientDashboard';
 
 
+import LandingPage from './pages/LandingPage';
 import './index.css';
 
 function App() {
@@ -15,7 +16,8 @@ function App() {
 
       <div className="min-h-screen bg-studio-black text-studio-white selection:bg-studio-gold selection:text-black flex flex-col">
         <Routes>
-          <Route path="/" element={
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/scan" element={
             <div className="flex-1 flex flex-col justify-center p-4">
               <Scanner />
             </div>
