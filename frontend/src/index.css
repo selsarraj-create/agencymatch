@@ -4,10 +4,10 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-studio-charcoal/80 backdrop-blur-md border border-white/10 shadow-xl;
+    @apply bg-card-light/80 dark:bg-card-dark/80 backdrop-blur-md border border-gray-200 dark:border-white/10 shadow-xl;
   }
 }
 
 body {
-  @apply bg-studio-black text-studio-white;
+  @apply bg-surface-light dark:bg-surface-dark text-text-primary-light dark:text-text-primary-dark font-sans transition-colors duration-300;
 }
