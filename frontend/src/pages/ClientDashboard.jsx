@@ -207,8 +207,8 @@ const ClientDashboard = () => {
                                     onClick={() => handleBuyCredits(pkg.id)}
                                     disabled={!!processingPkg}
                                     className={`relative group flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all ${pkg.popular
-                                            ? 'border-studio-gold bg-studio-gold/10 hover:bg-studio-gold/20'
-                                            : 'border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10'
+                                        ? 'border-studio-gold bg-studio-gold/10 hover:bg-studio-gold/20'
+                                        : 'border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10'
                                         }`}
                                 >
                                     {pkg.popular && (
@@ -302,8 +302,8 @@ const ClientDashboard = () => {
                                     key={agency.id}
                                     onClick={() => toggleAgency(agency.id)}
                                     className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedAgencies.has(agency.id)
-                                            ? 'bg-studio-gold/20 border-studio-gold'
-                                            : 'bg-white/5 border-white/5 hover:bg-white/10'
+                                        ? 'bg-studio-gold/20 border-studio-gold'
+                                        : 'bg-white/5 border-white/5 hover:bg-white/10'
                                         }`}
                                 >
                                     <div className="flex justify-between items-start">
@@ -323,9 +323,11 @@ const ClientDashboard = () => {
                 </div>
 
                 {/* Submissions Section */}
-                <div className="space-y-4">
+                <div className="space-y-4 pb-20 md:pb-0"> {/* Padding bottom for sticky footer */}
                     <h2 className="text-xl font-semibold text-white">Recent Activity</h2>
-                    <div className="glass-panel rounded-2xl border border-white/10 overflow-hidden">
+
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block glass-panel rounded-2xl border border-white/10 overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm text-gray-400">
                                 <thead className="bg-white/5 text-xs uppercase font-semibold text-gray-300">
@@ -384,8 +386,69 @@ const ClientDashboard = () => {
                             </table>
                         </div>
                     </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-3">
+                        {submissions.length === 0 ? (
+                            <div className="text-center text-gray-500 py-8 bg-white/5 rounded-xl border border-white/10">
+                                No active submissions.
+                            </div>
+                        ) : (
+                            submissions.map((item) => (
+                                <div key={item.id} className="bg-white/5 p-4 rounded-xl border border-white/10 space-y-3">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h3 className="font-bold text-white text-sm">{item.agency_url || 'General Submission'}</h3>
+                                            <p className="text-xs text-gray-500">{new Date(item.created_at).toLocaleDateString()}</p>
+                                        </div>
+                                        <div className={`px-2 py-1 rounded-full text-xs font-bold capitalize flex items-center gap-1 ${item.status === 'success' ? 'bg-green-500/10 text-green-500' :
+                                                item.status === 'failed' ? 'bg-red-500/10 text-red-500' : 'bg-yellow-500/10 text-yellow-500'
+                                            }`}>
+                                            <StatusIcon status={item.status} /> {item.status}
+                                        </div>
+                                    </div>
+
+                                    {item.error_message && (
+                                        <div className="text-xs text-red-400 bg-red-500/5 p-2 rounded">
+                                            Error: {item.error_message}
+                                        </div>
+                                    )}
+
+                                    {item.proof_screenshot_url && (
+                                        <div className="pt-2 border-t border-white/5 flex justify-end">
+                                            <a
+                                                href={item.proof_screenshot_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1 text-studio-gold hover:underline text-sm font-medium"
+                                            >
+                                                View Proof <ExternalLink size={14} />
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
             </div>
+
+            {/* Sticky Mobile Apply Bar */}
+            {selectedAgencies.size > 0 && (
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#1a1a1a] border-t border-white/10 md:hidden z-50 flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+                    <div className="text-white">
+                        <span className="font-bold text-lg">{selectedAgencies.size}</span>
+                        <span className="text-xs text-gray-400 block">Selected</span>
+                    </div>
+                    <button
+                        onClick={handleBulkApply}
+                        disabled={applying}
+                        className="bg-studio-gold text-black px-6 py-3 rounded-xl font-bold hover:bg-white transition-colors flex items-center gap-2 shadow-lg"
+                    >
+                        {applying ? <Loader2 className="animate-spin" /> : '🚀 Apply Now'}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
