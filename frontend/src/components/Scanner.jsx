@@ -99,20 +99,20 @@ const Scanner = () => {
         <div className="w-full max-w-4xl mx-auto min-h-[600px] flex flex-col items-center px-4 font-sans text-text-primary-light dark:text-text-primary-dark transition-colors duration-300">
 
             {/* Header */}
-            <div className="mb-8 text-center">
-                <div className="inline-flex items-center justify-center p-3 bg-brand-start/10 rounded-full mb-4">
-                    <ScanFace size={32} className="text-brand-start" />
+            <div className="mb-4 text-center">
+                <div className="inline-flex items-center justify-center p-2 bg-brand-start/10 rounded-full mb-3">
+                    <ScanFace size={24} className="text-brand-start" />
                 </div>
-                <h1 className="text-4xl sm:text-5xl font-black tracking-tighter mb-3 leading-tight">
+                <h1 className="text-3xl sm:text-4xl font-black tracking-tighter mb-2 leading-tight">
                     Free AI <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-start to-brand-end">Model Scout</span>
                 </h1>
-                <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark font-medium">
+                <p className="text-sm sm:text-base text-text-secondary-light dark:text-text-secondary-dark font-medium">
                     Upload a selfie. Get analyzed. Get discovered.
                 </p>
             </div>
 
             {/* Main Area */}
-            <div className="relative w-full min-h-[500px] md:aspect-video bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden group transition-colors duration-300">
+            <div className="relative w-full min-h-[600px] md:min-h-0 md:aspect-video bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden group transition-colors duration-300">
 
                 {/* IDLE STATE */}
                 {state === 'IDLE' && (
