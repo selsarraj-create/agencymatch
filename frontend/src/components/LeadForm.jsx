@@ -8,100 +8,13 @@ import SocialAuthButtons from './SocialAuthButtons';
 const LeadForm = ({ analysisData, imageBlob, onSubmitSuccess, onCancel }) => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        first_name: '',
-        last_name: '',
-        age: '',
-        gender: '',
         email: '',
-        password: '', // New Field
-        phone: '',
-        city: '',
-        zip_code: '',
-        wants_assessment: false
+        password: '',
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const validateForm = () => {
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
-            setError("Please enter a valid email address.");
-            return false;
-        }
-
-        // UK Phone validation
-        const cleanPhone = formData.phone.replace(/\D/g, '');
-        if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-            setError("Please enter a valid UK phone number.");
-            return false;
-        }
-
-        // Postcode Validation
-        const postcodeRegex = /^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$/i;
-        if (!postcodeRegex.test(formData.zip_code)) {
-            setError("Please enter a valid UK Postcode.");
-            return false;
-        }
-
-        // Password Validation
-        if (formData.password.length < 6) {
-            setError("Password must be at least 6 characters.");
-            return false;
-        }
-
-        return true;
-    };
-
-    // Campaign Code Logic
-    const TARGET_CITIES = {
-        'London': { code: '#LONFB3', lat: 51.5074, lon: -0.1278 },
-        'Manchester': { code: '#MANFB3', lat: 53.4808, lon: -2.2426 },
-        'Birmingham': { code: '#BIRFB3', lat: 52.4862, lon: -1.8904 },
-        'Glasgow': { code: '#GLAFB3', lat: 55.8642, lon: -4.2518 },
-        'Bristol': { code: '#BRIFB3', lat: 51.4545, lon: -2.5879 }
-    };
-
-    const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * (Math.PI / 180);
-        const dLon = (lon2 - lon1) * (Math.PI / 180);
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
-    }
-
-    const calculateCampaignCode = async (postcode, age, gender) => {
-        try {
-            const response = await axios.get(`https://api.postcodes.io/postcodes/${postcode}`);
-            const result = response.data.result;
-            const userLat = result.latitude;
-            const userLon = result.longitude;
-            const cityName = result.admin_district || result.parliamentary_constituency || "UK";
-
-            let nearestCity = null;
-            let minDistance = Infinity;
-
-            for (const [city, data] of Object.entries(TARGET_CITIES)) {
-                const distance = getDistanceFromLatLonInKm(userLat, userLon, data.lat, data.lon);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    nearestCity = data.code;
-                }
-            }
-            const cityCode = nearestCity || '#LONFB3';
-            const ageNum = parseInt(age);
-            let ageCode = '1';
-            if (ageNum >= 35 && ageNum <= 44) ageCode = '2';
-            if (ageNum >= 45) ageCode = '3';
-            const genderCode = gender === 'Female' ? 'F' : 'M';
-            return { code: `${cityCode}${ageCode}${genderCode}`, city: cityName };
-
-        } catch (error) {
-            console.error("Error calculating campaign code:", error);
-            throw new Error("Invalid Postcode");
-        }
-    };
+    // Basic Email/Pass Validation is handled in handleSubmit
 
     const handleSubmit = async (e) => {
         e.preventDefault();
