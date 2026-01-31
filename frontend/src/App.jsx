@@ -68,7 +68,7 @@ const AppContent = () => {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/scan" element={
-        <div className="flex-1 flex flex-col justify-center p-4 bg-surface-light dark:bg-surface-dark min-h-screen">
+        <div className="flex-1 flex flex-col justify-start pt-4 sm:pt-8 p-4 bg-surface-light dark:bg-surface-dark min-h-screen transition-colors duration-300">
           <Scanner />
         </div>
       } />
