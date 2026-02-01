@@ -63,8 +63,8 @@ const LandingPage = () => {
 
                             <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-[0.9]">
                                 Launch Your <br className="hidden md:block" />
-                                Modeling <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-start to-brand-end">
-                                    Era
+                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-start to-brand-end">
+                                    Modelling Career
                                 </span>
                             </h1>
 
