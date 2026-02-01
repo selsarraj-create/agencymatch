@@ -177,14 +177,18 @@ const Scanner = () => {
                         <div className="flex-1 p-5 md:p-6 bg-card-light dark:bg-card-dark flex flex-col overflow-y-auto transition-colors duration-300">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <h2 className="text-2xl font-black tracking-tight mb-0.5">Results</h2>
-                                    <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark font-medium">Vision 3.0 Analysis</p>
+                                    <h2 className="text-2xl font-black tracking-tight text-white mb-1">Analysis Results</h2>
+                                    <p className="text-xs text-gray-400 font-medium mb-2">Powered By Vision 3.0</p>
+                                    {/* Category Display */}
+                                    <div className="text-sm font-bold text-brand-start tracking-wider uppercase">
+                                        {analysisResult.market_categorization?.primary || 'UNCATEGORIZED'}
+                                    </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-brand-start to-brand-end">
+                                    <div className="text-5xl font-black text-brand-start">
                                         {analysisResult.suitability_score || 0}
                                     </div>
-                                    <div className="text-[10px] font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider">Score</div>
+                                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Suitability Score</div>
                                 </div>
                             </div>
 

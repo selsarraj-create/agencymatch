@@ -40,12 +40,12 @@ const ProcessingAnimation = ({ onComplete, hasResult }) => {
             {/* Laser Line */}
             <div className="absolute top-0 left-0 w-full h-1 bg-brand-start shadow-[0_0_20px_rgba(59,130,246,0.8)] animate-scan z-20"></div>
 
-            {/* Overlay/Grid effect */}
-            <div className="absolute inset-0 z-10 border-4 border-brand-start/50 rounded-3xl box-border m-4">
-                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-brand-start -mt-1 -ml-1"></div>
-                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-brand-start -mt-1 -mr-1"></div>
-                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-brand-start -mb-1 -ml-1"></div>
-                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-brand-start -mb-1 -mr-1"></div>
+            {/* Overlay/Grid effect - No Border, just corners */}
+            <div className="absolute inset-0 z-10 box-border p-2">
+                <div className="absolute top-2 left-2 w-8 h-8 border-t-4 border-l-4 border-brand-start"></div>
+                <div className="absolute top-2 right-2 w-8 h-8 border-t-4 border-r-4 border-brand-start"></div>
+                <div className="absolute bottom-2 left-2 w-8 h-8 border-b-4 border-l-4 border-brand-start"></div>
+                <div className="absolute bottom-2 right-2 w-8 h-8 border-b-4 border-r-4 border-brand-start"></div>
             </div>
 
             {/* Text Animation */}
