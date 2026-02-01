@@ -47,49 +47,66 @@ const StudioHub = () => {
 
     // Header with Toggle
     const StudioHeader = () => (
-        <div className="flex flex-col md:flex-row items-center justify-between py-6 px-4 max-w-6xl mx-auto w-full gap-4">
+        <div className="flex flex-col gap-4 py-4 px-4 md:px-8 max-w-6xl mx-auto w-full">
+            {/* Top Row: Title & Right Actions */}
+            <div className="flex justify-between items-center">
+                {/* Title */}
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-brand-start/10 rounded-xl text-brand-start">
+                        <Camera size={20} />
+                    </div>
+                    <h1 className="text-xl font-black tracking-tight">Studio Hub</h1>
+                </div>
 
-            {/* Title (Left on desktop) */}
-            <div className="flex flex-col items-center md:items-start">
-                <h1 className="text-2xl font-black tracking-tight">Studio Hub</h1>
+                {/* Right Actions: Credits, Theme, Profile */}
+                <div className="flex items-center gap-3">
+                    {/* Credits Badge */}
+                    <div className="bg-card-light dark:bg-card-dark border border-gray-200 dark:border-white/10 rounded-full pl-3 pr-1 py-1 flex items-center gap-2 shadow-sm">
+                        <div className="flex flex-col items-end leading-none">
+                            <span className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark font-bold uppercase">Credits</span>
+                            <span className="text-sm font-black text-brand-start">{profile?.credits || 0}</span>
+                        </div>
+                        <div className="w-6 h-6 rounded-full bg-brand-start text-white flex items-center justify-center shadow-sm">
+                            <Coins size={12} />
+                        </div>
+                    </div>
+
+                    {/* Desktop Profile Link */}
+                    <button
+                        onClick={() => navigate('/dashboard?tab=profile')}
+                        className="hidden md:flex w-9 h-9 items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors text-text-primary-light dark:text-white"
+                        title="Profile"
+                    >
+                        <User size={18} />
+                    </button>
+                </div>
             </div>
 
-            {/* Toggle Control (Center) */}
-            <div className="relative flex bg-gray-100 dark:bg-white/5 p-1 rounded-full border border-gray-200 dark:border-white/10 w-full max-w-xs order-3 md:order-2">
-                {['photos', 'video'].map((tab) => {
-                    const isActive = activeTab === tab;
-                    return (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`relative flex-1 py-2 text-sm font-bold transition-colors z-10 flex items-center justify-center gap-2 ${isActive ? 'text-black dark:text-white' : 'text-gray-400'}`}
-                        >
-                            {isActive && (
-                                <motion.div
-                                    layoutId="studio-tab"
-                                    className="absolute inset-0 bg-white dark:bg-white/10 rounded-full shadow-sm border border-gray-200 dark:border-white/5"
-                                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                />
-                            )}
-                            <span className="relative flex items-center gap-2">
-                                {tab === 'photos' ? <Camera size={16} /> : <Video size={16} />}
-                                {tab === 'photos' ? 'Photo Lab' : 'Video Reel'}
-                            </span>
-                        </button>
-                    );
-                })}
-            </div>
-
-            {/* Credits (Right) */}
-            <div className="flex items-center gap-3 order-2 md:order-3">
-                <div className="bg-card-light dark:bg-card-dark border border-gray-200 dark:border-white/10 rounded-full pl-3 pr-1 py-1 flex items-center gap-2 shadow-sm">
-                    <div className="flex flex-col items-end leading-none">
-                        <span className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark font-bold uppercase">Credits</span>
-                        <span className="text-sm font-black text-brand-start">{profile?.credits || 0}</span>
-                    </div>
-                    <div className="w-6 h-6 rounded-full bg-brand-start text-white flex items-center justify-center shadow-sm">
-                        <Coins size={12} />
-                    </div>
+            {/* Bottom Row: Toggle (Centered) */}
+            <div className="flex justify-center">
+                <div className="relative flex bg-gray-100 dark:bg-white/5 p-1 rounded-full border border-gray-200 dark:border-white/10 w-full max-w-xs">
+                    {['photos', 'video'].map((tab) => {
+                        const isActive = activeTab === tab;
+                        return (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`relative flex-1 py-2 text-sm font-bold transition-colors z-10 flex items-center justify-center gap-2 ${isActive ? 'text-black dark:text-white' : 'text-gray-400'}`}
+                            >
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="studio-tab"
+                                        className="absolute inset-0 bg-white dark:bg-white/10 rounded-full shadow-sm border border-gray-200 dark:border-white/5"
+                                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                    />
+                                )}
+                                <span className="relative flex items-center gap-2">
+                                    {tab === 'photos' ? <Camera size={16} /> : <Video size={16} />}
+                                    {tab === 'photos' ? 'Photo Lab' : 'Video Reel'}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
         </div>
