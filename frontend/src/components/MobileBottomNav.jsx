@@ -28,10 +28,10 @@ const MobileBottomNav = () => {
         },
         {
             name: 'Studio',
-            path: '/photo-lab',
+            path: '/studio',
             icon: Sparkles,
             isPrimary: true, // Brand color tint
-            isActive: pathname === '/photo-lab'
+            isActive: pathname === '/studio' || pathname === '/photo-lab'
         },
         {
             name: 'Profile',
@@ -73,8 +73,8 @@ const MobileBottomNav = () => {
                             key={item.name}
                             onClick={() => handleNavigation(item)}
                             className={`flex-1 flex flex-col items-center justify-center h-full gap-1 active:scale-95 transition-transform ${active
-                                    ? 'text-black dark:text-white'
-                                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                                ? 'text-black dark:text-white'
+                                : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
                                 }`}
                         >
                             <div className={`relative p-1 rounded-xl transition-colors ${active && 'bg-gray-100 dark:bg-white/10'}`}>

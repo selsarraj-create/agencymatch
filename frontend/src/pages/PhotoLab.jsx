@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '../components/ThemeToggle';
 import DashboardLayout from '../components/DashboardLayout';
 
-const PhotoLab = () => {
+const PhotoLab = ({ isEmbedded = false }) => {
     const [user, setUser] = useState(null);
     const [credits, setCredits] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -197,6 +197,145 @@ const PhotoLab = () => {
     );
 
     return (
+    const content = (
+            <div className="space-y-6">
+                {!isEmbedded && (
+                    <div className="text-center md:text-left">
+                        <p className="text-text-secondary-light dark:text-text-secondary-dark font-medium">Create strict Model Digitals from your selfies using AI.</p>
+                    </div>
+                )}
+
+                {/* Main Content Area */}
+                <div className="grid md:grid-cols-2 gap-8">
+
+                    {/* Input Section */}
+                    <div className="space-y-6">
+                        <div className="bg-white dark:bg-card-dark p-6 rounded-3xl border border-gray-200 dark:border-white/10 shadow-sm relative overflow-hidden group">
+                            <div className="relative z-10">
+                                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                    1. The Source
+                                    {inputImage && <CheckCircle size={18} className="text-green-500" />}
+                                </h2>
+
+                                {inputImage ? (
+                                    <div className="relative rounded-2xl overflow-hidden aspect-[3/4] border-2 border-dashed border-gray-200 dark:border-white/10 group-hover:border-brand-start/50 transition-colors">
+                                        <img src={inputImage} alt="Input" className="w-full h-full object-cover" />
+                                        <button
+                                            onClick={() => setInputImage(null)}
+                                            className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-md transition-colors"
+                                        >
+                                            <Upload size={16} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="aspect-[3/4] rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/20 flex flex-col items-center justify-center gap-4 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer relative">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleFileUpload}
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                        />
+                                        <div className="w-12 h-12 rounded-full bg-brand-start/10 text-brand-start flex items-center justify-center">
+                                            <Upload size={24} />
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="font-bold text-text-primary-light dark:text-white">Upload Selfie</p>
+                                            <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1">Neutral lighting, no heavy makeup</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {step !== 'result' && (
+                            <button
+                                onClick={handleGenerate}
+                                disabled={!inputImage || credits < 1 || step === 'processing'}
+                                className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] shadow-lg ${!inputImage || credits < 1
+                                    ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
+                                    : 'bg-brand-start hover:bg-brand-mid text-white'
+                                    }`}
+                            >
+                                {step === 'processing' ? (
+                                    <Loader2 className="animate-spin" />
+                                ) : (
+                                    <Sparkles size={20} />
+                                )}
+                                {step === 'processing' ? processingStage : 'Generate Digital (1 Credit)'}
+                            </button>
+                        )}
+
+                        {error && <p className="text-red-500 text-sm font-medium text-center bg-red-50 dark:bg-red-900/10 py-2 rounded-lg">{error}</p>}
+                    </div>
+
+                    {/* Output Section */}
+                    <div className="space-y-6">
+                        <div className={`bg-white dark:bg-card-dark p-6 rounded-3xl border border-gray-200 dark:border-white/10 shadow-sm h-full min-h-[500px] flex flex-col relative transition-all ${step === 'processing' ? 'ring-2 ring-brand-start/50' : ''}`}>
+                            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                2. The Result
+                                {step === 'result' && <Sparkles size={18} className="text-brand-start" />}
+                            </h2>
+
+                            {step === 'processing' ? (
+                                <div className="flex-1 flex flex-col items-center justify-center gap-6 text-center animate-pulse">
+                                    <div className="relative">
+                                        <div className="absolute inset-0 bg-brand-start/20 blur-xl rounded-full"></div>
+                                        <ScanFace size={64} className="text-brand-start relative z-10 animate-scan" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-text-primary-light dark:text-white mb-2">{processingStage}</h3>
+                                        <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark max-w-xs mx-auto">
+                                            {processingStage.includes('Identity')
+                                                ? 'Extracting bone structure and permanent features...'
+                                                : 'rendering strict polaroid with natural skin texture...'}
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : step === 'result' && generatedImage ? (
+                                <div className="flex-1 flex flex-col gap-4 animate-in fade-in duration-700">
+                                    <div className="relative rounded-lg overflow-hidden shadow-2xl bg-white p-2 md:p-4 rotate-1 border border-gray-100">
+                                        <img src={generatedImage} alt="Model Digital" className="w-full h-auto rounded-sm filter contrast-110 saturate-[0.85]" />
+                                        <div className="mt-4 flex justify-between items-end">
+                                            <div className="font-handwriting text-black/80 text-xl transform -rotate-2 ml-2">Digital #01</div>
+                                            <img src="/logo-small.png" className="h-6 opacity-50 grayscale" alt="" />
+                                        </div>
+                                    </div>
+
+                                    {identityConstraints && (
+                                        <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-100 dark:border-white/5 text-xs">
+                                            <p className="font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-2">Locked Identity Anchors:</p>
+                                            <p className="text-text-primary-light dark:text-white leading-relaxed font-mono opacity-80">{identityConstraints}</p>
+                                        </div>
+                                    )}
+
+                                    <button
+                                        onClick={() => { setStep('upload'); setGeneratedImage(null); setInputImage(null); }}
+                                        className="mt-auto w-full py-3 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 rounded-xl font-bold transition-colors text-text-primary-light dark:text-white"
+                                    >
+                                        Create Another
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex-1 flex flex-col items-center justify-center text-text-secondary-light dark:text-text-secondary-dark opacity-40">
+                                    <ImageIcon size={48} className="mb-4" />
+                                    <p>Waiting for source...</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <style>{`
+                @keyframes scan {
+                    0%, 100% { transform: translateY(0); opacity: 0.5; }
+                    50% { transform: translateY(10px); opacity: 1; }
+                }
+                .animate-scan { animation: scan 2s infinite ease-in-out; }
+            `}</style>
+            </div>
+        );
+
+    return (
         <>
             {/* Buy Credits Modal (Shared System) */}
             {showBuyModal && (
@@ -245,141 +384,13 @@ const PhotoLab = () => {
                 </div>
             )}
 
-            <DashboardLayout header={<PhotoLabHeader />}>
-                <div className="space-y-6">
-                    <div className="text-center md:text-left">
-                        <p className="text-text-secondary-light dark:text-text-secondary-dark font-medium">Create strict Model Digitals from your selfies using AI.</p>
-                    </div>
-
-                    {/* Main Content Area */}
-                    <div className="grid md:grid-cols-2 gap-8">
-
-                        {/* Input Section */}
-                        <div className="space-y-6">
-                            <div className="bg-white dark:bg-card-dark p-6 rounded-3xl border border-gray-200 dark:border-white/10 shadow-sm relative overflow-hidden group">
-                                <div className="relative z-10">
-                                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                                        1. The Source
-                                        {inputImage && <CheckCircle size={18} className="text-green-500" />}
-                                    </h2>
-
-                                    {inputImage ? (
-                                        <div className="relative rounded-2xl overflow-hidden aspect-[3/4] border-2 border-dashed border-gray-200 dark:border-white/10 group-hover:border-brand-start/50 transition-colors">
-                                            <img src={inputImage} alt="Input" className="w-full h-full object-cover" />
-                                            <button
-                                                onClick={() => setInputImage(null)}
-                                                className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-md transition-colors"
-                                            >
-                                                <Upload size={16} />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="aspect-[3/4] rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/20 flex flex-col items-center justify-center gap-4 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer relative">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleFileUpload}
-                                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                            />
-                                            <div className="w-12 h-12 rounded-full bg-brand-start/10 text-brand-start flex items-center justify-center">
-                                                <Upload size={24} />
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="font-bold text-text-primary-light dark:text-white">Upload Selfie</p>
-                                                <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1">Neutral lighting, no heavy makeup</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {step !== 'result' && (
-                                <button
-                                    onClick={handleGenerate}
-                                    disabled={!inputImage || credits < 1 || step === 'processing'}
-                                    className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] shadow-lg ${!inputImage || credits < 1
-                                        ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
-                                        : 'bg-brand-start hover:bg-brand-mid text-white'
-                                        }`}
-                                >
-                                    {step === 'processing' ? (
-                                        <Loader2 className="animate-spin" />
-                                    ) : (
-                                        <Sparkles size={20} />
-                                    )}
-                                    {step === 'processing' ? processingStage : 'Generate Digital (1 Credit)'}
-                                </button>
-                            )}
-
-                            {error && <p className="text-red-500 text-sm font-medium text-center bg-red-50 dark:bg-red-900/10 py-2 rounded-lg">{error}</p>}
-                        </div>
-
-                        {/* Output Section */}
-                        <div className="space-y-6">
-                            <div className={`bg-white dark:bg-card-dark p-6 rounded-3xl border border-gray-200 dark:border-white/10 shadow-sm h-full min-h-[500px] flex flex-col relative transition-all ${step === 'processing' ? 'ring-2 ring-brand-start/50' : ''}`}>
-                                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                                    2. The Result
-                                    {step === 'result' && <Sparkles size={18} className="text-brand-start" />}
-                                </h2>
-
-                                {step === 'processing' ? (
-                                    <div className="flex-1 flex flex-col items-center justify-center gap-6 text-center animate-pulse">
-                                        <div className="relative">
-                                            <div className="absolute inset-0 bg-brand-start/20 blur-xl rounded-full"></div>
-                                            <ScanFace size={64} className="text-brand-start relative z-10 animate-scan" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-text-primary-light dark:text-white mb-2">{processingStage}</h3>
-                                            <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark max-w-xs mx-auto">
-                                                {processingStage.includes('Identity')
-                                                    ? 'Extracting bone structure and permanent features...'
-                                                    : 'rendering strict polaroid with natural skin texture...'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ) : step === 'result' && generatedImage ? (
-                                    <div className="flex-1 flex flex-col gap-4 animate-in fade-in duration-700">
-                                        <div className="relative rounded-lg overflow-hidden shadow-2xl bg-white p-2 md:p-4 rotate-1 border border-gray-100">
-                                            <img src={generatedImage} alt="Model Digital" className="w-full h-auto rounded-sm filter contrast-110 saturate-[0.85]" />
-                                            <div className="mt-4 flex justify-between items-end">
-                                                <div className="font-handwriting text-black/80 text-xl transform -rotate-2 ml-2">Digital #01</div>
-                                                <img src="/logo-small.png" className="h-6 opacity-50 grayscale" alt="" />
-                                            </div>
-                                        </div>
-
-                                        {identityConstraints && (
-                                            <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-100 dark:border-white/5 text-xs">
-                                                <p className="font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase mb-2">Locked Identity Anchors:</p>
-                                                <p className="text-text-primary-light dark:text-white leading-relaxed font-mono opacity-80">{identityConstraints}</p>
-                                            </div>
-                                        )}
-
-                                        <button
-                                            onClick={() => { setStep('upload'); setGeneratedImage(null); setInputImage(null); }}
-                                            className="mt-auto w-full py-3 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 rounded-xl font-bold transition-colors text-text-primary-light dark:text-white"
-                                        >
-                                            Create Another
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="flex-1 flex flex-col items-center justify-center text-text-secondary-light dark:text-text-secondary-dark opacity-40">
-                                        <ImageIcon size={48} className="mb-4" />
-                                        <p>Waiting for source...</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <style>{`
-                    @keyframes scan {
-                        0%, 100% { transform: translateY(0); opacity: 0.5; }
-                        50% { transform: translateY(10px); opacity: 1; }
-                    }
-                    .animate-scan { animation: scan 2s infinite ease-in-out; }
-                `}</style>
-            </DashboardLayout>
+            {isEmbedded ? (
+                content
+            ) : (
+                <DashboardLayout header={<PhotoLabHeader />}>
+                    {content}
+                </DashboardLayout>
+            )}
         </>
     );
 };

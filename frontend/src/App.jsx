@@ -11,6 +11,7 @@ import OnboardingProfile from './pages/OnboardingProfile';
 import { Loader2 } from 'lucide-react';
 import { ThemeProvider } from './components/ThemeProvider';
 import MobileBottomNav from './components/MobileBottomNav';
+import StudioHub from './pages/StudioHub';
 
 import './index.css';
 
@@ -117,6 +118,14 @@ const AppContent = () => {
         <RequireAnalysis session={session}>
           <RequireOnboarding session={session}>
             <PhotoLab />
+          </RequireOnboarding>
+        </RequireAnalysis>
+      } />
+
+      <Route path="/studio" element={
+        <RequireAnalysis session={session}>
+          <RequireOnboarding session={session}>
+            <StudioHub />
           </RequireOnboarding>
         </RequireAnalysis>
       } />

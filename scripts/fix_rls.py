@@ -5,25 +5,7 @@ import sys
 # Connection string provided by user
 DB_URL = "postgresql://postgres:3TDpGHC4JBpgIXi@db.qldeodupxwwxysfnpseq.supabase.co:5432/postgres"
 
-SQL_FIX = """
--- 1. Enable RLS (idempotent)
-ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
-
--- 2. Drop specific policy if exists to avoid conflict
-DROP POLICY IF EXISTS "Allow anon users to insert leads" ON leads;
-
--- 3. Re-create the policy allowing anon inserts
-CREATE POLICY "Allow anon users to insert leads"
-    ON leads
-    FOR INSERT
-    TO anon
-    WITH CHECK (true);
-
--- 4. Grant permissions
-GRANT USAGE ON SCHEMA public TO anon;
-GRANT ALL ON TABLE leads TO anon;
-GRANT ALL ON TABLE leads TO service_role;
-"""
+SQL_FILE_PATH = r"C:\Users\selsa\.gemini\antigravity\brain\e23a96d3-837e-41eb-b4e3-96297b16dc43\fix_rls_recursion.sql"
 
 def apply_fix():
     print("Connecting to Supabase Database...")
@@ -32,11 +14,15 @@ def apply_fix():
         conn.autocommit = True
         cursor = conn.cursor()
         
-        print("Executing RLS Policy Fix...")
-        cursor.execute(SQL_FIX)
+        print(f"Reading SQL from {SQL_FILE_PATH}...")
+        with open(SQL_FILE_PATH, 'r') as f:
+            sql_fix = f.read()
+
+        print("Executing RLS Policy Fix on PROFILES...")
+        cursor.execute(sql_fix)
         
-        print("✅ Success! RLS Policy applied.")
-        print("Anonymous users should now be able to insert leads.")
+        print("✅ Success! RLS Policy applied to profiles table.")
+        print("Users should now be able to insert/update their own profile data.")
         
         cursor.close()
         conn.close()
