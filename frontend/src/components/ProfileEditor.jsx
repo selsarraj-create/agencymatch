@@ -208,14 +208,22 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                     </div>
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-4 flex flex-col gap-4">
                     <button
                         type="submit"
                         disabled={saving}
-                        className="flex items-center gap-2 bg-brand-start hover:bg-brand-mid text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100"
+                        className="flex items-center justify-center gap-2 bg-brand-start hover:bg-brand-mid text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100"
                     >
                         {saving ? <Loader2 className="animate-spin" /> : <Save size={20} />}
                         {saving ? 'Saving...' : 'Save Changes'}
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }}
+                        className="flex items-center justify-center gap-2 border border-red-200 dark:border-red-900/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 px-8 py-3 rounded-full font-bold transition-all"
+                    >
+                        Sign Out
                     </button>
                 </div>
 

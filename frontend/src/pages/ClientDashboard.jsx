@@ -140,58 +140,43 @@ const ClientDashboard = () => {
 
     // Define Header Component
     const DashboardHeader = () => (
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-4 md:px-8 py-6 max-w-6xl mx-auto">
-            <div className="flex items-center gap-4">
-                <div className="p-3 bg-brand-start/10 rounded-2xl text-brand-start">
-                    <LayoutDashboard size={24} />
+        <div className="flex justify-between items-center px-4 md:px-8 py-4 max-w-6xl mx-auto">
+            {/* Left: Brand / Title */}
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-brand-start/10 rounded-xl text-brand-start">
+                    <LayoutDashboard size={20} />
                 </div>
-                <div>
-                    <h1 className="text-3xl font-black tracking-tight">Dashboard</h1>
-                    <p className="text-text-secondary-light dark:text-text-secondary-dark font-medium">Manage your agency applications</p>
-                </div>
+                <h1 className="text-xl font-black tracking-tight">Dashboard</h1>
             </div>
 
-            <div className="flex items-center gap-4 flex-wrap">
-                {/* Tab Switcher */}
-                <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-full border border-gray-200 dark:border-white/10">
-                    <button
-                        onClick={() => {
-                            setActiveTab('dashboard');
-                            navigate('/dashboard'); // Clear params
-                        }}
-                        className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${activeTab === 'dashboard' ? 'bg-white dark:bg-white/10 shadow-sm text-black dark:text-white' : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-black dark:hover:text-white'}`}
-                    >
-                        Dashboard
-                    </button>
-                    <button
-                        onClick={() => {
-                            setActiveTab('profile');
-                            navigate('/dashboard?tab=profile'); // Set params
-                        }}
-                        className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'profile' ? 'bg-white dark:bg-white/10 shadow-sm text-black dark:text-white' : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-black dark:hover:text-white'}`}
-                    >
-                        <User size={14} /> Profile
-                    </button>
+            {/* Right: Credits, Theme, Profile Link (Desktop) */}
+            <div className="flex items-center gap-3">
+                {/* Credits Badge */}
+                <div
+                    onClick={() => setShowBuyModal(true)}
+                    className="cursor-pointer bg-card-light dark:bg-card-dark border border-gray-200 dark:border-white/10 rounded-full pl-3 pr-1 py-1 flex items-center gap-2 shadow-sm hover:scale-105 transition-transform"
+                >
+                    <div className="flex flex-col items-end leading-none">
+                        <span className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark font-bold uppercase">Credits</span>
+                        <span className="text-sm font-black text-brand-start">{credits}</span>
+                    </div>
+                    <div className="w-6 h-6 rounded-full bg-brand-start text-white flex items-center justify-center shadow-sm">
+                        <Coins size={12} />
+                    </div>
                 </div>
 
-                <div className="bg-card-light dark:bg-card-dark border border-gray-200 dark:border-white/10 rounded-full pl-5 pr-2 py-2 flex items-center gap-4 shadow-sm">
-                    <div className="flex flex-col items-end leading-tight">
-                        <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark font-bold uppercase">Credits</span>
-                        <span className="text-xl font-black text-brand-start">{credits}</span>
-                    </div>
-                    <button
-                        onClick={() => setShowBuyModal(true)}
-                        className="w-8 h-8 rounded-full bg-brand-start text-white flex items-center justify-center hover:bg-brand-end transition-colors shadow-md active:scale-95"
-                    >
-                        <Coins size={16} />
-                    </button>
-                </div>
                 <ThemeToggle />
+
+                {/* Profile Link (Desktop Only fallback, though BottomNav handles mobile) */}
                 <button
-                    onClick={async () => { await supabase.auth.signOut(); navigate('/login'); }}
-                    className="text-sm font-bold text-text-secondary-light dark:text-text-secondary-dark hover:text-red-500 transition-colors px-4"
+                    onClick={() => {
+                        setActiveTab('profile');
+                        navigate('/dashboard?tab=profile');
+                    }}
+                    className="hidden md:flex w-9 h-9 items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors text-text-primary-light dark:text-white"
+                    title="Profile"
                 >
-                    Logout
+                    <User size={18} />
                 </button>
             </div>
         </div>
