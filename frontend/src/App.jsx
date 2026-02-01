@@ -26,31 +26,30 @@ const AppContent = () => {
 
     const pendingAnalysis = localStorage.getItem('pending_analysis');
     if (pendingAnalysis) {
-      console.log("Found pending analysis. Hydrating profile...");
+      console.log("Found pending analysis. Hydrating profile via Server API...");
       try {
-        const analysisData = JSON.parse(pendingAnalysis);
+        // Use Server API to bypass RLS
+        const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
 
-        // Use UPSERT to handle race condition where Trigger hasn't created profile yet
-        // This ensures the row exists and has the data.
-        const { error } = await supabase.from('profiles').upsert({
-          id: currentSession.user.id,
-          email: currentSession.user.email,
-          analysis_data: analysisData,
-          is_analysis_complete: true,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
+        const response = await fetch(`${API_URL}/handoff`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: currentSession.user.id,
+            email: currentSession.user.email,
+            analysis_data: pendingAnalysis // Sending raw string, server parses it
+          })
+        });
 
-        if (!error) {
-          console.log("Analysis hydrated successfully.");
+        if (response.ok) {
+          console.log("Analysis hydrated successfully via API.");
           localStorage.removeItem('pending_analysis');
         } else {
-          console.error("Error hydrating profile:", error);
-          // Keep it in localStorage for one retry cycle in the Guard, 
-          // but if it fails repeatedly, the Guard will clear it.
+          console.error("API Handoff failed:", await response.text());
+          // Keep in localStorage for retry by Guard
         }
       } catch (e) {
-        console.error("Failed to parse pending analysis", e);
-        localStorage.removeItem('pending_analysis'); // Corrupt data
+        console.error("Failed to execute handoff", e);
       }
     }
   };
