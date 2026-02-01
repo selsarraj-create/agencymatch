@@ -98,16 +98,16 @@ const Scanner = () => {
     return (
         <div className="w-full max-w-4xl mx-auto min-h-[700px] flex flex-col items-center px-4 font-sans text-text-primary-light dark:text-text-primary-dark transition-colors duration-300">
 
-            {/* Header */}
+            {/* Header - Restored Wording & Theme Aware */}
             <div className="mb-4 text-center">
-                <div className="inline-flex items-center justify-center p-2 bg-brand-start/10 rounded-full mb-3">
-                    <ScanFace size={24} className="text-brand-start" />
-                </div>
-                <h1 className="text-3xl sm:text-4xl font-black tracking-tighter mb-2 leading-tight">
-                    Free AI <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-start to-brand-end">Model Scout</span>
+                <h1 className="text-3xl sm:text-5xl font-black tracking-tighter mb-2 leading-tight text-text-primary-light dark:text-white">
+                    10 Second <span className="text-brand-start">Model Scout</span>
                 </h1>
-                <p className="text-sm sm:text-base text-text-secondary-light dark:text-text-secondary-dark font-medium">
-                    Upload a selfie. Get analyzed. Get discovered.
+                <p className="text-lg font-bold text-text-primary-light dark:text-white mb-1">
+                    Could You Be A Model?
+                </p>
+                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark font-medium">
+                    Find Out Instantly With Our AI Analysis
                 </p>
             </div>
 
@@ -177,8 +177,8 @@ const Scanner = () => {
                         <div className="flex-1 p-5 md:p-6 bg-card-light dark:bg-card-dark flex flex-col overflow-y-auto transition-colors duration-300">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <h2 className="text-2xl font-black tracking-tight text-white mb-1">Analysis Results</h2>
-                                    <p className="text-xs text-gray-400 font-medium mb-2">Powered By Vision 3.0</p>
+                                    <h2 className="text-2xl font-black tracking-tight text-text-primary-light dark:text-white mb-1">Analysis Results</h2>
+                                    <p className="text-xs text-text-secondary-light dark:text-gray-400 font-medium mb-2">Powered By Vision 3.0</p>
                                     {/* Category Display */}
                                     <div className="text-sm font-bold text-brand-start tracking-wider uppercase">
                                         {analysisResult.market_categorization?.primary || 'UNCATEGORIZED'}
