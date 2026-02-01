@@ -96,7 +96,7 @@ const Scanner = () => {
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto min-h-[600px] flex flex-col items-center px-4 font-sans text-text-primary-light dark:text-text-primary-dark transition-colors duration-300">
+        <div className="w-full max-w-4xl mx-auto min-h-[700px] flex flex-col items-center px-4 font-sans text-text-primary-light dark:text-text-primary-dark transition-colors duration-300">
 
             {/* Header */}
             <div className="mb-4 text-center">
@@ -112,7 +112,7 @@ const Scanner = () => {
             </div>
 
             {/* Main Area */}
-            <div className="relative w-full min-h-[600px] md:min-h-0 md:aspect-video bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden group transition-colors duration-300">
+            <div className="relative w-full min-h-[700px] md:aspect-video bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden group transition-colors duration-300">
 
                 {/* IDLE STATE */}
                 {state === 'IDLE' && (
@@ -208,7 +208,7 @@ const Scanner = () => {
                             </div>
 
                             {/* BLURRED SECTION (Gated Content) */}
-                            <div className="relative w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-4 flex-grow flex flex-col justify-center">
+                            <div className="relative w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-4 flex-grow flex flex-col justify-center min-h-[350px]">
 
                                 <div className="absolute top-4 left-4 z-0 opacity-50">
                                     <h3 className="font-bold text-sm flex items-center gap-2">
