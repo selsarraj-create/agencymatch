@@ -6,10 +6,12 @@ import { LayoutDashboard, ExternalLink, CheckCircle, XCircle, Clock, Loader2, Co
 import { ThemeToggle } from '../components/ThemeToggle';
 import ProfileEditor from '../components/ProfileEditor';
 import DashboardLayout from '../components/DashboardLayout';
+import CastingFeed from '../components/CastingFeed';
 
 const ClientDashboard = () => {
     const [submissions, setSubmissions] = useState([]);
     const [credits, setCredits] = useState(0);
+    const [userProfile, setUserProfile] = useState(null); // Full Profile
     const [loading, setLoading] = useState(true);
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [processingPkg, setProcessingPkg] = useState(null);
@@ -19,6 +21,7 @@ const ClientDashboard = () => {
 
     // Tab State
     const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'profile'
+    const [feedView, setFeedView] = useState('agencies'); // 'agencies' | 'jobs' | 'applications'
     const [currentUserId, setCurrentUserId] = useState(null);
 
     const navigate = useNavigate();
@@ -62,8 +65,12 @@ const ClientDashboard = () => {
             if (tabParam === 'profile') setActiveTab('profile');
             else setActiveTab('dashboard'); // Default reset if no param
 
-            const profile = await supabase.from('profiles').select('credits').eq('id', user.id).single();
-            if (profile.data) setCredits(profile.data.credits);
+            // Get Full Profile for Smart Match
+            const profile = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            if (profile.data) {
+                setCredits(profile.data.credits);
+                setUserProfile(profile.data);
+            }
 
             const { data } = await supabase.from('agency_submissions').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
             if (data) setSubmissions(data);
@@ -78,7 +85,12 @@ const ClientDashboard = () => {
 
             const channel = supabase.channel('dashboard_realtime')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'agency_submissions', filter: `user_id=eq.${user.id}` }, payload => handleSubmissionUpdate(payload))
-                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, payload => { if (payload.new) setCredits(payload.new.credits); })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, payload => {
+                    if (payload.new) {
+                        setCredits(payload.new.credits);
+                        setUserProfile(payload.new);
+                    }
+                })
                 .subscribe();
 
             return () => { supabase.removeChannel(channel); };
@@ -237,60 +249,87 @@ const ClientDashboard = () => {
                     <ProfileEditor userId={currentUserId} />
                 ) : (
                     <>
-                        {/* Agency Directory Section */}
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center">
-                                <h2 className="text-xl font-bold">Agency Directory <span className="text-text-secondary-light dark:text-text-secondary-dark font-medium text-sm ml-2">({agencies.length} available)</span></h2>
-                                {selectedAgencies.size > 0 && (
-                                    <button
-                                        onClick={handleBulkApply}
-                                        disabled={applying}
-                                        className="bg-text-primary-light dark:bg-white text-white dark:text-black px-6 py-2 rounded-full font-bold hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-lg"
-                                    >
-                                        {applying ? <Loader2 className="animate-spin" /> : 'Apply Selected'}
-                                        <span className="text-xs bg-white/20 dark:bg-black/10 px-2 py-1 rounded-full text-current">
-                                            {selectedAgencies.size}
-                                        </span>
-                                    </button>
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-1">
-                                {agencies.length === 0 ? (
-                                    <div className="col-span-full text-center text-text-secondary-light dark:text-text-secondary-dark py-12 bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10">
-                                        <Loader2 className="animate-spin mx-auto mb-2" />
-                                        Loading agencies...
-                                    </div>
-                                ) : (
-                                    agencies.map(agency => (
-                                        <div
-                                            key={agency.id}
-                                            onClick={() => toggleAgency(agency.id)}
-                                            className={`p-6 rounded-3xl border cursor-pointer transition-all group relative overflow-hidden ${selectedAgencies.has(agency.id)
-                                                ? 'bg-brand-start/5 border-brand-start ring-1 ring-brand-start shadow-md'
-                                                : 'bg-card-light dark:bg-card-dark border-gray-200 dark:border-white/10 hover:border-brand-start/30 hover:shadow-lg hover:-translate-y-1'
-                                                }`}
-                                        >
-                                            <div className="flex justify-between items-start relative z-10">
-                                                <div>
-                                                    <h3 className="font-bold text-lg leading-tight mb-1">{agency.name}</h3>
-                                                    <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wide">{agency.location}</p>
-                                                </div>
-                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
-                                                    {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-white" />}
-                                                </div>
-                                            </div>
-                                            {/* Sublte Category Tag */}
-                                            <div className="mt-4 flex gap-2">
-                                                <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
-                                                    {agency.category || 'Modeling'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
+                        {/* Feed Toggle */}
+                        <div className="flex justify-center mb-8">
+                            <div className="bg-gray-100 dark:bg-white/5 p-1 rounded-full flex gap-1 border border-gray-200 dark:border-white/10">
+                                <button
+                                    onClick={() => setFeedView('agencies')}
+                                    className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${feedView === 'agencies' ? 'bg-white dark:bg-white/10 shadow-sm text-black dark:text-white' : 'text-gray-500 hover:text-black dark:hover:text-white'}`}
+                                >
+                                    Find Agencies
+                                </button>
+                                <button
+                                    onClick={() => setFeedView('jobs')}
+                                    className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${feedView === 'jobs' ? 'bg-white dark:bg-white/10 shadow-sm text-black dark:text-white' : 'text-gray-500 hover:text-black dark:hover:text-white'}`}
+                                >
+                                    Find Jobs
+                                </button>
+                                <button
+                                    onClick={() => setFeedView('applications')}
+                                    className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${feedView === 'applications' ? 'bg-white dark:bg-white/10 shadow-sm text-black dark:text-white' : 'text-gray-500 hover:text-black dark:hover:text-white'}`}
+                                >
+                                    My Applications
+                                </button>
                             </div>
                         </div>
+
+                        {feedView === 'jobs' || feedView === 'applications' ? (
+                            <CastingFeed userProfile={userProfile} filters={{ onlyApplied: feedView === 'applications' }} />
+                        ) : (
+                            /* Agency Directory Section */
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-xl font-bold">Agency Directory <span className="text-text-secondary-light dark:text-text-secondary-dark font-medium text-sm ml-2">({agencies.length} available)</span></h2>
+                                    {selectedAgencies.size > 0 && (
+                                        <button
+                                            onClick={handleBulkApply}
+                                            disabled={applying}
+                                            className="bg-text-primary-light dark:bg-white text-white dark:text-black px-6 py-2 rounded-full font-bold hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-lg"
+                                        >
+                                            {applying ? <Loader2 className="animate-spin" /> : 'Apply Selected'}
+                                            <span className="text-xs bg-white/20 dark:bg-black/10 px-2 py-1 rounded-full text-current">
+                                                {selectedAgencies.size}
+                                            </span>
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-1">
+                                    {agencies.length === 0 ? (
+                                        <div className="col-span-full text-center text-text-secondary-light dark:text-text-secondary-dark py-12 bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10">
+                                            <Loader2 className="animate-spin mx-auto mb-2" />
+                                            Loading agencies...
+                                        </div>
+                                    ) : (
+                                        agencies.map(agency => (
+                                            <div
+                                                key={agency.id}
+                                                onClick={() => toggleAgency(agency.id)}
+                                                className={`p-6 rounded-3xl border cursor-pointer transition-all group relative overflow-hidden ${selectedAgencies.has(agency.id)
+                                                    ? 'bg-brand-start/5 border-brand-start ring-1 ring-brand-start shadow-md'
+                                                    : 'bg-card-light dark:bg-card-dark border-gray-200 dark:border-white/10 hover:border-brand-start/30 hover:shadow-lg hover:-translate-y-1'
+                                                    }`}
+                                            >
+                                                <div className="flex justify-between items-start relative z-10">
+                                                    <div>
+                                                        <h3 className="font-bold text-lg leading-tight mb-1">{agency.name}</h3>
+                                                        <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wide">{agency.location}</p>
+                                                    </div>
+                                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
+                                                        {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-white" />}
+                                                    </div>
+                                                </div>
+                                                {/* Sublte Category Tag */}
+                                                <div className="mt-4 flex gap-2">
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
+                                                        {agency.category || 'Modeling'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
 
                         {/* Recent submissions */}
                         <div className="space-y-4">
