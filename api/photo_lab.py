@@ -71,14 +71,17 @@ def process_digitals(image_url: str):
     print("Pass 2: Generating Model Digital...")
     
     generation_prompt = f"""
-    Act as a professional fashion photographer. Develop this raw image into a 'Model Digital' (Polaroid). 
-    
-    Lighting: Neutral, soft window light, white wall background. 
-    Technical: 85mm lens, f/2.8, sharp focus on eyes. 
-    
-    CRITICAL IDENTITY RULES: You must preserve the following features exactly: {identity_constraints}. 
-    
-    Texture: Do NOT smooth skin. Retain all pores and natural texture identified in the constraints.
+    STRICT VISUAL CONSTRAINT: You are a Photo Technician, NOT a Creative Director.
+
+    Environment Lock: You are strictly forbidden from placing the subject in new environments (e.g., beaches, cities, studios). You must ONLY replace the background with a Neutral White/Grey Wall or Seamless Paper.
+
+    Asset Lock: Do not change the user's clothing, hair color, or makeup. If the user is wearing a t-shirt, they must remain in that t-shirt.
+
+    No "Editorial" Style: Do not apply "Cinematic" or "Fantasy" color grading. Keep colors strictly realistic and neutral (Ra > 95).
+
+    Goal: The output must look like a raw, unedited test shot taken on a high-end camera, not a generated image.
+
+    CRITICAL IDENTITY RULES: You must preserve the following features exactly: {identity_constraints}.
     """
 
     try:
