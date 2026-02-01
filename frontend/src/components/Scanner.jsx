@@ -112,7 +112,7 @@ const Scanner = () => {
             </div>
 
             {/* Main Area */}
-            <div className="relative w-full min-h-[700px] md:aspect-video bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden group transition-colors duration-300">
+            <div className={`relative w-full ${state === 'IDLE' ? 'min-h-[500px]' : 'min-h-[700px]'} md:aspect-video bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden group transition-all duration-500 ease-in-out`}>
 
                 {/* IDLE STATE */}
                 {state === 'IDLE' && (
