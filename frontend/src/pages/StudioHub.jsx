@@ -6,6 +6,7 @@ import DashboardLayout from '../components/DashboardLayout';
 import PhotoLab from './PhotoLab'; // Reusing existing PhotoLab
 import VideoRecorderModal from '../components/VideoRecorderModal';
 import { useNavigate } from 'react-router-dom';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 const StudioHub = () => {
     const [activeTab, setActiveTab] = useState('photos'); // 'photos' | 'video'
@@ -70,6 +71,8 @@ const StudioHub = () => {
                             <Coins size={12} />
                         </div>
                     </div>
+
+                    <ThemeToggle />
 
                     {/* Desktop Profile Link */}
                     <button
