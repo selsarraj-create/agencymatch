@@ -294,6 +294,64 @@ async def create_lead(
         print(f"Error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+class HandoffRequest(BaseModel):
+    user_id: str
+    email: str
+    analysis_data: str # JSON string
+
+@app.post("/api/handoff")
+async def auth_handoff(req: HandoffRequest):
+    """
+    Server-side handoff to bypass RLS policies on 'profiles' table.
+    Updates the user profile with anonymous scan results.
+    """
+    try:
+        supabase = get_supabase()
+        
+        # Parse analysis data
+        try:
+            analysis_json = json.loads(req.analysis_data)
+        except:
+            analysis_json = {}
+
+        # Upsert Profile using Service Role (Bypasses RLS)
+        data = {
+            'id': req.user_id,
+            'email': req.email,
+            'analysis_data': analysis_json,
+            'is_analysis_complete': True,
+            'updated_at': time.strftime('%Y-%m-%dT%H:%M:%S%z') # Simple ISO format
+        }
+        
+        # First ensure the profile exists (though Auth trigger should handle it, this is safer)
+        # We need to be careful not to overwrite other fields if they exist, 
+        # but 'upsert' with minimal data on 'id' conflict might overwrite nulls.
+        # Ideally, we UPDATE. If update fails (no row), we INSERT.
+        
+        print(f"Executing Handoff for {req.user_id}...")
+        
+        # Try Update first
+        try:
+            update_resp = supabase.table('profiles').update({
+                'analysis_data': analysis_json,
+                'is_analysis_complete': True
+            }).eq('id', req.user_id).execute()
+            
+            if update_resp.data:
+                return {"status": "success", "message": "Profile updated"}
+                
+        except Exception as e:
+            print(f"Update failed, trying upsert: {e}")
+
+        # Fallback to Upsert (if trigger failed)
+        response = supabase.table('profiles').upsert(data).execute()
+        
+        return {"status": "success", "message": "Profile hydrated (upsert)"}
+
+    except Exception as e:
+        print(f"Handoff Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
 @app.post("/api/analyze")
 async def analyze_endpoint(file: UploadFile = File(...)):
     try:
