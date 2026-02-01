@@ -63,8 +63,8 @@ const LandingPage = () => {
 
                             <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-[0.9]">
                                 Launch Your <br className="hidden md:block" />
-                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-start to-brand-end">
-                                    Model Model
+                                Modeling <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-start to-brand-end">
+                                    Era
                                 </span>
                             </h1>
 
@@ -75,13 +75,13 @@ const LandingPage = () => {
                             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
                                 <button
                                     onClick={handleStart}
-                                    className="w-full sm:w-auto px-10 py-5 bg-gradient-to-r from-brand-start to-brand-end text-white font-bold text-lg rounded-full shadow-lg shadow-brand-start/30 hover:shadow-brand-start/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+                                    className="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-brand-start to-brand-end text-white font-bold text-lg rounded-full shadow-lg shadow-brand-start/30 hover:shadow-brand-start/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
                                 >
                                     Start Analysis <ArrowRight size={20} />
                                 </button>
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className="w-full sm:w-auto px-10 py-5 bg-white dark:bg-white/5 text-text-primary-light dark:text-white border border-gray-200 dark:border-white/10 font-bold text-lg rounded-full hover:bg-gray-50 dark:hover:bg-white/10 active:scale-95 transition-all"
+                                    className="w-full md:w-auto px-10 py-5 bg-white dark:bg-white/5 text-text-primary-light dark:text-white border border-gray-200 dark:border-white/10 font-bold text-lg rounded-full hover:bg-gray-50 dark:hover:bg-white/10 active:scale-95 transition-all"
                                 >
                                     Login
                                 </button>
@@ -118,13 +118,13 @@ const LandingPage = () => {
                             </div>
 
                             {/* Card 2 - Stats */}
-                            <div className="aspect-square rounded-3xl bg-card-light dark:bg-card-dark border border-gray-200 dark:border-white/10 p-6 flex flex-col justify-between shadow-xl">
+                            <div className="aspect-square rounded-3xl bg-white dark:bg-white/5 dark:backdrop-blur-md border border-gray-100 dark:border-white/10 p-6 flex flex-col justify-between shadow-sm">
                                 <div className="w-10 h-10 rounded-full bg-brand-start/10 flex items-center justify-center text-brand-start">
                                     <Zap size={20} fill="currentColor" />
                                 </div>
                                 <div>
-                                    <p className="text-3xl font-black text-text-primary-light dark:text-white">98%</p>
-                                    <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark font-medium">Match Rate</p>
+                                    <p className="text-3xl font-black text-black dark:text-white">98%</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Match Rate</p>
                                 </div>
                             </div>
 
@@ -140,8 +140,34 @@ const LandingPage = () => {
                 </div>
             </section>
 
+            {/* Logo Marquee */}
+            <div className="w-full overflow-hidden py-12 border-y border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
+                <div className="relative flex overflow-x-hidden group">
+                    {/* Fast Infinite Scroll */}
+                    <motion.div
+                        className="flex gap-16 items-center whitespace-nowrap px-16"
+                        animate={{ x: ["0%", "-50%"] }}
+                        transition={{ repeat: Infinity, ease: "linear", duration: 20 }}
+                    >
+                        {/* Repeat Logos Twice for seamless loop */}
+                        {[...Array(2)].map((_, i) => (
+                            <React.Fragment key={i}>
+                                <span className="text-3xl font-black text-text-primary-light/20 dark:text-white/20 uppercase">ELITE</span>
+                                <span className="text-3xl font-black text-text-primary-light/20 dark:text-white/20 uppercase">IMG MODELS</span>
+                                <span className="text-3xl font-black text-text-primary-light/20 dark:text-white/20 uppercase">FORD</span>
+                                <span className="text-3xl font-black text-text-primary-light/20 dark:text-white/20 uppercase">NEXT</span>
+                                <span className="text-3xl font-black text-text-primary-light/20 dark:text-white/20 uppercase">WILHELMINA</span>
+                                <span className="text-3xl font-black text-text-primary-light/20 dark:text-white/20 uppercase">STORM</span>
+                                <span className="text-3xl font-black text-text-primary-light/20 dark:text-white/20 uppercase">SELECT</span>
+                            </React.Fragment>
+                        ))}
+                    </motion.div>
+                </div>
+            </div>
+
+
             {/* Bento Grid Features */}
-            <section className="py-24 bg-gray-50 dark:bg-[#0a0a0a] px-4">
+            <section className="py-24 bg-surface-light dark:bg-[#0a0a0a] px-4">
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-text-primary-light dark:text-white">
@@ -161,8 +187,9 @@ const LandingPage = () => {
                                 transition={{ delay: idx * 0.1 }}
                                 className="bg-card-light dark:bg-card-dark p-8 rounded-3xl shadow-sm border border-gray-200 dark:border-white/5 hover:shadow-xl transition-all hover:-translate-y-1 group"
                             >
-                                <div className={`w-12 h-12 rounded-2xl ${feature.color} flex items-center justify-center mb-6 shadow-lg shadow-${feature.color}/30 group-hover:scale-110 transition-transform`}>
-                                    {feature.icon}
+                                <div className={`w-12 h-12 rounded-2xl bg-brand-start/10 text-brand-start flex items-center justify-center mb-6`}>
+                                    {/* Clone icon to enforce color if needed, but text-brand-start should cascade if icons use currentColor */}
+                                    {React.cloneElement(feature.icon, { className: "text-brand-start" })}
                                 </div>
                                 <h3 className="text-2xl font-bold mb-3 text-text-primary-light dark:text-white">{feature.title}</h3>
                                 <p className="text-text-secondary-light dark:text-text-secondary-dark font-medium leading-relaxed">
