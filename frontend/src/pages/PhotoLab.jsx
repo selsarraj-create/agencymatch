@@ -198,11 +198,9 @@ const PhotoLab = ({ isEmbedded = false }) => {
 
     const content = (
         <div className="space-y-6">
-            {!isEmbedded && (
-                <div className="text-center md:text-left">
-                    <p className="text-text-secondary-light dark:text-text-secondary-dark font-medium">Create strict Model Digitals from your selfies using AI.</p>
-                </div>
-            )}
+            <div className="text-center md:text-left">
+                <p className="text-text-secondary-light dark:text-text-secondary-dark font-medium">Create strict Model Digitals from your selfies using AI.</p>
+            </div>
 
             {/* Main Content Area */}
             <div className="grid md:grid-cols-2 gap-8">
