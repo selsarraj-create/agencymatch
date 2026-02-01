@@ -496,10 +496,17 @@ async def create_checkout_session(req: CheckoutRequest):
     try:
         # Get correct domain
         # Vercel automatically sets VERCEL_URL, but it lacks 'https://'
+        # PRIORITIZE PRODUCTION DOMAIN
+        
+        # Hardcoded production override (as requested by user)
+        PRODUCTION_DOMAIN = "https://agencyscout.io"
+        
         vercel_url = os.getenv('VERCEL_URL')
         site_url = os.getenv('VITE_SITE_URL')
         
-        if site_url:
+        if os.getenv('VERCEL_ENV') == 'production':
+            domain_url = PRODUCTION_DOMAIN
+        elif site_url:
             domain_url = site_url
         elif vercel_url:
             domain_url = f"https://{vercel_url}"
