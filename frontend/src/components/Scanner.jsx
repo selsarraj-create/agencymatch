@@ -243,9 +243,9 @@ const Scanner = () => {
                                                     <Check size={24} strokeWidth={4} />
                                                 </div>
                                                 <h3 className="text-xl font-black mb-1 text-text-primary-light dark:text-white">
-                                                    You qualified!
+                                                    Congratulations!
                                                 </h3>
-                                                <p className="text-sm text-text-secondary-light dark:text-gray-300 font-medium mb-6 max-w-xs mx-auto leading-tight">
+                                                <p className="text-sm text-text-secondary-light dark:text-gray-300 font-medium mb-3 max-w-xs mx-auto leading-tight">
                                                     Your face structure matches 3+ partner agencies.
                                                 </p>
 
