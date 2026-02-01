@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { User, Calendar, Smartphone, Save, Loader2, FileText, Mail, History as HistoryIcon, Plus, Minus } from 'lucide-react';
 import { motion } from 'framer-motion';
+import DeleteAccountZone from './DeleteAccountZone';
 
 const ProfileEditor = ({ userId, onUpdate }) => {
     const [loading, setLoading] = useState(true);
@@ -293,7 +294,11 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                         No transactions yet.
                     </div>
                 )}
+                )}
             </div>
+
+            {/* Danger Zone */}
+            <DeleteAccountZone userId={userId} />
         </motion.div>
     );
 };

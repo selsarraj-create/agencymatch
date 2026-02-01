@@ -885,3 +885,58 @@ async def apply_bulk(req: BulkApplyRequest):
     except Exception as e:
         print(f"Apply Error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.delete("/api/delete-account")
+async def delete_account(request: Request):
+    """
+    Securely deletes a user account, including:
+    1. Storage files (photos/videos)
+    2. Profile data
+    3. Auth user record (Admin)
+    """
+    try:
+        # Verify Auth Token
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+             return JSONResponse(status_code=401, content={"error": "Missing auth token"})
+        token = auth_header.split(' ')[1]
+        
+        supabase = get_supabase() # Admin Client
+        
+        # Verify User Identity
+        user_response = supabase.auth.get_user(token)
+        user = user_response.user
+        if not user:
+             return JSONResponse(status_code=401, content={"error": "Invalid token"})
+        
+        user_id = user.id
+        print(f"Processing Account Deletion for: {user_id}")
+        
+        # 1. Storage Cleanup
+        for bucket in ['photos', 'videos']:
+            try:
+                # List files in users/{user_id}
+                path = f"users/{user_id}"
+                files = supabase.storage.from_(bucket).list(path)
+                if files:
+                    file_paths = [f"{path}/{f['name']}" for f in files]
+                    if file_paths:
+                        supabase.storage.from_(bucket).remove(file_paths)
+            except Exception as e:
+                print(f"Storage wipe warning ({bucket}): {e}")
+
+        # 2. Database Cleanup (Manual)
+        try:
+            supabase.table('profiles').delete().eq('id', user_id).execute()
+        except Exception as e:
+             # This might fail if Auth delete handles it via cascade, which is fine.
+            print(f"Profile delete warning: {e}")
+
+        # 3. Auth Cleanup (Admin)
+        supabase.auth.admin.delete_user(user_id)
+        
+        return {"status": "success", "message": "Account deleted"}
+        
+    except Exception as e:
+        print(f"Delete Account Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
