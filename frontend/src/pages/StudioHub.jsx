@@ -16,7 +16,35 @@ const StudioHub = () => {
     const [deleting, setDeleting] = useState(false);
     const navigate = useNavigate();
 
-    // ... (handleDeleteVideo)
+    const handleDeleteVideo = async () => {
+        if (!confirm("Are you sure you want to delete your video reel?")) return;
+        setDeleting(true);
+        try {
+            const userId = profile.id;
+            // 1. Delete from Storage
+            const { error: storageError } = await supabase.storage
+                .from('videos')
+                .remove([`users/${userId}/intro.webm`]);
+
+            if (storageError) throw storageError;
+
+            // 2. Update Profile
+            const { error: dbError } = await supabase
+                .from('profiles')
+                .update({ video_url: null })
+                .eq('id', userId);
+
+            if (dbError) throw dbError;
+
+            // 3. Update Local State
+            setProfile(prev => ({ ...prev, video_url: null }));
+        } catch (error) {
+            console.error("Error deleting video:", error);
+            alert("Failed to delete video. Please try again.");
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     // Fetch Profile for Video Data
     const fetchProfile = async () => {
