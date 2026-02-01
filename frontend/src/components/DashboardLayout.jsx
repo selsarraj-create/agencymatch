@@ -3,7 +3,9 @@ import React from 'react';
 const DashboardLayout = ({ children, header }) => {
     return (
         // Container (The "Shell")
-        <div className="h-[100dvh] flex flex-col overflow-hidden bg-surface-light dark:bg-surface-dark transition-colors duration-300">
+        // CHANGED: Use 'fixed inset-0' to break out of the flow and ignore the App's global footer/min-height layout.
+        // This ensures the 100dvh scroll lock actually works.
+        <div className="fixed inset-0 z-30 flex flex-col overflow-hidden bg-surface-light dark:bg-surface-dark transition-colors duration-300">
 
             {/* The Header (Top) */}
             {header && (
