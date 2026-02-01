@@ -29,17 +29,24 @@ const AppContent = () => {
       console.log("Found pending analysis. Hydrating profile...");
       try {
         const analysisData = JSON.parse(pendingAnalysis);
-        // Save to Profile
-        const { error } = await supabase.from('profiles').update({
+
+        // Use UPSERT to handle race condition where Trigger hasn't created profile yet
+        // This ensures the row exists and has the data.
+        const { error } = await supabase.from('profiles').upsert({
+          id: currentSession.user.id,
+          email: currentSession.user.email,
           analysis_data: analysisData,
-          is_analysis_complete: true
-        }).eq('id', currentSession.user.id);
+          is_analysis_complete: true,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
 
         if (!error) {
           console.log("Analysis hydrated successfully.");
           localStorage.removeItem('pending_analysis');
         } else {
           console.error("Error hydrating profile:", error);
+          // Keep it in localStorage for one retry cycle in the Guard, 
+          // but if it fails repeatedly, the Guard will clear it.
         }
       } catch (e) {
         console.error("Failed to parse pending analysis", e);
@@ -62,7 +69,8 @@ const AppContent = () => {
 
       // Listen for auth changes
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-        if (newSession && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        // Run handoff on sign-in events
+        if (newSession && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION')) {
           await handleAuthHandoff(newSession);
         }
         setSession(newSession);
@@ -124,6 +132,7 @@ const AppContent = () => {
 const RequireAnalysis = ({ children, session }) => {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (!session) {
@@ -145,17 +154,28 @@ const RequireAnalysis = ({ children, session }) => {
 
       // If profile incomplete BUT we have local data, wait for Handoff
       if (pendingLocal) {
-        console.log("Hold on... waiting for analysis handoff.");
-        setTimeout(checkAnalysis, 1000); // Retry in 1s
-        return;
+        // Retry Limit: 10 attempts (~10 seconds)
+        if (retryCount < 10) {
+          console.log(`Waiting for analysis handoff... (${retryCount + 1}/10)`);
+          const timer = setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+          }, 1000);
+          return () => clearTimeout(timer);
+        } else {
+          // Gave up waiting
+          console.warn("Handoff timed out. Clearing stuck data to prevent infinite loop.");
+          localStorage.removeItem('pending_analysis');
+          // Proceed to fail (redirect to scan) logic below
+        }
       }
 
       // Really incomplete
       navigate('/scan');
       setChecking(false);
     };
+
     checkAnalysis();
-  }, [session, navigate]);
+  }, [session, navigate, retryCount]);
 
   if (checking) return <div className="min-h-screen bg-surface-light dark:bg-surface-dark flex items-center justify-center"><Loader2 className="animate-spin text-brand-start" /></div>;
   return children;
