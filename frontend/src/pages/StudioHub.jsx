@@ -11,6 +11,37 @@ const StudioHub = () => {
     const [loading, setLoading] = useState(true);
     const [profile, setProfile] = useState(null);
     const [isRecorderOpen, setRecorderOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+
+    const handleDeleteVideo = async () => {
+        if (!confirm("Are you sure you want to delete your video reel?")) return;
+        setDeleting(true);
+        try {
+            const userId = profile.id;
+            // 1. Delete from Storage
+            const { error: storageError } = await supabase.storage
+                .from('videos')
+                .remove([`users/${userId}/intro.webm`]);
+
+            if (storageError) throw storageError;
+
+            // 2. Update Profile
+            const { error: dbError } = await supabase
+                .from('profiles')
+                .update({ video_url: null })
+                .eq('id', userId);
+
+            if (dbError) throw dbError;
+
+            // 3. Update Local State
+            setProfile(prev => ({ ...prev, video_url: null }));
+        } catch (error) {
+            console.error("Error deleting video:", error);
+            alert("Failed to delete video. Please try again.");
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     // Fetch Profile for Video Data
     const fetchProfile = async () => {
@@ -129,6 +160,14 @@ const StudioHub = () => {
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-3">
+                                                    <button
+                                                        onClick={handleDeleteVideo}
+                                                        disabled={deleting}
+                                                        className="p-2 md:px-4 md:py-2 rounded-xl border border-red-200 dark:border-red-900/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors flex items-center justify-center"
+                                                        title="Delete Reel"
+                                                    >
+                                                        {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                                                    </button>
                                                     <button
                                                         onClick={() => setRecorderOpen(true)}
                                                         className="px-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 font-bold text-sm transition-colors"
