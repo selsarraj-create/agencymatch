@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { User, Calendar, Smartphone, Save, Loader2, FileText, Mail } from 'lucide-react';
+import { User, Calendar, Smartphone, Save, Loader2, FileText, Mail, History as HistoryIcon, Plus, Minus } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const ProfileEditor = ({ userId, onUpdate }) => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+
+    // Transaction History State
+    const [transactions, setTransactions] = useState([]);
+    const [historyLoading, setHistoryLoading] = useState(true);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -47,7 +51,28 @@ const ProfileEditor = ({ userId, onUpdate }) => {
             }
         };
 
-        if (userId) fetchProfile();
+        const fetchTransactions = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('transactions')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .order('created_at', { ascending: false })
+                    .limit(20); // Last 20 transactions
+
+                if (error) throw error;
+                setTransactions(data || []);
+            } catch (error) {
+                console.error("Error fetching transactions:", error);
+            } finally {
+                setHistoryLoading(false);
+            }
+        };
+
+        if (userId) {
+            fetchProfile();
+            fetchTransactions();
+        }
     }, [userId]);
 
     const handleChange = (e) => {
@@ -228,6 +253,47 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                 </div>
 
             </form>
+
+            <div className="border-t border-gray-200 dark:border-white/10 my-8"></div>
+
+            {/* Transaction History Section */}
+            <div>
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                    <HistoryIcon className="text-brand-start" /> Credit History
+                </h3>
+
+                {historyLoading ? (
+                    <div className="flex justify-center py-8"><Loader2 className="animate-spin text-gray-400" /></div>
+                ) : transactions.length > 0 ? (
+                    <div className="space-y-3">
+                        {transactions.map((tx) => (
+                            <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-full ${tx.amount > 0 ? 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400'}`}>
+                                        {tx.amount > 0 ? <Plus size={16} /> : <Minus size={16} />}
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-sm text-text-primary-light dark:text-white capitalize">{tx.type}</p>
+                                        <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{tx.description || 'No description'}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className={`font-black ${tx.amount > 0 ? 'text-green-600 dark:text-green-400' : 'text-text-primary-light dark:text-white'}`}>
+                                        {tx.amount > 0 ? '+' : ''}{tx.amount}
+                                    </p>
+                                    <p className="text-[10px] text-gray-400">
+                                        {new Date(tx.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-8 text-gray-400 text-sm">
+                        No transactions yet.
+                    </div>
+                )}
+            </div>
         </motion.div>
     );
 };
