@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Video, Play, Download, Trash2, Loader2, Sparkles, Mic } from 'lucide-react';
+import { Camera, Video, Play, Download, Trash2, Loader2, Sparkles, Mic, Coins, User } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import DashboardLayout from '../components/DashboardLayout';
 import PhotoLab from './PhotoLab'; // Reusing existing PhotoLab
 import VideoRecorderModal from '../components/VideoRecorderModal';
+import { useNavigate } from 'react-router-dom';
 
 const StudioHub = () => {
     const [activeTab, setActiveTab] = useState('photos'); // 'photos' | 'video'
@@ -12,36 +13,9 @@ const StudioHub = () => {
     const [profile, setProfile] = useState(null);
     const [isRecorderOpen, setRecorderOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const navigate = useNavigate();
 
-    const handleDeleteVideo = async () => {
-        if (!confirm("Are you sure you want to delete your video reel?")) return;
-        setDeleting(true);
-        try {
-            const userId = profile.id;
-            // 1. Delete from Storage
-            const { error: storageError } = await supabase.storage
-                .from('videos')
-                .remove([`users/${userId}/intro.webm`]);
-
-            if (storageError) throw storageError;
-
-            // 2. Update Profile
-            const { error: dbError } = await supabase
-                .from('profiles')
-                .update({ video_url: null })
-                .eq('id', userId);
-
-            if (dbError) throw dbError;
-
-            // 3. Update Local State
-            setProfile(prev => ({ ...prev, video_url: null }));
-        } catch (error) {
-            console.error("Error deleting video:", error);
-            alert("Failed to delete video. Please try again.");
-        } finally {
-            setDeleting(false);
-        }
-    };
+    // ... (handleDeleteVideo)
 
     // Fetch Profile for Video Data
     const fetchProfile = async () => {
@@ -51,8 +25,14 @@ const StudioHub = () => {
                 const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
                 setProfile(data);
 
-                // If user has 'first_name', well they don't in profile usually, it's in metadata or leads
-                // But we'll try to get what we can.
+                // Subscribe to profile updates (credits, video_url)
+                const channel = supabase.channel('studio_realtime')
+                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, payload => {
+                        if (payload.new) setProfile(payload.new);
+                    })
+                    .subscribe();
+
+                return () => { supabase.removeChannel(channel); };
             }
         } catch (e) {
             console.error(e);
@@ -67,11 +47,15 @@ const StudioHub = () => {
 
     // Header with Toggle
     const StudioHeader = () => (
-        <div className="flex flex-col items-center justify-center py-6 px-4">
-            <h1 className="text-2xl font-black mb-6 tracking-tight">Studio Hub</h1>
+        <div className="flex flex-col md:flex-row items-center justify-between py-6 px-4 max-w-6xl mx-auto w-full gap-4">
 
-            {/* Toggle Control */}
-            <div className="relative flex bg-gray-100 dark:bg-white/5 p-1 rounded-full border border-gray-200 dark:border-white/10 w-full max-w-xs">
+            {/* Title (Left on desktop) */}
+            <div className="flex flex-col items-center md:items-start">
+                <h1 className="text-2xl font-black tracking-tight">Studio Hub</h1>
+            </div>
+
+            {/* Toggle Control (Center) */}
+            <div className="relative flex bg-gray-100 dark:bg-white/5 p-1 rounded-full border border-gray-200 dark:border-white/10 w-full max-w-xs order-3 md:order-2">
                 {['photos', 'video'].map((tab) => {
                     const isActive = activeTab === tab;
                     return (
@@ -94,6 +78,19 @@ const StudioHub = () => {
                         </button>
                     );
                 })}
+            </div>
+
+            {/* Credits (Right) */}
+            <div className="flex items-center gap-3 order-2 md:order-3">
+                <div className="bg-card-light dark:bg-card-dark border border-gray-200 dark:border-white/10 rounded-full pl-3 pr-1 py-1 flex items-center gap-2 shadow-sm">
+                    <div className="flex flex-col items-end leading-none">
+                        <span className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark font-bold uppercase">Credits</span>
+                        <span className="text-sm font-black text-brand-start">{profile?.credits || 0}</span>
+                    </div>
+                    <div className="w-6 h-6 rounded-full bg-brand-start text-white flex items-center justify-center shadow-sm">
+                        <Coins size={12} />
+                    </div>
+                </div>
             </div>
         </div>
     );
