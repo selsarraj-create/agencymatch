@@ -370,7 +370,35 @@ async def analyze_endpoint(file: UploadFile = File(...)):
             
         return result
     except Exception as e:
+        return result
+    except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+# --- Photo Lab Endpoints ---
+from api.photo_lab import process_digitals
+
+class DigitalGenRequest(BaseModel):
+    photo_url: str
+    user_id: str
+
+@app.post("/api/generate-digitals")
+async def generate_digitals_endpoint(req: DigitalGenRequest):
+    try:
+        # In a real app, we check credits here
+        # supabase = get_supabase()
+        # check_credits(req.user_id, cost=5) ...
+
+        result = process_digitals(req.photo_url)
+        
+        if "error" in result:
+             return JSONResponse(status_code=500, content=result)
+             
+        return result
+        
+    except Exception as e:
+        print(f"Generate Digitals Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
 
 class RetryRequest(BaseModel):
     lead_id: str
