@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { LayoutDashboard, ExternalLink, CheckCircle, XCircle, Clock, Loader2, Coins, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { LayoutDashboard, ExternalLink, CheckCircle, XCircle, Clock, Loader2, Coins, ArrowRight, CheckCircle2, User } from 'lucide-react';
 import { ThemeToggle } from '../components/ThemeToggle';
+import ProfileEditor from '../components/ProfileEditor';
 
 const ClientDashboard = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -14,6 +15,10 @@ const ClientDashboard = () => {
     const [agencies, setAgencies] = useState([]);
     const [selectedAgencies, setSelectedAgencies] = useState(new Set());
     const [applying, setApplying] = useState(false);
+
+    // Tab State
+    const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'profile'
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     const navigate = useNavigate();
 
@@ -48,6 +53,7 @@ const ClientDashboard = () => {
         const fetchData = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) { navigate('/login'); return; }
+            setCurrentUserId(user.id);
 
             const profile = await supabase.from('profiles').select('credits').eq('id', user.id).single();
             if (profile.data) setCredits(profile.data.credits);
@@ -187,7 +193,23 @@ const ClientDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 flex-wrap">
+                        {/* Tab Switcher */}
+                        <div className="flex p-1 bg-gray-100 dark:bg-white/5 rounded-full border border-gray-200 dark:border-white/10">
+                            <button
+                                onClick={() => setActiveTab('dashboard')}
+                                className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${activeTab === 'dashboard' ? 'bg-white dark:bg-white/10 shadow-sm text-black dark:text-white' : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-black dark:hover:text-white'}`}
+                            >
+                                Dashboard
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('profile')}
+                                className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'profile' ? 'bg-white dark:bg-white/10 shadow-sm text-black dark:text-white' : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-black dark:hover:text-white'}`}
+                            >
+                                <User size={14} /> Profile
+                            </button>
+                        </div>
+
                         <div className="bg-card-light dark:bg-card-dark border border-gray-200 dark:border-white/10 rounded-full pl-5 pr-2 py-2 flex items-center gap-4 shadow-sm">
                             <div className="flex flex-col items-end leading-tight">
                                 <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark font-bold uppercase">Credits</span>
@@ -210,113 +232,120 @@ const ClientDashboard = () => {
                     </div>
                 </div>
 
-                {/* Agency Directory Section */}
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold">Agency Directory <span className="text-text-secondary-light dark:text-text-secondary-dark font-medium text-sm ml-2">({agencies.length} available)</span></h2>
-                        {selectedAgencies.size > 0 && (
-                            <button
-                                onClick={handleBulkApply}
-                                disabled={applying}
-                                className="bg-text-primary-light dark:bg-white text-white dark:text-black px-6 py-2 rounded-full font-bold hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-lg"
-                            >
-                                {applying ? <Loader2 className="animate-spin" /> : 'Apply Selected'}
-                                <span className="text-xs bg-white/20 dark:bg-black/10 px-2 py-1 rounded-full text-current">
-                                    {selectedAgencies.size}
-                                </span>
-                            </button>
-                        )}
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto p-1">
-                        {agencies.length === 0 ? (
-                            <div className="col-span-full text-center text-text-secondary-light dark:text-text-secondary-dark py-12 bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10">
-                                <Loader2 className="animate-spin mx-auto mb-2" />
-                                Loading agencies...
-                            </div>
-                        ) : (
-                            agencies.map(agency => (
-                                <div
-                                    key={agency.id}
-                                    onClick={() => toggleAgency(agency.id)}
-                                    className={`p-6 rounded-3xl border cursor-pointer transition-all group relative overflow-hidden ${selectedAgencies.has(agency.id)
-                                        ? 'bg-brand-start/5 border-brand-start ring-1 ring-brand-start shadow-md'
-                                        : 'bg-card-light dark:bg-card-dark border-gray-200 dark:border-white/10 hover:border-brand-start/30 hover:shadow-lg hover:-translate-y-1'
-                                        }`}
-                                >
-                                    <div className="flex justify-between items-start relative z-10">
-                                        <div>
-                                            <h3 className="font-bold text-lg leading-tight mb-1">{agency.name}</h3>
-                                            <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wide">{agency.location}</p>
-                                        </div>
-                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
-                                            {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-white" />}
-                                        </div>
-                                    </div>
-                                    {/* Sublte Category Tag */}
-                                    <div className="mt-4 flex gap-2">
-                                        <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
-                                            {agency.category || 'Modeling'}
+                {/* Content Area */}
+                {activeTab === 'profile' ? (
+                    <ProfileEditor userId={currentUserId} />
+                ) : (
+                    <>
+                        {/* Agency Directory Section */}
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-xl font-bold">Agency Directory <span className="text-text-secondary-light dark:text-text-secondary-dark font-medium text-sm ml-2">({agencies.length} available)</span></h2>
+                                {selectedAgencies.size > 0 && (
+                                    <button
+                                        onClick={handleBulkApply}
+                                        disabled={applying}
+                                        className="bg-text-primary-light dark:bg-white text-white dark:text-black px-6 py-2 rounded-full font-bold hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-lg"
+                                    >
+                                        {applying ? <Loader2 className="animate-spin" /> : 'Apply Selected'}
+                                        <span className="text-xs bg-white/20 dark:bg-black/10 px-2 py-1 rounded-full text-current">
+                                            {selectedAgencies.size}
                                         </span>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
+                                    </button>
+                                )}
+                            </div>
 
-                {/* Recent submissions */}
-                <div className="space-y-4 pb-24">
-                    <h2 className="text-xl font-bold">Recent Applications</h2>
-                    <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-gray-50 dark:bg-white/5 text-xs uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">
-                                    <tr>
-                                        <th className="p-5">Agency</th>
-                                        <th className="p-5">Status</th>
-                                        <th className="p-5">Date</th>
-                                        <th className="p-5 text-right">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                                    {submissions.length === 0 ? (
-                                        <tr><td colSpan="4" className="p-8 text-center text-text-secondary-light dark:text-text-secondary-dark font-medium">No applications yet. Start selecting agencies above!</td></tr>
-                                    ) : (
-                                        submissions.map((item) => (
-                                            <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                                                <td className="p-5 font-bold">{item.agency_url}</td>
-                                                <td className="p-5">
-                                                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${item.status === 'success' ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-500 border-green-200 dark:border-green-500/20' :
-                                                            item.status === 'failed' ? 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 border-red-200 dark:border-red-500/20' :
-                                                                'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-200 dark:border-yellow-500/20'
-                                                        }`}>
-                                                        <StatusIcon status={item.status} />
-                                                        <span className="capitalize">{item.status}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-5 text-text-secondary-light dark:text-text-secondary-dark font-medium">
-                                                    {new Date(item.created_at).toLocaleDateString()}
-                                                </td>
-                                                <td className="p-5 text-right">
-                                                    {item.proof_screenshot_url && (
-                                                        <a href={item.proof_screenshot_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-brand-start font-bold hover:underline">
-                                                            Proof <ExternalLink size={14} />
-                                                        </a>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto p-1">
+                                {agencies.length === 0 ? (
+                                    <div className="col-span-full text-center text-text-secondary-light dark:text-text-secondary-dark py-12 bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10">
+                                        <Loader2 className="animate-spin mx-auto mb-2" />
+                                        Loading agencies...
+                                    </div>
+                                ) : (
+                                    agencies.map(agency => (
+                                        <div
+                                            key={agency.id}
+                                            onClick={() => toggleAgency(agency.id)}
+                                            className={`p-6 rounded-3xl border cursor-pointer transition-all group relative overflow-hidden ${selectedAgencies.has(agency.id)
+                                                ? 'bg-brand-start/5 border-brand-start ring-1 ring-brand-start shadow-md'
+                                                : 'bg-card-light dark:bg-card-dark border-gray-200 dark:border-white/10 hover:border-brand-start/30 hover:shadow-lg hover:-translate-y-1'
+                                                }`}
+                                        >
+                                            <div className="flex justify-between items-start relative z-10">
+                                                <div>
+                                                    <h3 className="font-bold text-lg leading-tight mb-1">{agency.name}</h3>
+                                                    <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wide">{agency.location}</p>
+                                                </div>
+                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
+                                                    {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-white" />}
+                                                </div>
+                                            </div>
+                                            {/* Sublte Category Tag */}
+                                            <div className="mt-4 flex gap-2">
+                                                <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
+                                                    {agency.category || 'Modeling'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </div>
-                    </div>
-                </div>
+
+                        {/* Recent submissions */}
+                        <div className="space-y-4 pb-24">
+                            <h2 className="text-xl font-bold">Recent Applications</h2>
+                            <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-sm">
+                                        <thead className="bg-gray-50 dark:bg-white/5 text-xs uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">
+                                            <tr>
+                                                <th className="p-5">Agency</th>
+                                                <th className="p-5">Status</th>
+                                                <th className="p-5">Date</th>
+                                                <th className="p-5 text-right">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                                            {submissions.length === 0 ? (
+                                                <tr><td colSpan="4" className="p-8 text-center text-text-secondary-light dark:text-text-secondary-dark font-medium">No applications yet. Start selecting agencies above!</td></tr>
+                                            ) : (
+                                                submissions.map((item) => (
+                                                    <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                                                        <td className="p-5 font-bold">{item.agency_url}</td>
+                                                        <td className="p-5">
+                                                            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${item.status === 'success' ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-500 border-green-200 dark:border-green-500/20' :
+                                                                item.status === 'failed' ? 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 border-red-200 dark:border-red-500/20' :
+                                                                    'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-200 dark:border-yellow-500/20'
+                                                                }`}>
+                                                                <StatusIcon status={item.status} />
+                                                                <span className="capitalize">{item.status}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-5 text-text-secondary-light dark:text-text-secondary-dark font-medium">
+                                                            {new Date(item.created_at).toLocaleDateString()}
+                                                        </td>
+                                                        <td className="p-5 text-right">
+                                                            {item.proof_screenshot_url && (
+                                                                <a href={item.proof_screenshot_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-brand-start font-bold hover:underline">
+                                                                    Proof <ExternalLink size={14} />
+                                                                </a>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
 
-            {/* Mobile Sticky Bar */}
-            {selectedAgencies.size > 0 && (
+            {/* Mobile Sticky Bar - Only show on dashboard tab */}
+            {activeTab === 'dashboard' && selectedAgencies.size > 0 && (
                 <div className="fixed bottom-6 left-4 right-4 p-4 bg-text-primary-light dark:bg-card-dark border border-white/10 rounded-2xl md:hidden z-50 flex items-center justify-between shadow-2xl">
                     <div className="text-white">
                         <span className="font-bold text-lg">{selectedAgencies.size}</span>
