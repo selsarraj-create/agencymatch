@@ -275,7 +275,7 @@ const ClientDashboard = () => {
 
                         {feedView === 'jobs' || feedView === 'applications' ? (
                             <CastingFeed userProfile={userProfile} filters={{ onlyApplied: feedView === 'applications' }} />
-                        ) : (
+                        ) : (<>
                             /* Agency Directory Section */
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
@@ -331,54 +331,55 @@ const ClientDashboard = () => {
                                 </div>
                             </div>
 
-                        {/* Recent submissions */}
-                        <div className="space-y-4">
-                            <h2 className="text-xl font-bold">Recent Applications</h2>
-                            <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left text-sm">
-                                        <thead className="bg-gray-50 dark:bg-white/5 text-xs uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">
-                                            <tr>
-                                                <th className="p-5">Agency</th>
-                                                <th className="p-5">Status</th>
-                                                <th className="p-5">Date</th>
-                                                <th className="p-5 text-right">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                                            {submissions.length === 0 ? (
-                                                <tr><td colSpan="4" className="p-8 text-center text-text-secondary-light dark:text-text-secondary-dark font-medium">No applications yet. Start selecting agencies above!</td></tr>
-                                            ) : (
-                                                submissions.map((item) => (
-                                                    <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                                                        <td className="p-5 font-bold">{item.agency_url}</td>
-                                                        <td className="p-5">
-                                                            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${item.status === 'success' ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-500 border-green-200 dark:border-green-500/20' :
-                                                                item.status === 'failed' ? 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 border-red-200 dark:border-red-500/20' :
-                                                                    'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-200 dark:border-yellow-500/20'
-                                                                }`}>
-                                                                <StatusIcon status={item.status} />
-                                                                <span className="capitalize">{item.status}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="p-5 text-text-secondary-light dark:text-text-secondary-dark font-medium">
-                                                            {new Date(item.created_at).toLocaleDateString()}
-                                                        </td>
-                                                        <td className="p-5 text-right">
-                                                            {item.proof_screenshot_url && (
-                                                                <a href={item.proof_screenshot_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-brand-start font-bold hover:underline">
-                                                                    Proof <ExternalLink size={14} />
-                                                                </a>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                    </table>
+                            {/* Recent submissions */}
+                            <div className="space-y-4">
+                                <h2 className="text-xl font-bold">Recent Applications</h2>
+                                <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left text-sm">
+                                            <thead className="bg-gray-50 dark:bg-white/5 text-xs uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">
+                                                <tr>
+                                                    <th className="p-5">Agency</th>
+                                                    <th className="p-5">Status</th>
+                                                    <th className="p-5">Date</th>
+                                                    <th className="p-5 text-right">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                                                {submissions.length === 0 ? (
+                                                    <tr><td colSpan="4" className="p-8 text-center text-text-secondary-light dark:text-text-secondary-dark font-medium">No applications yet. Start selecting agencies above!</td></tr>
+                                                ) : (
+                                                    submissions.map((item) => (
+                                                        <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                                                            <td className="p-5 font-bold">{item.agency_url}</td>
+                                                            <td className="p-5">
+                                                                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${item.status === 'success' ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-500 border-green-200 dark:border-green-500/20' :
+                                                                    item.status === 'failed' ? 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 border-red-200 dark:border-red-500/20' :
+                                                                        'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-200 dark:border-yellow-500/20'
+                                                                    }`}>
+                                                                    <StatusIcon status={item.status} />
+                                                                    <span className="capitalize">{item.status}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-5 text-text-secondary-light dark:text-text-secondary-dark font-medium">
+                                                                {new Date(item.created_at).toLocaleDateString()}
+                                                            </td>
+                                                            <td className="p-5 text-right">
+                                                                {item.proof_screenshot_url && (
+                                                                    <a href={item.proof_screenshot_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-brand-start font-bold hover:underline">
+                                                                        Proof <ExternalLink size={14} />
+                                                                    </a>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </>)}
                     </>
                 )}
             </DashboardLayout>
