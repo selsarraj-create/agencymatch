@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabaseClient';
 const VideoRecorderModal = ({ isOpen, onClose, userId, userName, userCity, userHeight, onUploadComplete }) => {
     const [isTeleprompterOpen, setTeleprompterOpen] = useState(true);
     const [uploading, setUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
+    const [recordingTime, setRecordingTime] = useState(0); // Seconds
 
     const {
         status,
@@ -26,6 +26,26 @@ const VideoRecorderModal = ({ isOpen, onClose, userId, userName, userCity, userH
             videoPreviewRef.current.srcObject = previewStream;
         }
     }, [previewStream]);
+
+    // Timer Logic
+    useEffect(() => {
+        let interval;
+        if (status === 'recording') {
+            setRecordingTime(0);
+            interval = setInterval(() => {
+                setRecordingTime(prev => prev + 1);
+            }, 1000);
+        } else if (status === 'stopped') {
+            clearInterval(interval);
+        }
+        return () => clearInterval(interval);
+    }, [status]);
+
+    const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
 
     // Teleprompter Script
     const script = `Hi, I'm ${userName || '[Name]'}. I am ${userHeight || '[Height]'}cm tall and based in ${userCity || '[City]'}. I'm excited to apply.`;
@@ -53,15 +73,18 @@ const VideoRecorderModal = ({ isOpen, onClose, userId, userName, userCity, userH
                 .from('videos')
                 .getPublicUrl(filePath);
 
+            // Cache bust the URL
+            const finalUrl = `${publicUrl}?t=${Date.now()}`;
+
             // 4. Update Profile
             const { error: dbError } = await supabase
                 .from('profiles')
-                .update({ video_url: publicUrl })
+                .update({ video_url: finalUrl })
                 .eq('id', userId);
 
             if (dbError) throw dbError;
 
-            onUploadComplete(publicUrl);
+            onUploadComplete(finalUrl);
             onClose();
 
         } catch (error) {
@@ -135,7 +158,7 @@ const VideoRecorderModal = ({ isOpen, onClose, userId, userName, userCity, userH
                 {status === 'recording' && (
                     <div className="flex items-center gap-2 text-red-500 animate-pulse">
                         <div className="w-3 h-3 bg-red-500 rounded-full" />
-                        <span className="font-mono font-bold">RECORDING 00:00</span>
+                        <span className="font-mono font-bold">RECORDING {formatTime(recordingTime)}</span>
                     </div>
                 )}
 
