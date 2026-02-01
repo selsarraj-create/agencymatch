@@ -39,7 +39,17 @@ const PhotoLab = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { navigate('/login'); return; }
         setUser(user);
-        fetchCredits(user.id);
+
+        // Fetch credits directly from profile (Standardized with Dashboard)
+        const { data: profile, error: profileError } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
+        if (profile && !profileError) {
+            setCredits(profile.credits);
+        } else {
+            console.warn("Failed to fetch credits directly from Supabase profile, falling back to API.", profileError);
+            fetchCredits(user.id); // Fallback to API if profile fetch fails
+        }
+
+        setLoading(false);
 
         // Subscribe to credit updates
         const channel = supabase.channel('photolab_realtime')
@@ -49,14 +59,13 @@ const PhotoLab = () => {
         return () => { supabase.removeChannel(channel); };
     };
 
+    // Legacy fetch (kept as backup, or can be removed if confident)
     const fetchCredits = async (userId) => {
         try {
             const response = await axios.get(`${API_URL}/api/credits/balance?user_id=${userId}`);
             setCredits(response.data.credits);
         } catch (err) {
-            console.error("Failed to fetch credits", err);
-        } finally {
-            setLoading(false);
+            console.error("Failed to fetch credits via API", err);
         }
     };
 
@@ -289,8 +298,8 @@ const PhotoLab = () => {
                                     onClick={handleGenerate}
                                     disabled={!inputImage || credits < 1 || step === 'processing'}
                                     className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] shadow-lg ${!inputImage || credits < 1
-                                            ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
-                                            : 'bg-brand-start hover:bg-brand-mid text-white'
+                                        ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
+                                        : 'bg-brand-start hover:bg-brand-mid text-white'
                                         }`}
                                 >
                                     {step === 'processing' ? (
