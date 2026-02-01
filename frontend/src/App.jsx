@@ -10,6 +10,7 @@ import LandingPage from './pages/LandingPage';
 import OnboardingProfile from './pages/OnboardingProfile';
 import { Loader2 } from 'lucide-react';
 import { ThemeProvider } from './components/ThemeProvider';
+import MobileBottomNav from './components/MobileBottomNav';
 
 import './index.css';
 
@@ -208,9 +209,10 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <div className="min-h-screen bg-surface-light dark:bg-surface-dark text-text-primary-light dark:text-text-primary-dark font-sans transition-colors duration-300">
           <AppContent />
+          <MobileBottomNav />
           {/* Footer */}
-          <footer className="w-full py-6 text-center text-gray-500 text-xs relative z-10 bg-card-light/50 dark:bg-black/50 backdrop-blur-sm border-t border-gray-200 dark:border-white/5">
-            <p>© 2026 MODEL SUITABILITY ENGINE</p>
+          <footer className="w-full py-6 text-center text-gray-500 text-xs relative z-10 bg-card-light/50 dark:bg-black/50 backdrop-blur-sm border-t border-gray-200 dark:border-white/5 pb-20 md:pb-6">
+            <p>© 2026 AGENCY SCOUT</p>
           </footer>
         </div>
       </ThemeProvider>

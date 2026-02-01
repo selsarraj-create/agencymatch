@@ -55,6 +55,12 @@ const ClientDashboard = () => {
             if (!user) { navigate('/login'); return; }
             setCurrentUserId(user.id);
 
+            // Check URL param for tab
+            const params = new URLSearchParams(window.location.search);
+            const tabParam = params.get('tab');
+            if (tabParam === 'profile') setActiveTab('profile');
+            else setActiveTab('dashboard'); // Default reset if no param
+
             const profile = await supabase.from('profiles').select('credits').eq('id', user.id).single();
             if (profile.data) setCredits(profile.data.credits);
 
@@ -77,7 +83,8 @@ const ClientDashboard = () => {
             return () => { supabase.removeChannel(channel); };
         };
         fetchData();
-    }, [navigate]);
+        // Listen for Location changes to update tab if user clicks Nav while already on page
+    }, [navigate, window.location.search]);
 
     const handleSubmissionUpdate = (payload) => {
         if (payload.eventType === 'INSERT') setSubmissions(prev => [payload.new, ...prev]);
