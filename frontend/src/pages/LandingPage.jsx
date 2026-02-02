@@ -83,7 +83,7 @@ const LandingPage = () => {
                                     onClick={handleStart}
                                     className="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-brand-start to-brand-end text-white font-bold text-lg rounded-full shadow-lg shadow-brand-start/30 hover:shadow-brand-start/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
                                 >
-                                    Start Analysis <ArrowRight size={20} />
+                                    Start Free Scan <ArrowRight size={20} />
                                 </button>
                                 <button
                                     onClick={() => navigate('/login')}
