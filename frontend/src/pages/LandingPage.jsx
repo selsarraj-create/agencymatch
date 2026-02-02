@@ -211,7 +211,7 @@ const LandingPage = () => {
             </div>
 
 
-            {/* Bento Grid Features */}
+            {/* Bento Grid Features - Control Center */}
             <section className="py-24 bg-surface-light dark:bg-[#0a0a0a] px-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
@@ -223,25 +223,84 @@ const LandingPage = () => {
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {features.map((feature, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.1 }}
-                                className="bg-card-light dark:bg-card-dark p-8 rounded-3xl shadow-sm border border-gray-200 dark:border-white/5 hover:shadow-xl transition-all hover:-translate-y-1 group"
-                            >
-                                <div className={`w-12 h-12 rounded-2xl bg-brand-start/10 text-brand-start flex items-center justify-center mb-6`}>
-                                    {/* Clone icon to enforce color if needed, but text-brand-start should cascade if icons use currentColor */}
-                                    {React.cloneElement(feature.icon, { className: "text-brand-start" })}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {/* Card 1: AI Analysis (Full Width on Mobile, 2 Cols on Desktop) */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="col-span-2 aspect-[2/1] md:aspect-auto bg-white/60 dark:bg-white/5 backdrop-blur-xl rounded-3xl border border-white/40 dark:border-white/10 shadow-xl shadow-blue-500/5 dark:shadow-black/50 p-8 relative overflow-hidden group hover:border-blue-500/50 hover:shadow-blue-500/20 transition-all duration-300"
+                        >
+                            <div className="relative z-10 h-full flex flex-col justify-between">
+                                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-4">
+                                    <ScanFace size={24} />
                                 </div>
-                                <h3 className="text-2xl font-bold mb-3 text-text-primary-light dark:text-white">{feature.title}</h3>
-                                <p className="text-text-secondary-light dark:text-text-secondary-dark font-medium leading-relaxed">
-                                    {feature.desc}
-                                </p>
-                            </motion.div>
-                        ))}
+                                <div>
+                                    <h3 className="text-lg md:text-2xl font-bold dark:text-white mb-2">AI Analysis</h3>
+                                    <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 font-medium leading-relaxed max-w-xs">
+                                        Instant breakdown of your features using pro-grade computer vision.
+                                    </p>
+                                </div>
+                            </div>
+                            {/* Ghost Icon */}
+                            <ScanFace className="absolute -bottom-4 -right-4 w-24 h-24 text-gray-900 dark:text-white opacity-5 rotate-[-15deg] group-hover:scale-110 group-hover:opacity-10 transition-all duration-500" />
+                        </motion.div>
+
+                        {/* Card 2: Smart Castings (Square) */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="col-span-1 aspect-square bg-white/60 dark:bg-white/5 backdrop-blur-xl rounded-3xl border border-white/40 dark:border-white/10 shadow-xl shadow-blue-500/5 dark:shadow-black/50 p-6 relative overflow-hidden group hover:border-green-500/50 hover:shadow-green-500/20 active:scale-[0.98] transition-all duration-300"
+                        >
+                            <div className="relative z-10 h-full flex flex-col justify-between">
+                                <div className="w-10 h-10 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center">
+                                    <Briefcase size={20} />
+                                </div>
+                                <h3 className="text-lg md:text-xl font-bold dark:text-white leading-tight">Smart<br />Castings</h3>
+                            </div>
+                            <Briefcase className="absolute -bottom-4 -right-4 w-20 h-20 text-gray-900 dark:text-white opacity-5 rotate-[-15deg] group-hover:scale-110 group-hover:opacity-10 transition-all duration-500" />
+                        </motion.div>
+
+                        {/* Card 3: Agency Match (Square) */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                            className="col-span-1 aspect-square bg-white/60 dark:bg-white/5 backdrop-blur-xl rounded-3xl border border-white/40 dark:border-white/10 shadow-xl shadow-blue-500/5 dark:shadow-black/50 p-6 relative overflow-hidden group hover:border-purple-500/50 hover:shadow-purple-500/20 active:scale-[0.98] transition-all duration-300"
+                        >
+                            <div className="relative z-10 h-full flex flex-col justify-between">
+                                <div className="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
+                                    <Building2 size={20} />
+                                </div>
+                                <h3 className="text-lg md:text-xl font-bold dark:text-white leading-tight">Agency<br />Match</h3>
+                            </div>
+                            <Building2 className="absolute -bottom-4 -right-4 w-20 h-20 text-gray-900 dark:text-white opacity-5 rotate-[-15deg] group-hover:scale-110 group-hover:opacity-10 transition-all duration-500" />
+                        </motion.div>
+
+                        {/* Card 4: Portfolio Lab (Wide Banner on Mobile, 2 Cols on Desktop) */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.3 }}
+                            className="col-span-2 md:col-span-3 lg:col-span-2 aspect-[2/1] md:aspect-auto bg-white/60 dark:bg-white/5 backdrop-blur-xl rounded-3xl border border-white/40 dark:border-white/10 shadow-xl shadow-blue-500/5 dark:shadow-black/50 p-8 relative overflow-hidden group hover:border-pink-500/50 hover:shadow-pink-500/20 transition-all duration-300"
+                        >
+                            <div className="relative z-10 h-full flex flex-col justify-between">
+                                <div className="w-12 h-12 rounded-2xl bg-pink-500/10 text-pink-500 flex items-center justify-center mb-4">
+                                    <Camera size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg md:text-2xl font-bold dark:text-white mb-2">Portfolio Lab</h3>
+                                    <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 font-medium leading-relaxed max-w-xs">
+                                        Generate professional composite cards without the photoshoot cost.
+                                    </p>
+                                </div>
+                            </div>
+                            <Camera className="absolute -bottom-4 -right-4 w-24 h-24 text-gray-900 dark:text-white opacity-5 rotate-[-15deg] group-hover:scale-110 group-hover:opacity-10 transition-all duration-500" />
+                        </motion.div>
                     </div>
                 </div>
             </section>
