@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { Lock } from 'lucide-react';
+import { Lock, X } from 'lucide-react';
 import SocialAuthButtons from '../components/SocialAuthButtons';
 
 const Login = () => {
@@ -31,7 +31,14 @@ const Login = () => {
 
     return (
         <div className="min-h-screen bg-studio-black flex items-center justify-center p-4">
-            <div className="max-w-md w-full glass-panel p-8 rounded-2xl border border-white/10">
+            <div className="max-w-md w-full glass-panel p-8 rounded-2xl border border-white/10 relative">
+                <button
+                    onClick={() => navigate('/')}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full"
+                >
+                    <X size={20} />
+                </button>
+
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-studio-gold/20 mb-4 text-studio-gold">
                         <Lock size={24} />
