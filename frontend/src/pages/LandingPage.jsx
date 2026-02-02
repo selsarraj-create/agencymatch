@@ -201,6 +201,80 @@ const LandingPage = () => {
                 </div>
             </section>
 
+            {/* Testimonials Section */}
+            <section className="py-24 bg-white dark:bg-black px-4 border-t border-gray-100 dark:border-white/5">
+                <div className="max-w-6xl mx-auto">
+                    <h2 className="text-4xl font-black text-center mb-16 tracking-tight text-text-primary-light dark:text-white">
+                        Don't just take our word for it.
+                    </h2>
+
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {/* Testimonial 1 */}
+                        <div className="bg-gray-50 dark:bg-white/5 p-8 rounded-3xl border border-gray-100 dark:border-white/5">
+                            <div className="flex items-center gap-4 mb-6">
+                                <img src="/assets/avatar_user_1.png" alt="Sarah" className="w-12 h-12 rounded-full object-cover" />
+                                <div>
+                                    <p className="font-bold text-text-primary-light dark:text-white">Sarah Jenkins</p>
+                                    <p className="text-xs text-brand-start font-bold">SIGNED WITH FORD</p>
+                                </div>
+                            </div>
+                            <p className="text-text-secondary-light dark:text-text-secondary-dark italic">
+                                "I spent years sending emails to agencies and hearing nothing. One scan with Model Match and I realized my digitals were the problem. Fixed them, and got signed in 2 weeks."
+                            </p>
+                            <div className="flex gap-1 mt-6 text-yellow-400">
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                            </div>
+                        </div>
+
+                        {/* Testimonial 2 */}
+                        <div className="bg-gray-50 dark:bg-white/5 p-8 rounded-3xl border border-gray-100 dark:border-white/5">
+                            <div className="flex items-center gap-4 mb-6">
+                                <img src="/assets/avatar_user_2.png" alt="Marcus" className="w-12 h-12 rounded-full object-cover" />
+                                <div>
+                                    <p className="font-bold text-text-primary-light dark:text-white">Marcus Chen</p>
+                                    <p className="text-xs text-brand-start font-bold">SIGNED WITH ELITE</p>
+                                </div>
+                            </div>
+                            <p className="text-text-secondary-light dark:text-text-secondary-dark italic">
+                                "The AI feedback was brutally honest but exactly what I needed. It told me which market I actually fit in. I stopped wasting time applying to commercial agencies and focused on high fashion."
+                            </p>
+                            <div className="flex gap-1 mt-6 text-yellow-400">
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                            </div>
+                        </div>
+
+                        {/* Testimonial 3 */}
+                        <div className="bg-gray-50 dark:bg-white/5 p-8 rounded-3xl border border-gray-100 dark:border-white/5">
+                            <div className="flex items-center gap-4 mb-6">
+                                <img src="/assets/avatar_user_4.png" alt="Priya" className="w-12 h-12 rounded-full object-cover" />
+                                <div>
+                                    <p className="font-bold text-text-primary-light dark:text-white">Priya Patel</p>
+                                    <p className="text-xs text-brand-start font-bold">SIGNED WITH IMG</p>
+                                </div>
+                            </div>
+                            <p className="text-text-secondary-light dark:text-text-secondary-dark italic">
+                                "The Portfolio Lab saved me £500. I needed clean digitals for my application but couldn't afford a photographer. The AI generated exactly what the agencies asked for."
+                            </p>
+                            <div className="flex gap-1 mt-6 text-yellow-400">
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                                <Star fill="currentColor" size={16} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* CTA Section */}
             <section className="py-32 px-4 text-center">
                 <div className="max-w-4xl mx-auto">
