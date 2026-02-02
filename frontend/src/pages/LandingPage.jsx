@@ -319,7 +319,7 @@ const LandingPage = () => {
             <section className="py-24 bg-white dark:bg-black px-4 border-t border-gray-100 dark:border-white/5">
                 <div className="max-w-6xl mx-auto">
                     <h2 className="text-4xl font-black text-center mb-16 tracking-tight text-text-primary-light dark:text-white">
-                        Don't just take our word for it.
+                        Don't take our word for it.
                     </h2>
 
                     <div className="grid md:grid-cols-3 gap-8">
