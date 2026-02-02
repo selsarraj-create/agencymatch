@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ScanFace, Building2, Camera, ArrowRight, CheckCircle2, Star, Zap } from 'lucide-react';
+import { ScanFace, Building2, Camera, ArrowRight, CheckCircle2, Star, Zap, Briefcase } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ThemeToggle } from '../components/ThemeToggle';
 
@@ -17,6 +17,12 @@ const LandingPage = () => {
             title: "AI Analysis",
             desc: "Instant breakdown of your features using pro-grade computer vision.",
             color: "bg-blue-500"
+        },
+        {
+            icon: <Briefcase className="text-white" size={24} />,
+            title: "Smart Castings",
+            desc: "Direct access to paid modeling jobs matched specifically to your profile.",
+            color: "bg-green-500"
         },
         {
             icon: <Building2 className="text-white" size={24} />,
@@ -168,7 +174,7 @@ const LandingPage = () => {
 
             {/* Bento Grid Features */}
             <section className="py-24 bg-surface-light dark:bg-[#0a0a0a] px-4">
-                <div className="max-w-6xl mx-auto">
+                <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-text-primary-light dark:text-white">
                             Everything you need.
@@ -178,7 +184,7 @@ const LandingPage = () => {
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {features.map((feature, idx) => (
                             <motion.div
                                 key={idx}
