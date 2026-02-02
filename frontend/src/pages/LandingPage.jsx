@@ -104,41 +104,80 @@ const LandingPage = () => {
                         </motion.div>
                     </div>
 
-                    {/* Hero Visual - Bento Style Collage */}
-                    <div className="flex-1 w-full max-w-[500px] md:max-w-none relative">
+                    {/* Hero Visual - App Utility Mockup */}
+                    <div className="flex-1 w-full max-w-[500px] md:max-w-none relative flex justify-center py-10 md:py-0">
+                        {/* Background Blobs */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-brand-start/20 blur-[80px] rounded-full pointer-events-none animate-pulse-slow" />
+                        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500/20 blur-[60px] rounded-full pointer-events-none" />
+
+                        {/* Floating Notification Pill */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
-                            className="relative z-10 grid grid-cols-2 gap-4"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 1, duration: 0.8 }}
+                            className="absolute top-10 -right-4 md:right-0 z-20 bg-white/90 dark:bg-black/80 backdrop-blur-md border border-gray-200 dark:border-white/10 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-float-delayed"
                         >
-                            {/* Card 1 */}
-                            <div className="col-span-2 aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl relative group">
-                                <img src="/assets/hero_model_collage.png" alt="Models" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex flex-col justify-end">
-                                    <div className="bg-white/20 backdrop-blur-md self-start px-3 py-1 rounded-full text-xs font-bold text-white mb-2">
-                                        Trending
+                            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-green-500/30">
+                                <CheckCircle2 size={16} />
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-text-primary-light dark:text-white">@Sarah just matched</p>
+                                <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">with Ford Models</p>
+                            </div>
+                        </motion.div>
+
+                        {/* iPhone Mockup */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 40 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            className="relative z-10 w-[280px] h-[580px] bg-black rounded-[50px] border-[8px] border-gray-900 shadow-2xl overflow-hidden ring-1 ring-white/10 animate-float"
+                        >
+                            {/* Dynamic Island */}
+                            <div className="absolute top-3 left-1/2 -translate-x-1/2 h-[26px] w-[90px] bg-black z-30 rounded-full pointer-events-none" />
+
+                            {/* Screen Content */}
+                            <div className="relative w-full h-full bg-gray-900">
+                                {/* Selfie Image */}
+                                <img
+                                    src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop"
+                                    alt="User Scan"
+                                    className="w-full h-full object-cover opacity-90"
+                                />
+
+                                {/* Dark Gradient Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+
+                                {/* UI Elements Overlay */}
+                                <div className="absolute top-4 left-6 right-6 flex justify-between text-white text-[10px] font-medium z-20 opacity-80">
+                                    <span>9:41</span>
+                                    <div className="flex gap-1 items-center">
+                                        <div className="w-3 h-3 border border-white rounded-[2px]" /> {/* Battery */}
                                     </div>
-                                    <p className="text-white font-bold text-xl">Real People. Real Careers.</p>
                                 </div>
-                            </div>
 
-                            {/* Card 2 - Stats */}
-                            <div className="aspect-square rounded-3xl bg-white dark:bg-white/5 dark:backdrop-blur-md border border-gray-100 dark:border-white/10 p-6 flex flex-col justify-between shadow-sm">
-                                <div className="w-10 h-10 rounded-full bg-brand-start/10 flex items-center justify-center text-brand-start">
-                                    <Zap size={20} fill="currentColor" />
-                                </div>
-                                <div>
-                                    <p className="text-3xl font-black text-black dark:text-white">98%</p>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Match Rate</p>
-                                </div>
-                            </div>
-
-                            {/* Card 3 - Image */}
-                            <div className="aspect-square rounded-3xl overflow-hidden shadow-xl relative">
-                                <img src="/assets/avatar_user_3.png" alt="User" className="w-full h-full object-cover" />
-                                <div className="absolute bottom-3 right-3 bg-white text-black text-xs font-bold px-2 py-1 rounded-md">
-                                    @scout_ai
+                                {/* Analysis Result Card Inside Phone */}
+                                <div className="absolute bottom-6 left-4 right-4 bg-white/10 backdrop-blur-xl border border-white/20 p-4 rounded-3xl z-20 shadow-xl">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white shadow-lg shadow-green-500/30">
+                                            <CheckCircle2 size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-white font-bold text-lg leading-tight">Commercial Face</p>
+                                            <p className="text-green-400 text-sm font-bold">88% Match</p>
+                                        </div>
+                                    </div>
+                                    {/* Phone Stats Row */}
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="bg-black/30 rounded-xl p-2 text-center">
+                                            <p className="text-[10px] text-white/50 uppercase font-bold tracking-wider">Symmetry</p>
+                                            <p className="text-white font-bold text-sm">92%</p>
+                                        </div>
+                                        <div className="bg-black/30 rounded-xl p-2 text-center">
+                                            <p className="text-[10px] text-white/50 uppercase font-bold tracking-wider">Skin</p>
+                                            <p className="text-white font-bold text-sm">Clear</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
