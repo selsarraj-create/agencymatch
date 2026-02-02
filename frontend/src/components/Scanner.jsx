@@ -264,7 +264,7 @@ const Scanner = () => {
                                     <>
                                         {!showApplyForm ? (
                                             <div className="absolute inset-0 bg-white/80 dark:bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center z-20">
-                                                {Number(analysisResult.suitability_score) === 0 ? (
+                                                {!analysisResult.suitability_score || Number(analysisResult.suitability_score) < 50 ? (
                                                     // FAILED SCAN UI
                                                     <>
                                                         <div className="mb-2 bg-red-500 text-white p-3 rounded-full shadow-lg shadow-red-500/30">
