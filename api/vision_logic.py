@@ -111,23 +111,41 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
             print(f"Failed to parse Gemini response: {resp_json}")
             raise ValueError("Invalid API response format")
 
-        # 6. Post-process Score
-        if 'suitability_score' in result:
-            try:
-                score = int(result['suitability_score'])
-                result['suitability_score'] = max(score, 70)
-            except:
-                result['suitability_score'] = 70
-        else:
-            result['suitability_score'] = 70
-            
-        # Fallbacks
-        if 'face_geometry' in result:
-            if not result['face_geometry'].get('jawline_definition'):
-                result['face_geometry']['jawline_definition'] = 'Defined'
+        # 6. Post-process Score with Integrity Check
+        # If face_geometry is "N/A" or "Unknown", it means no face was detected.
+        # In this specific case, the score should be 0.
         
-        if not result.get('scout_feedback'):
-            result['scout_feedback'] = 'Strong commercial potential with natural appeal.'
+        is_valid_face = True
+        face_geo = result.get('face_geometry', {})
+        shape = face_geo.get('primary_shape', '').lower()
+        jaw = face_geo.get('jawline_definition', '').lower()
+        
+        if 'n/a' in shape or 'unknown' in shape or 'n/a' in jaw or 'unknown' in jaw:
+            is_valid_face = False
+            
+        if not is_valid_face:
+            result['suitability_score'] = 0
+            if 'scout_feedback' not in result:
+                result['scout_feedback'] = "No clear face detected. Please upload a clear headshot."
+        else:
+            # Only enforce minimum 70 if it looks like a valid face
+            if 'suitability_score' in result:
+                try:
+                    score = int(result['suitability_score'])
+                    result['suitability_score'] = max(score, 70)
+                except:
+                    result['suitability_score'] = 70
+            else:
+                result['suitability_score'] = 70
+            
+        # Fallbacks (Only if valid face)
+        if is_valid_face:
+            if 'face_geometry' in result:
+                if not result['face_geometry'].get('jawline_definition'):
+                    result['face_geometry']['jawline_definition'] = 'Defined'
+            
+            if not result.get('scout_feedback'):
+                result['scout_feedback'] = 'Strong commercial potential with natural appeal.'
 
         return result
 
@@ -137,7 +155,7 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
         print(f"Error in Gemini REST analysis: {e}")
         return {
             "error": f"{str(e)}",
-            "suitability_score": 70,
+            "suitability_score": 70, # Keep default error score as 70 unless explicitly 0 needed
             "market_categorization": {"primary": "Error", "rationale": "Analysis failed."},
             "face_geometry": {"primary_shape": "Unknown", "jawline_definition": "Unknown", "structural_note": "N/A"},
             "aesthetic_audit": {"lighting_quality": "Unknown", "professional_readiness": "Unknown", "technical_flaw": "Analysis Error"},

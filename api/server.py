@@ -361,15 +361,21 @@ async def analyze_endpoint(file: UploadFile = File(...)):
         result = analyze_image(content, mime_type=mime_type)
         
         # DOUBLE CHECK: Enforce strict minimum score of 70 at the API level
-        # This overrides anything returned by the vision engine
+        # EXCEPTION: If the vision logic explicitly returned 0 (Invalid Face), allow it.
         try:
             current_score = int(result.get('suitability_score', 0))
-            result['suitability_score'] = max(current_score, 70)
+            if current_score > 0:
+                result['suitability_score'] = max(current_score, 70)
+            # If 0, leave it as 0 (No Face Detected)
         except:
-            result['suitability_score'] = 70
+             # Default fallback is still 70 for errors, but vision_logic handles the 0 case
+            if result.get('suitability_score') != 0:
+                result['suitability_score'] = 70
             
         return result
     except Exception as e:
+        # Return partial result if available, or error structure
+        # If we have a partial result with score 0, return it
         return result
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
