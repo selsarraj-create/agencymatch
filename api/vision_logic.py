@@ -155,9 +155,9 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
         print(f"Error in Gemini REST analysis: {e}")
         return {
             "error": f"{str(e)}",
-            "suitability_score": 70, # Keep default error score as 70 unless explicitly 0 needed
+            "suitability_score": 0, # Return 0 for errors so we show "Please try again" instead of passing
             "market_categorization": {"primary": "Error", "rationale": "Analysis failed."},
             "face_geometry": {"primary_shape": "Unknown", "jawline_definition": "Unknown", "structural_note": "N/A"},
             "aesthetic_audit": {"lighting_quality": "Unknown", "professional_readiness": "Unknown", "technical_flaw": "Analysis Error"},
-            "scout_feedback": f"Analysis failed: {str(e)}"
+            "scout_feedback": "We couldn't detect a clear face. Please try again with a better photo."
         }

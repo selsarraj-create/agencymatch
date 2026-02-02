@@ -264,23 +264,47 @@ const Scanner = () => {
                                     <>
                                         {!showApplyForm ? (
                                             <div className="absolute inset-0 bg-white/80 dark:bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center z-20">
-                                                <div className="mb-2 bg-brand-start text-white p-3 rounded-full shadow-lg shadow-brand-start/30">
-                                                    <Check size={24} strokeWidth={4} />
-                                                </div>
-                                                <h3 className="text-xl font-black mb-1 text-text-primary-light dark:text-white">
-                                                    Congratulations!
-                                                </h3>
-                                                <p className="text-sm text-text-secondary-light dark:text-gray-300 font-medium mb-3 max-w-xs mx-auto leading-tight">
-                                                    Your face structure matches 3+ partner agencies.
-                                                </p>
+                                                {Number(analysisResult.suitability_score) === 0 ? (
+                                                    // FAILED SCAN UI
+                                                    <>
+                                                        <div className="mb-2 bg-red-500 text-white p-3 rounded-full shadow-lg shadow-red-500/30">
+                                                            <X size={24} strokeWidth={4} />
+                                                        </div>
+                                                        <h3 className="text-xl font-black mb-1 text-text-primary-light dark:text-white">
+                                                            Please try again
+                                                        </h3>
+                                                        <p className="text-sm text-text-secondary-light dark:text-gray-300 font-medium mb-3 max-w-xs mx-auto leading-tight">
+                                                            We couldn't detect a clear face.
+                                                        </p>
 
-                                                <button
-                                                    onClick={() => setShowApplyForm(true)}
-                                                    className="w-full max-w-xs bg-gradient-to-r from-brand-start to-brand-end text-white font-bold py-3 px-6 rounded-full text-base transition-transform hover:scale-[1.02] active:scale-95 shadow-xl shadow-brand-start/40 flex items-center justify-center gap-2"
-                                                >
-                                                    Create Account <ArrowRight size={18} />
-                                                </button>
+                                                        <button
+                                                            onClick={reset}
+                                                            className="w-full max-w-xs bg-white dark:bg-white/10 text-text-primary-light dark:text-white border border-gray-200 dark:border-white/20 font-bold py-3 px-6 rounded-full text-base transition-transform hover:scale-[1.02] active:scale-95 shadow-xl flex items-center justify-center gap-2"
+                                                        >
+                                                            Upload Selfie <Upload size={18} />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    // SUCCESS UI
+                                                    <>
+                                                        <div className="mb-2 bg-brand-start text-white p-3 rounded-full shadow-lg shadow-brand-start/30">
+                                                            <Check size={24} strokeWidth={4} />
+                                                        </div>
+                                                        <h3 className="text-xl font-black mb-1 text-text-primary-light dark:text-white">
+                                                            Congratulations!
+                                                        </h3>
+                                                        <p className="text-sm text-text-secondary-light dark:text-gray-300 font-medium mb-3 max-w-xs mx-auto leading-tight">
+                                                            Your face structure matches 3+ partner agencies.
+                                                        </p>
 
+                                                        <button
+                                                            onClick={() => setShowApplyForm(true)}
+                                                            className="w-full max-w-xs bg-gradient-to-r from-brand-start to-brand-end text-white font-bold py-3 px-6 rounded-full text-base transition-transform hover:scale-[1.02] active:scale-95 shadow-xl shadow-brand-start/40 flex items-center justify-center gap-2"
+                                                        >
+                                                            Create Account <ArrowRight size={18} />
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                         ) : (
                                             <LeadForm
