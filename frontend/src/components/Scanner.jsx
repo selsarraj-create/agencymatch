@@ -111,13 +111,24 @@ const Scanner = () => {
                 </p>
             </div>
 
-            {/* Main Area */}
-            <div className={`relative w-full ${state === 'IDLE' ? 'min-h-[500px]' : 'min-h-[700px]'} md:aspect-video bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden group transition-all duration-500 ease-in-out`}>
+            {/* Ambient Background (Aurora) */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {/* Light Mode Blobs */}
+                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-300/40 blur-[120px] rounded-full mix-blend-multiply dark:hidden animate-pulse-slow" />
+                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-300/40 blur-[120px] rounded-full mix-blend-multiply dark:hidden animate-pulse-slow delay-1000" />
+
+                {/* Dark Mode Blobs */}
+                <div className="hidden dark:block absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/20 blur-[100px] rounded-full animate-pulse-slow" />
+                <div className="hidden dark:block absolute bottom-0 right-0 w-[500px] h-[500px] bg-violet-600/20 blur-[100px] rounded-full animate-pulse-slow delay-1000" />
+            </div>
+
+            {/* Main Area - Portal Card */}
+            <div className={`relative z-10 w-full max-w-md ${state === 'IDLE' ? 'min-h-[500px]' : 'min-h-[700px]'} bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-xl shadow-blue-500/5 dark:shadow-2xl dark:shadow-black/50 rounded-3xl overflow-hidden transition-all duration-500 ease-in-out`}>
 
                 {/* IDLE STATE */}
                 {state === 'IDLE' && (
                     <div
-                        className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-white/20 hover:border-brand-start dark:hover:border-brand-start transition-colors cursor-pointer p-8 bg-gray-50/50 dark:bg-white/5"
+                        className="absolute inset-0 flex flex-col items-center justify-center p-8 cursor-pointer group"
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
@@ -130,16 +141,26 @@ const Scanner = () => {
                             onChange={(e) => handleFileSelect(e.target.files[0])}
                         />
 
-                        <div className="w-24 h-24 rounded-full bg-brand-start/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-brand-start/20">
-                            <Upload className="text-brand-start" size={40} />
+                        {/* Upload Zone (Viewfinder) */}
+                        <div className="relative w-64 h-64 mb-8 flex items-center justify-center">
+                            {/* Corner Brackets */}
+                            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500 dark:border-blue-400 rounded-tl-lg group-hover:translate-x-2 group-hover:translate-y-2 transition-transform duration-300" />
+                            <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-500 dark:border-blue-400 rounded-tr-lg group-hover:-translate-x-2 group-hover:translate-y-2 transition-transform duration-300" />
+                            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-500 dark:border-blue-400 rounded-bl-lg group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform duration-300" />
+                            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-500 dark:border-blue-400 rounded-br-lg group-hover:-translate-x-2 group-hover:-translate-y-2 transition-transform duration-300" />
+
+                            {/* Icon */}
+                            <div className="text-gray-700 dark:text-white animate-pulse">
+                                <ScanFace size={64} strokeWidth={1} />
+                            </div>
                         </div>
 
-                        <h3 className="text-2xl font-bold mb-2 text-center">Upload A Clear Selfie</h3>
-                        <p className="text-text-secondary-light dark:text-text-secondary-dark text-base text-center max-w-sm mb-8">
-                            Drag & drop or tap to upload. We accept JPG and PNG.
+                        <h3 className="text-2xl font-bold mb-2 text-center text-gray-900 dark:text-white">Let's See Your Potential.</h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-base text-center max-w-sm mb-8 font-medium">
+                            Drop your best selfie here.
                         </p>
 
-                        <button className="px-8 py-3 bg-text-primary-light dark:bg-white text-white dark:text-black font-bold rounded-full shadow-lg active:scale-95 transition-transform">
+                        <button className="bg-gradient-to-r from-blue-600 to-violet-600 text-white font-bold rounded-full px-8 py-3 shadow-lg shadow-blue-500/30 hover:scale-105 transition-transform">
                             Select Photo
                         </button>
                     </div>
