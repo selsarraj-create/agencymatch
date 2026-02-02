@@ -258,7 +258,12 @@ const LandingPage = () => {
                                 <div className="w-10 h-10 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center">
                                     <Briefcase size={20} />
                                 </div>
-                                <h3 className="text-lg md:text-xl font-bold dark:text-white leading-tight">Smart<br />Castings</h3>
+                                <div>
+                                    <h3 className="text-lg md:text-xl font-bold dark:text-white leading-tight mb-1">Smart<br />Castings</h3>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium leading-tight">
+                                        Direct access to paid modeling jobs.
+                                    </p>
+                                </div>
                             </div>
                             <Briefcase className="absolute -bottom-4 -right-4 w-20 h-20 text-gray-900 dark:text-white opacity-5 rotate-[-15deg] group-hover:scale-110 group-hover:opacity-10 transition-all duration-500" />
                         </motion.div>
@@ -275,7 +280,12 @@ const LandingPage = () => {
                                 <div className="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
                                     <Building2 size={20} />
                                 </div>
-                                <h3 className="text-lg md:text-xl font-bold dark:text-white leading-tight">Agency<br />Match</h3>
+                                <div>
+                                    <h3 className="text-lg md:text-xl font-bold dark:text-white leading-tight mb-1">Agency<br />Match</h3>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium leading-tight">
+                                        Match with 50+ top agencies.
+                                    </p>
+                                </div>
                             </div>
                             <Building2 className="absolute -bottom-4 -right-4 w-20 h-20 text-gray-900 dark:text-white opacity-5 rotate-[-15deg] group-hover:scale-110 group-hover:opacity-10 transition-all duration-500" />
                         </motion.div>
