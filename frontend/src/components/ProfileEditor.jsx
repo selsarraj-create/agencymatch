@@ -16,7 +16,6 @@ const ProfileEditor = ({ userId, onUpdate }) => {
 
     // Form State
     const [formData, setFormData] = useState({
-        stage_name: '',
         legal_name: '', // Read only usually, but let's see
         email: '', // Read only
         date_of_birth: '',
@@ -45,7 +44,6 @@ const ProfileEditor = ({ userId, onUpdate }) => {
 
                 if (profile) {
                     setFormData({
-                        stage_name: profile.stage_name || '',
                         legal_name: profile.legal_name || '',
                         email: profile.email || '',
                         date_of_birth: profile.date_of_birth || '',
@@ -105,7 +103,6 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                 .update({
                     email: formData.email,
                     legal_name: formData.legal_name,
-                    stage_name: formData.stage_name,
                     date_of_birth: formData.date_of_birth,
                     gender: formData.gender,
                     phone_number: formData.phone_number,
@@ -190,22 +187,6 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                 <div className="border-t border-gray-100 dark:border-white/5 my-6"></div>
 
                 {/* Editable Fields */}
-
-                {/* Stage Name */}
-                <div>
-                    <label className="block text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Stage Name</label>
-                    <div className="relative">
-                        <User className="absolute left-3 top-3.5 text-brand-start" size={18} />
-                        <input
-                            type="text"
-                            name="stage_name"
-                            value={formData.stage_name}
-                            onChange={handleChange}
-                            className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-3 pl-10 text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
-                            placeholder="Enter your stage name"
-                        />
-                    </div>
-                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* DOB */}

@@ -12,7 +12,6 @@ const OnboardingProfile = () => {
     // Form State
     const [userId, setUserId] = useState(null);
     const [legalName, setLegalName] = useState('');
-    const [stageName, setStageName] = useState('');
     const [dob, setDob] = useState('');
     const [gender, setGender] = useState('');
     const [phone, setPhone] = useState('');
@@ -37,7 +36,6 @@ const OnboardingProfile = () => {
                     navigate('/dashboard');
                 }
                 setLegalName(profile.legal_name || '');
-                setStageName(profile.stage_name || profile.legal_name || '');
             } else {
                 setLegalName(user.user_metadata?.full_name || 'New User');
             }
@@ -54,7 +52,6 @@ const OnboardingProfile = () => {
             const { error } = await supabase
                 .from('profiles')
                 .update({
-                    stage_name: stageName,
                     date_of_birth: dob,
                     gender: gender,
                     phone_number: phone,
@@ -91,22 +88,6 @@ const OnboardingProfile = () => {
 
                 <div className="bg-card-light dark:bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-3xl p-8 shadow-2xl">
                     <form onSubmit={handleSubmit} className="space-y-6">
-
-                        {/* Stage Name */}
-                        <div>
-                            <label className="block text-sm font-bold text-text-primary-light dark:text-white mb-1 uppercase tracking-wider">Stage Name</label>
-                            <div className="relative">
-                                <User className="absolute left-3 top-3.5 text-gray-400" size={18} />
-                                <input
-                                    type="text"
-                                    required
-                                    value={stageName}
-                                    onChange={(e) => setStageName(e.target.value)}
-                                    className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-3 pl-10 text-text-primary-light dark:text-white placeholder-gray-400 focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors duration-200"
-                                    placeholder={legalName}
-                                />
-                            </div>
-                        </div>
 
                         {/* DOB */}
                         <div>

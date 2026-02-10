@@ -266,7 +266,7 @@ const StudioHub = () => {
                     setProfile(prev => ({ ...prev, video_url: url }));
                     fetchProfile(); // Refresh
                 }}
-                userName={profile?.stage_name || 'Model'}
+                userName={profile?.legal_name?.split(' ')[0] || 'Model'}
                 userCity={profile?.city || 'London'}
                 userHeight={profile?.height || ''}
             />
