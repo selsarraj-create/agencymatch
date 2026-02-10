@@ -101,6 +101,8 @@ const ProfileEditor = ({ userId, onUpdate }) => {
             const { error } = await supabase
                 .from('profiles')
                 .update({
+                    email: formData.email,
+                    legal_name: formData.legal_name,
                     stage_name: formData.stage_name,
                     date_of_birth: formData.date_of_birth,
                     gender: formData.gender,
@@ -142,29 +144,31 @@ const ProfileEditor = ({ userId, onUpdate }) => {
 
             <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
 
-                {/* Read Only Fields */}
+                {/* Contact Info & Legal Name */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Email (Read Only)</label>
-                        <div className="relative opacity-70">
-                            <Mail className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                        <label className="block text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Email Address</label>
+                        <div className="relative">
+                            <Mail className="absolute left-3 top-3.5 text-brand-start" size={18} />
                             <input
-                                type="text"
+                                type="email"
+                                name="email"
                                 value={formData.email}
-                                disabled
-                                className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 py-3 pl-10 text-text-primary-light dark:text-white cursor-not-allowed"
+                                onChange={handleChange}
+                                className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-3 pl-10 text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
                             />
                         </div>
                     </div>
                     <div>
-                        <label className="block text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Legal Name (Read Only)</label>
-                        <div className="relative opacity-70">
-                            <User className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                        <label className="block text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Legal Name</label>
+                        <div className="relative">
+                            <User className="absolute left-3 top-3.5 text-brand-start" size={18} />
                             <input
                                 type="text"
+                                name="legal_name"
                                 value={formData.legal_name}
-                                disabled
-                                className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 py-3 pl-10 text-text-primary-light dark:text-white cursor-not-allowed"
+                                onChange={handleChange}
+                                className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-3 pl-10 text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
                             />
                         </div>
                     </div>
