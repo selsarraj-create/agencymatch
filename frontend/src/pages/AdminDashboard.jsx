@@ -6,6 +6,7 @@ import { Shield, Users, Search, PlusCircle, Coins, Loader2, X, Lock } from 'luci
 import { ThemeToggle } from '../components/ThemeToggle';
 
 import AdminAgencyManager from '../components/AdminAgencyManager'; // Import the new component
+import AdminCastingManager from '../components/AdminCastingManager'; // Import Castings Manager
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('users'); // 'users' or 'agencies'
@@ -168,11 +169,19 @@ const AdminDashboard = () => {
                         >
                             <Shield size={16} className="inline mr-2" /> Agencies
                         </button>
+                        <button
+                            onClick={() => setActiveTab('castings')}
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'castings' ? 'bg-white dark:bg-white/10 shadow-sm text-black dark:text-white' : 'text-gray-500 hover:text-black dark:hover:text-white'}`}
+                        >
+                            <Loader2 size={16} className="inline mr-2" /> Castings
+                        </button>
                     </div>
                 </div>
 
                 {activeTab === 'agencies' ? (
                     <AdminAgencyManager />
+                ) : activeTab === 'castings' ? (
+                    <AdminCastingManager />
                 ) : (
                     <div className="bg-card-light dark:bg-card-dark p-6 rounded-3xl border border-gray-200 dark:border-white/10 shadow-sm">
                         <div className="flex flex-col md:flex-row justify-between items-center pb-6 border-b border-gray-100 dark:border-white/5 gap-4">
