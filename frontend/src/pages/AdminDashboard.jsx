@@ -240,3 +240,4 @@ const AdminDashboard = () => {
 };
 
 // End of file
+export default AdminDashboard;

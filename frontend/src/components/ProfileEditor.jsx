@@ -294,7 +294,6 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                         No transactions yet.
                     </div>
                 )}
-                )}
             </div>
 
             {/* Danger Zone */}
