@@ -20,7 +20,14 @@ const ProfileEditor = ({ userId, onUpdate }) => {
         date_of_birth: '',
         gender: '',
         phone_number: '',
-        bio: ''
+        bio: '',
+        height_cm: '',
+        bust_cm: '',
+        waist_cm: '',
+        hips_cm: '',
+        shoe_size_uk: '',
+        eye_color: '',
+        hair_color: ''
     });
 
     useEffect(() => {
@@ -42,7 +49,14 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                         date_of_birth: profile.date_of_birth || '',
                         gender: profile.gender || '',
                         phone_number: profile.phone_number || '',
-                        bio: profile.bio || ''
+                        bio: profile.bio || '',
+                        height_cm: profile.height_cm || '',
+                        bust_cm: profile.bust_cm || '',
+                        waist_cm: profile.waist_cm || '',
+                        hips_cm: profile.hips_cm || '',
+                        shoe_size_uk: profile.shoe_size_uk || '',
+                        eye_color: profile.eye_color || '',
+                        hair_color: profile.hair_color || ''
                     });
                 }
             } catch (error) {
@@ -91,7 +105,14 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                     date_of_birth: formData.date_of_birth,
                     gender: formData.gender,
                     phone_number: formData.phone_number,
-                    bio: formData.bio
+                    bio: formData.bio,
+                    height_cm: formData.height_cm || null,
+                    bust_cm: formData.bust_cm || null,
+                    waist_cm: formData.waist_cm || null,
+                    hips_cm: formData.hips_cm || null,
+                    shoe_size_uk: formData.shoe_size_uk || null,
+                    eye_color: formData.eye_color,
+                    hair_color: formData.hair_color
                 })
                 .eq('id', userId);
 
@@ -234,6 +255,124 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                     </div>
                 </div>
 
+                <div className="border-t border-gray-100 dark:border-white/5 my-6"></div>
+
+                {/* Model Stats Section */}
+                <div>
+                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-text-primary-light dark:text-white">
+                        <span className="bg-brand-start/10 text-brand-start p-1 rounded-lg"><User size={16} /></span>
+                        Model Stats (Optional)
+                    </h3>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {/* Height */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Height (cm)</label>
+                            <input
+                                type="number"
+                                name="height_cm"
+                                value={formData.height_cm}
+                                onChange={handleChange}
+                                placeholder="175"
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                            />
+                        </div>
+
+                        {/* Shoe Size */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Shoe Size (UK)</label>
+                            <input
+                                type="number"
+                                step="0.5"
+                                name="shoe_size_uk"
+                                value={formData.shoe_size_uk}
+                                onChange={handleChange}
+                                placeholder="6.5"
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                            />
+                        </div>
+
+                        {/* Bust */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Bust (cm)</label>
+                            <input
+                                type="number"
+                                name="bust_cm"
+                                value={formData.bust_cm}
+                                onChange={handleChange}
+                                placeholder="86"
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                            />
+                        </div>
+
+                        {/* Waist */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Waist (cm)</label>
+                            <input
+                                type="number"
+                                name="waist_cm"
+                                value={formData.waist_cm}
+                                onChange={handleChange}
+                                placeholder="60"
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                            />
+                        </div>
+
+                        {/* Hips */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Hips (cm)</label>
+                            <input
+                                type="number"
+                                name="hips_cm"
+                                value={formData.hips_cm}
+                                onChange={handleChange}
+                                placeholder="90"
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                            />
+                        </div>
+
+                        {/* Eye Color */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Eye Color</label>
+                            <select
+                                name="eye_color"
+                                value={formData.eye_color}
+                                onChange={handleChange}
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors appearance-none"
+                            >
+                                <option value="">Select</option>
+                                <option value="Blue">Blue</option>
+                                <option value="Brown">Brown</option>
+                                <option value="Green">Green</option>
+                                <option value="Hazel">Hazel</option>
+                                <option value="Grey">Grey</option>
+                                <option value="Amber">Amber</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        {/* Hair Color */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Hair Color</label>
+                            <select
+                                name="hair_color"
+                                value={formData.hair_color}
+                                onChange={handleChange}
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors appearance-none"
+                            >
+                                <option value="">Select</option>
+                                <option value="Blonde">Blonde</option>
+                                <option value="Brown">Brown</option>
+                                <option value="Black">Black</option>
+                                <option value="Red">Red</option>
+                                <option value="Grey">Grey</option>
+                                <option value="White">White</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="pt-4 flex flex-col gap-4">
                     <button
                         type="submit"
@@ -298,7 +437,7 @@ const ProfileEditor = ({ userId, onUpdate }) => {
 
             {/* Danger Zone */}
             <DeleteAccountZone userId={userId} />
-        </motion.div>
+        </motion.div >
     );
 };
 
