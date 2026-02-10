@@ -273,8 +273,67 @@ const AdminCastingManager = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold uppercase mb-1">Image URL</label>
-                                    <input className="w-full p-2 rounded-xl bg-gray-50 dark:bg-black/20 border" value={formData.image_url} onChange={e => setFormData({ ...formData, image_url: e.target.value })} />
+                                    <label className="block text-xs font-bold uppercase mb-1">Casting Image</label>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <label className="cursor-pointer bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
+                                                <ImageIcon size={16} />
+                                                Choose Image
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={async (e) => {
+                                                        const file = e.target.files[0];
+                                                        if (!file) return;
+
+                                                        // Upload logic
+                                                        try {
+                                                            const fileExt = file.name.split('.').pop();
+                                                            const fileName = `${Math.random()}.${fileExt}`;
+                                                            const filePath = `${fileName}`;
+
+                                                            const { error: uploadError } = await supabase.storage
+                                                                .from('casting-images')
+                                                                .upload(filePath, file);
+
+                                                            if (uploadError) throw uploadError;
+
+                                                            const { data: { publicUrl } } = supabase.storage
+                                                                .from('casting-images')
+                                                                .getPublicUrl(filePath);
+
+                                                            setFormData({ ...formData, image_url: publicUrl });
+                                                        } catch (error) {
+                                                            console.error("Upload error:", error);
+                                                            alert("Failed to upload image. Make sure the 'casting-images' bucket exists (run scripts/setup_storage.sql).");
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                            {formData.image_url && (
+                                                <span className="text-xs text-green-500 font-bold flex items-center gap-1">
+                                                    <Loader2 size={12} className="hidden" /> Uploaded!
+                                                </span>
+                                            )}
+                                        </div>
+                                        {formData.image_url && (
+                                            <div className="w-full h-32 bg-gray-100 dark:bg-white/5 rounded-xl overflow-hidden relative group border border-gray-200 dark:border-white/10">
+                                                <img src={formData.image_url} className="w-full h-full object-cover" alt="Preview" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, image_url: '' })}
+                                                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <X size={12} />
+                                                </button>
+                                            </div>
+                                        )}
+                                        <input
+                                            type="hidden"
+                                            value={formData.image_url}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="col-span-1 md:col-span-2">
