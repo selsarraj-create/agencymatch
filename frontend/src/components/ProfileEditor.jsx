@@ -16,7 +16,8 @@ const ProfileEditor = ({ userId, onUpdate }) => {
 
     // Form State
     const [formData, setFormData] = useState({
-        legal_name: '', // Read only usually, but let's see
+        first_name: '',
+        last_name: '',
         email: '', // Read only
         date_of_birth: '',
         gender: '',
@@ -44,7 +45,8 @@ const ProfileEditor = ({ userId, onUpdate }) => {
 
                 if (profile) {
                     setFormData({
-                        legal_name: profile.legal_name || '',
+                        first_name: profile.first_name || '',
+                        last_name: profile.last_name || '',
                         email: profile.email || '',
                         date_of_birth: profile.date_of_birth || '',
                         gender: profile.gender || '',
@@ -102,7 +104,10 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                 .from('profiles')
                 .update({
                     email: formData.email,
-                    legal_name: formData.legal_name,
+                    first_name: formData.first_name,
+                    last_name: formData.last_name,
+                    // Keep legal_name synced for now as fallback/legacy
+                    legal_name: `${formData.first_name} ${formData.last_name}`.trim(),
                     date_of_birth: formData.date_of_birth,
                     gender: formData.gender,
                     phone_number: formData.phone_number,
@@ -144,7 +149,8 @@ const ProfileEditor = ({ userId, onUpdate }) => {
             <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
 
                 {/* Contact Info & Legal Name */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Contact Info & Legal Name */}
+                <div className="space-y-6">
                     <div>
                         <div className="flex justify-between items-center mb-1">
                             <label className="block text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark">Email Address</label>
@@ -169,17 +175,35 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                             <p className="text-[10px] text-gray-400 mt-1 ml-2">This is your public contact email. To change your login email, click the link above.</p>
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Legal Name</label>
-                        <div className="relative">
-                            <User className="absolute left-3 top-3.5 text-brand-start" size={18} />
-                            <input
-                                type="text"
-                                name="legal_name"
-                                value={formData.legal_name}
-                                onChange={handleChange}
-                                className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-3 pl-10 text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
-                            />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">First Name</label>
+                            <div className="relative">
+                                <User className="absolute left-3 top-3.5 text-brand-start" size={18} />
+                                <input
+                                    type="text"
+                                    name="first_name"
+                                    value={formData.first_name}
+                                    onChange={handleChange}
+                                    placeholder="Jane"
+                                    className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-3 pl-10 text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Last Name</label>
+                            <div className="relative">
+                                <User className="absolute left-3 top-3.5 text-brand-start" size={18} />
+                                <input
+                                    type="text"
+                                    name="last_name"
+                                    value={formData.last_name}
+                                    onChange={handleChange}
+                                    placeholder="Doe"
+                                    className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-3 pl-10 text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

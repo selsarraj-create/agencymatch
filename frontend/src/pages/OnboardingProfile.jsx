@@ -11,7 +11,8 @@ const OnboardingProfile = () => {
 
     // Form State
     const [userId, setUserId] = useState(null);
-    const [legalName, setLegalName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [dob, setDob] = useState('');
     const [gender, setGender] = useState('');
     const [phone, setPhone] = useState('');
@@ -35,9 +36,21 @@ const OnboardingProfile = () => {
                 if (profile.is_onboarding_complete) {
                     navigate('/dashboard');
                 }
-                setLegalName(profile.legal_name || '');
+                setFirstName(profile.first_name || '');
+                setLastName(profile.last_name || '');
+                // Fallback for migration not run yet
+                if (!profile.first_name && profile.legal_name) {
+                    const parts = profile.legal_name.split(' ');
+                    setFirstName(parts[0]);
+                    setLastName(parts.slice(1).join(' '));
+                }
             } else {
-                setLegalName(user.user_metadata?.full_name || 'New User');
+                // Parse metadata
+                if (user.user_metadata?.full_name) {
+                    const parts = user.user_metadata.full_name.split(' ');
+                    setFirstName(parts[0]);
+                    setLastName(parts.slice(1).join(' '));
+                }
             }
             setLoading(false);
         };
@@ -52,6 +65,9 @@ const OnboardingProfile = () => {
             const { error } = await supabase
                 .from('profiles')
                 .update({
+                    first_name: firstName,
+                    last_name: lastName,
+                    legal_name: `${firstName} ${lastName}`.trim(),
                     date_of_birth: dob,
                     gender: gender,
                     phone_number: phone,
@@ -88,6 +104,37 @@ const OnboardingProfile = () => {
 
                 <div className="bg-card-light dark:bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-3xl p-8 shadow-2xl">
                     <form onSubmit={handleSubmit} className="space-y-6">
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-text-primary-light dark:text-white mb-1 uppercase tracking-wider">First Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                                    <input
+                                        type="text"
+                                        required
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                        className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-3 pl-10 text-text-primary-light dark:text-white placeholder-gray-400 focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors duration-200"
+                                        placeholder="Jane"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-text-primary-light dark:text-white mb-1 uppercase tracking-wider">Last Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                                    <input
+                                        type="text"
+                                        required
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                        className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-3 pl-10 text-text-primary-light dark:text-white placeholder-gray-400 focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors duration-200"
+                                        placeholder="Doe"
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
                         {/* DOB */}
                         <div>
