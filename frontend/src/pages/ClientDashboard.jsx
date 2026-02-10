@@ -78,7 +78,14 @@ const ClientDashboard = () => {
             try {
                 const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
                 const agencyResp = await axios.get(`${API_URL}/agencies`);
-                if (agencyResp.data) setAgencies(agencyResp.data);
+                if (agencyResp.data) {
+                    // Sort: Vacancies first, then alphabetical
+                    const sorted = agencyResp.data.sort((a, b) => {
+                        if (a.has_vacancies === b.has_vacancies) return a.name.localeCompare(b.name);
+                        return a.has_vacancies ? -1 : 1;
+                    });
+                    setAgencies(sorted);
+                }
             } catch (e) { console.error("Failed to load agencies", e); }
 
             setLoading(false);
@@ -307,9 +314,16 @@ const ClientDashboard = () => {
                                                 onClick={() => toggleAgency(agency.id)}
                                                 className={`p-6 rounded-3xl border cursor-pointer transition-all group relative overflow-hidden flex flex-col justify-between ${selectedAgencies.has(agency.id)
                                                     ? 'bg-brand-start/5 border-brand-start ring-1 ring-brand-start shadow-md'
-                                                    : 'bg-card-light dark:bg-card-dark border-gray-200 dark:border-white/10 hover:border-brand-start/30 hover:shadow-lg hover:-translate-y-1'
+                                                    : agency.has_vacancies
+                                                        ? 'bg-green-500/5 border-green-500/50 hover:border-green-500 hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1'
+                                                        : 'bg-card-light dark:bg-card-dark border-gray-200 dark:border-white/10 hover:border-brand-start/30 hover:shadow-lg hover:-translate-y-1'
                                                     }`}
                                             >
+                                                {agency.has_vacancies && (
+                                                    <div className="absolute top-0 right-0 bg-green-500 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-bl-xl shadow-sm z-20">
+                                                        Booking Now
+                                                    </div>
+                                                )}
                                                 <div className="flex justify-between items-start relative z-10 mb-4">
                                                     <div className="flex gap-4 items-start">
                                                         {/* Logo */}

@@ -18,7 +18,8 @@ const AdminAgencyManager = () => {
         location: 'London, UK',
         status: 'active',
         logo_url: '',
-        modeling_types: []
+        modeling_types: [],
+        has_vacancies: false
     });
 
     useEffect(() => {
@@ -52,7 +53,8 @@ const AdminAgencyManager = () => {
             location: agency.location || 'London, UK',
             status: agency.status || 'active',
             logo_url: agency.logo_url || '',
-            modeling_types: agency.modeling_types || []
+            modeling_types: agency.modeling_types || [],
+            has_vacancies: agency.has_vacancies || false
         });
         setShowModal(true);
     };
@@ -66,7 +68,8 @@ const AdminAgencyManager = () => {
             location: 'London, UK',
             status: 'active',
             logo_url: '',
-            modeling_types: []
+            modeling_types: [],
+            has_vacancies: false
         });
         setShowModal(true);
     };
@@ -166,6 +169,7 @@ const AdminAgencyManager = () => {
                                         <td className="p-4 font-bold flex items-center gap-3">
                                             {agency.logo_url && <img src={agency.logo_url} className="w-8 h-8 rounded-lg object-contain bg-white border" alt="" />}
                                             {agency.name}
+                                            {agency.has_vacancies && <span className="ml-2 text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wide">Hiring</span>}
                                         </td>
                                         <td className="p-4 text-text-secondary-light dark:text-text-secondary-dark">{agency.location}</td>
                                         <td className="p-4">
@@ -237,6 +241,19 @@ const AdminAgencyManager = () => {
                                         <option value="active">Active</option>
                                         <option value="inactive">Inactive</option>
                                     </select>
+                                </div>
+                                <div className="col-span-1 md:col-span-2 flex items-center gap-3 p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10">
+                                    <input
+                                        type="checkbox"
+                                        id="has_vacancies"
+                                        checked={formData.has_vacancies}
+                                        onChange={e => setFormData({ ...formData, has_vacancies: e.target.checked })}
+                                        className="w-5 h-5 rounded border-gray-300 text-brand-start focus:ring-brand-start"
+                                    />
+                                    <label htmlFor="has_vacancies" className="text-sm font-bold cursor-pointer select-none">
+                                        Has Vacancies / Hiring
+                                        <span className="block text-xs text-text-secondary-light dark:text-text-secondary-dark font-normal">Check this to highlight agency on client dashboard</span>
+                                    </label>
                                 </div>
                             </div>
 
