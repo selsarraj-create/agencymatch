@@ -3,9 +3,11 @@ import { supabase } from '../lib/supabaseClient';
 import { User, Calendar, Smartphone, Save, Loader2, FileText, Mail, History as HistoryIcon, Plus, Minus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import DeleteAccountZone from './DeleteAccountZone';
+import EmailChangeModal from './EmailChangeModal';
 
 const ProfileEditor = ({ userId, onUpdate }) => {
     const [loading, setLoading] = useState(true);
+    const [isEmailModalOpen, setEmailModalOpen] = useState(false);
     const [saving, setSaving] = useState(false);
 
     // Transaction History State
@@ -147,7 +149,16 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                 {/* Contact Info & Legal Name */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Email Address</label>
+                        <div className="flex justify-between items-center mb-1">
+                            <label className="block text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark">Email Address</label>
+                            <button
+                                type="button"
+                                onClick={() => setEmailModalOpen(true)}
+                                className="text-[10px] font-bold text-brand-start hover:underline"
+                            >
+                                Change Login Email
+                            </button>
+                        </div>
                         <div className="relative">
                             <Mail className="absolute left-3 top-3.5 text-brand-start" size={18} />
                             <input
@@ -155,8 +166,10 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
+                                placeholder="Contact email for agencies"
                                 className="block w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-3 pl-10 text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
                             />
+                            <p className="text-[10px] text-gray-400 mt-1 ml-2">This is your public contact email. To change your login email, click the link above.</p>
                         </div>
                     </div>
                     <div>
@@ -441,7 +454,14 @@ const ProfileEditor = ({ userId, onUpdate }) => {
 
             {/* Danger Zone */}
             <DeleteAccountZone userId={userId} />
-        </motion.div >
+
+            {/* Modals */}
+            <EmailChangeModal
+                isOpen={isEmailModalOpen}
+                onClose={() => setEmailModalOpen(false)}
+                currentEmail={formData.email}
+            />
+        </motion.div>
     );
 };
 
