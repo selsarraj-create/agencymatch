@@ -276,7 +276,7 @@ const ClientDashboard = () => {
                         {feedView === 'jobs' || feedView === 'applications' ? (
                             <CastingFeed userProfile={userProfile} filters={{ onlyApplied: feedView === 'applications' }} />
                         ) : (<>
-                            /* Agency Directory Section */
+                            {/* Agency Directory Section */}
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
                                     <h2 className="text-xl font-bold">Agency Directory <span className="text-text-secondary-light dark:text-text-secondary-dark font-medium text-sm ml-2">({agencies.length} available)</span></h2>
