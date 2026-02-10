@@ -1,26 +1,32 @@
-import React from 'react';
+import DesktopSidebar from './DesktopSidebar';
 
 const DashboardLayout = ({ children, header }) => {
     return (
         // Container (The "Shell")
         // CHANGED: Use 'fixed inset-0' to break out of the flow and ignore the App's global footer/min-height layout.
         // This ensures the 100dvh scroll lock actually works.
-        <div className="fixed inset-0 z-30 flex flex-col overflow-hidden bg-surface-light dark:bg-surface-dark transition-colors duration-300">
+        <div className="fixed inset-0 z-30 flex flex-col md:flex-row overflow-hidden bg-surface-light dark:bg-surface-dark transition-colors duration-300">
 
-            {/* The Header (Top) */}
-            {header && (
-                <div className="w-full z-40 shrink-0 bg-surface-light dark:bg-surface-dark border-b border-gray-100 dark:border-white/5">
-                    {header}
-                </div>
-            )}
+            {/* Desktop Sidebar (Hidden on Mobile) */}
+            <DesktopSidebar />
 
-            {/* The Main Content (The "Scroll Zone") */}
-            {/* Added pb-24 to prevent content from being hidden behind Fixed Bottom Nav */}
-            <main className="flex-1 overflow-y-auto pb-24 px-4 md:px-8 pt-6 scrollbar-hide">
-                <div className="max-w-6xl mx-auto space-y-8">
-                    {children}
-                </div>
-            </main>
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+                {/* The Header (Top) */}
+                {header && (
+                    <div className="w-full z-40 shrink-0 bg-surface-light dark:bg-surface-dark border-b border-gray-100 dark:border-white/5">
+                        {header}
+                    </div>
+                )}
+
+                {/* The Main Content (The "Scroll Zone") */}
+                {/* Added pb-24 to prevent content from being hidden behind Fixed Bottom Nav */}
+                <main className="flex-1 overflow-y-auto pb-24 px-4 md:px-8 pt-6 scrollbar-hide">
+                    <div className="max-w-6xl mx-auto space-y-8">
+                        {children}
+                    </div>
+                </main>
+            </div>
         </div>
     );
 };
