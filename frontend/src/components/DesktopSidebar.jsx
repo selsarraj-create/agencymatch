@@ -53,7 +53,7 @@ const DesktopSidebar = () => {
         <div className="hidden md:flex flex-col w-64 bg-surface-light dark:bg-black border-r border-gray-200 dark:border-white/10 h-full shrink-0">
             {/* Logo Area */}
             <div className="p-6">
-                <h1 className="text-2xl font-black tracking-tighter text-brand-start">AGENCY MATCH</h1>
+                <h1 className="text-2xl font-black tracking-tighter text-brand-start">AGENCY SCOUT</h1>
                 <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark font-medium uppercase tracking-widest">Model Dashboard</p>
             </div>
 

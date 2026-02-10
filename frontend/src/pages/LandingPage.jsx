@@ -26,7 +26,7 @@ const LandingPage = () => {
         },
         {
             icon: <Building2 className="text-white" size={24} />,
-            title: "Agency Match",
+            title: "Agency Scout",
             desc: "We match your specific look with 50+ top agencies looking for you.",
             color: "bg-purple-500"
         },
@@ -281,7 +281,7 @@ const LandingPage = () => {
                                     <Building2 size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg md:text-xl font-bold dark:text-white leading-tight mb-1">Agency<br />Match</h3>
+                                    <h3 className="text-lg md:text-xl font-bold dark:text-white leading-tight mb-1">Agency<br />Scout</h3>
                                     <p className="text-xs text-gray-600 dark:text-gray-400 font-medium leading-tight">
                                         Match with 50+ top agencies.
                                     </p>
@@ -333,7 +333,7 @@ const LandingPage = () => {
                                 </div>
                             </div>
                             <p className="text-text-secondary-light dark:text-text-secondary-dark italic">
-                                "I spent years sending emails to agencies and hearing nothing. One scan with Model Match and I realized my digitals were the problem. Fixed them, and got signed in 2 weeks."
+                                "I spent years sending emails to agencies and hearing nothing. One scan with Agency Scout and I realized my digitals were the problem. Fixed them, and got signed in 2 weeks."
                             </p>
                             <div className="flex gap-1 mt-6 text-yellow-400">
                                 <Star fill="currentColor" size={16} />
