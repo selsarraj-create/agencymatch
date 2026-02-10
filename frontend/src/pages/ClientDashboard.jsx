@@ -305,26 +305,57 @@ const ClientDashboard = () => {
                                             <div
                                                 key={agency.id}
                                                 onClick={() => toggleAgency(agency.id)}
-                                                className={`p-6 rounded-3xl border cursor-pointer transition-all group relative overflow-hidden ${selectedAgencies.has(agency.id)
+                                                className={`p-6 rounded-3xl border cursor-pointer transition-all group relative overflow-hidden flex flex-col justify-between ${selectedAgencies.has(agency.id)
                                                     ? 'bg-brand-start/5 border-brand-start ring-1 ring-brand-start shadow-md'
                                                     : 'bg-card-light dark:bg-card-dark border-gray-200 dark:border-white/10 hover:border-brand-start/30 hover:shadow-lg hover:-translate-y-1'
                                                     }`}
                                             >
-                                                <div className="flex justify-between items-start relative z-10">
-                                                    <div>
-                                                        <h3 className="font-bold text-lg leading-tight mb-1">{agency.name}</h3>
-                                                        <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wide">{agency.location}</p>
+                                                <div className="flex justify-between items-start relative z-10 mb-4">
+                                                    <div className="flex gap-4 items-start">
+                                                        {/* Logo */}
+                                                        <div className="w-12 h-12 rounded-xl bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden shrink-0">
+                                                            {agency.logo_url ? (
+                                                                <img src={agency.logo_url} alt={agency.name} className="w-full h-full object-contain p-1" />
+                                                            ) : (
+                                                                <span className="text-xl font-black text-brand-start">{agency.name.charAt(0)}</span>
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-lg leading-tight mb-1 line-clamp-2">{agency.name}</h3>
+                                                            <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wide flex items-center gap-1">
+                                                                {agency.location || 'London, UK'}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
+                                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
                                                         {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-white" />}
                                                     </div>
                                                 </div>
-                                                {/* Sublte Category Tag */}
-                                                <div className="mt-4 flex gap-2">
-                                                    <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
-                                                        {agency.category || 'Modeling'}
-                                                    </span>
+
+                                                {/* Modeling Types Tags */}
+                                                <div className="flex flex-wrap gap-2 mt-auto">
+                                                    {agency.modeling_types && agency.modeling_types.length > 0 ? (
+                                                        agency.modeling_types.slice(0, 3).map((type, idx) => (
+                                                            <span key={idx} className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
+                                                                {type}
+                                                            </span>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
+                                                            Fashion
+                                                        </span>
+                                                    )}
+                                                    {agency.modeling_types && agency.modeling_types.length > 3 && (
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
+                                                            +{agency.modeling_types.length - 3}
+                                                        </span>
+                                                    )}
                                                 </div>
+
+                                                {/* Description Preview (Optional, usually takes too much space) */}
+                                                {/* <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-3 line-clamp-2">
+                                                    {agency.description}
+                                                </p> */}
                                             </div>
                                         ))
                                     )}

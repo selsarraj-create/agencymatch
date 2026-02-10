@@ -8,3 +8,6 @@ playwright
 numpy
 Pillow
 supabase
+googlesearch-python
+beautifulsoup4
+requests
