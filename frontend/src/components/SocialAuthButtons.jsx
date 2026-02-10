@@ -36,6 +36,7 @@ const SocialAuthButtons = () => {
 
     const ButtonBase = ({ onClick, icon, label, bgColor, textColor, borderColor, badge }) => (
         <button
+            type="button"
             onClick={onClick}
             disabled={loading}
             className={`
