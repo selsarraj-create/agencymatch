@@ -7,11 +7,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize Supabase Client
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY")
+# Initialize Supabase Client
+url: str = os.environ.get("SUPABASE_URL") or os.environ.get("VITE_SUPABASE_URL")
+key: str = (os.environ.get("SUPABASE_SERVICE_KEY") or 
+            os.environ.get("SUPABASE_KEY") or 
+            os.environ.get("VITE_SUPABASE_SERVICE_ROLE_KEY"))
 
 if not url or not key:
-    print("WARNING: SUPABASE_URL or SUPABASE_KEY not found in environment.")
+    print("WARNING: SUPABASE_URL or SUPABASE_KEY (or VITE_ equivalents) not found in environment.")
     supabase = None
 else:
     supabase: Client = create_client(url, key)
