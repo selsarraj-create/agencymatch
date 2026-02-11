@@ -390,15 +390,43 @@ class DigitalGenRequest(BaseModel):
 
 @app.post("/api/generate-digitals")
 async def generate_digitals_endpoint(req: DigitalGenRequest):
-    try:
-        # In a real app, we check credits here
-        # supabase = get_supabase()
-        # check_credits(req.user_id, cost=5) ...
-
-        result = process_digitals(req.photo_url)
+    try:        result = process_digitals(req.photo_url)
         
         if "error" in result:
              return JSONResponse(status_code=500, content=result)
+
+        # --- Save to Supabase Storage + Update Profile ---
+        try:
+            import base64
+            import time
+
+            supabase = get_supabase()
+            image_bytes = base64.b64decode(result["image_bytes"])
+            
+            # Upload to 'generated' bucket
+            filename = f"{req.user_id}/{int(time.time())}_digital.jpg"
+            supabase.storage.from_("generated").upload(
+                file=image_bytes,
+                path=filename,
+                file_options={"content-type": "image/jpeg"}
+            )
+            
+            # Get public URL
+            public_url = supabase.storage.from_("generated").get_public_url(filename)
+            print(f"Saved to storage: {public_url}")
+            
+            # Append to profiles.generated_photos array
+            profile_resp = supabase.table("profiles").select("generated_photos").eq("id", req.user_id).single().execute()
+            current_photos = (profile_resp.data or {}).get("generated_photos") or []
+            current_photos.append(public_url)
+            supabase.table("profiles").update({"generated_photos": current_photos}).eq("id", req.user_id).execute()
+            print(f"Updated profile: {len(current_photos)} generated photos")
+            
+            result["public_url"] = public_url
+            
+        except Exception as storage_err:
+            print(f"Storage/profile save failed (non-fatal): {storage_err}")
+            result["storage_warning"] = str(storage_err)
              
         return result
         
