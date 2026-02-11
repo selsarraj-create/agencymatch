@@ -281,21 +281,33 @@ async def generate_digitals(req: GenerateDigitalsRequest):
              
              # Get Public URL
              public_url = database.supabase.storage.from_("generated").get_public_url(generated_filename)
+             print(f"Generated Public URL: {public_url}")
              
              # Save to profile
-             p_res = database.supabase.table('profiles').select('generated_photos').eq('id', req.user_id).single().execute()
-             current_photos = p_res.data.get('generated_photos') or []
-             current_photos.append(public_url)
-             
-             database.supabase.table('profiles').update({'generated_photos': current_photos}).eq('id', req.user_id).execute()
-             
+             try:
+                 p_res = database.supabase.table('profiles').select('generated_photos').eq('id', req.user_id).single().execute()
+                 
+                 if p_res.data:
+                     current_photos = p_res.data.get('generated_photos') or []
+                     current_photos.append(public_url)
+                     
+                     update_res = database.supabase.table('profiles').update({'generated_photos': current_photos}).eq('id', req.user_id).execute()
+                     print(f"Profile updated: {update_res.data}")
+                 else:
+                     logger.error(f"Profile not found for user {req.user_id}")
+             except Exception as db_err:
+                 logger.error(f"Failed to update profile database: {db_err}")
+                 # We don't raise here so the user at least gets the image in the response
+                 
         except Exception as upload_err:
              logger.error(f"Failed to upload generated image: {upload_err}")
+             public_url = None
         
         return {
             "status": "success",
             "identity_constraints": analysis_result.get("physical_description", "Analyzed"),
-            "image_bytes": base64.b64encode(image_bytes_out).decode('utf-8'), 
+            "image_bytes": base64.b64encode(image_bytes_out).decode('utf-8'),
+            "public_url": public_url,
             "credits": new_balance
         }
 
