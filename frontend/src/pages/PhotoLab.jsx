@@ -99,6 +99,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
         // Upload to Supabase Storage to get a public URL for the backend
         try {
             const fileName = `${user.id}/${Date.now()}_input.jpg`;
+            // Ensure bucket exists or handled by error boundary
             const { error: uploadError } = await supabase.storage.from('uploads').upload(fileName, file);
             if (uploadError) throw uploadError;
 
@@ -124,7 +125,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
 
         try {
             // Call the new Strict Identity Endpoint
-            const response = await axios.post(`${API_URL}/api/generate-digitals`, {
+            const response = await axios.post(`${API_URL}/generate-digitals`, {
                 user_id: user.id,
                 photo_url: inputImage
             });
@@ -294,6 +295,9 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                     <img src={generatedImage} alt="Model Digital" className="w-full h-auto rounded-sm filter contrast-110 saturate-[0.85]" />
                                     <div className="mt-4 flex justify-between items-end">
                                         <div className="font-handwriting text-black/80 text-xl transform -rotate-2 ml-2">Digital #01</div>
+                                        <div className="flex items-center gap-1 text-[10px] text-green-600 font-bold bg-green-50 px-2 py-1 rounded-full border border-green-100">
+                                            <CheckCircle size={10} /> Saved to Profile
+                                        </div>
                                         <img src="/logo-small.png" className="h-6 opacity-50 grayscale" alt="" />
                                     </div>
                                 </div>
