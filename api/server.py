@@ -390,7 +390,8 @@ class DigitalGenRequest(BaseModel):
 
 @app.post("/api/generate-digitals")
 async def generate_digitals_endpoint(req: DigitalGenRequest):
-    try:        result = process_digitals(req.photo_url)
+    try:
+        result = process_digitals(req.photo_url)
         
         if "error" in result:
              return JSONResponse(status_code=500, content=result)
