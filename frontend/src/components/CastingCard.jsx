@@ -73,8 +73,8 @@ const CastingCard = ({ casting, userProfile }) => {
 
             <div className="flex justify-between items-start mb-4 relative z-10">
                 <div className="flex items-center gap-3">
-                    {casting.brand_logo_url ? (
-                        <img src={casting.brand_logo_url} alt={casting.brand_name} className="w-12 h-12 rounded-full object-cover border border-gray-100 dark:border-white/10" />
+                    {casting.agency?.image_url ? (
+                        <img src={casting.agency.image_url} alt={casting.brand_name} className="w-12 h-12 rounded-full object-cover border border-gray-100 dark:border-white/10" />
                     ) : (
                         <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center">
                             <Briefcase size={20} className="text-gray-400" />

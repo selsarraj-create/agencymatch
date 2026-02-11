@@ -347,8 +347,8 @@ const ClientDashboard = () => {
                                                     <div className="flex gap-4 items-start">
                                                         {/* Logo */}
                                                         <div className="w-12 h-12 rounded-xl bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden shrink-0">
-                                                            {agency.logo_url ? (
-                                                                <img src={agency.logo_url} alt={agency.name} className="w-full h-full object-contain p-1" />
+                                                            {agency.image_url ? (
+                                                                <img src={agency.image_url} alt={agency.name} className="w-full h-full object-contain p-1" />
                                                             ) : (
                                                                 <span className="text-xl font-black text-brand-start">{agency.name.charAt(0)}</span>
                                                             )}

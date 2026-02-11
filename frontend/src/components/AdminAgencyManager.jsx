@@ -17,7 +17,7 @@ const AdminAgencyManager = () => {
         application_url: '',
         location: 'London, UK',
         status: 'active',
-        logo_url: '',
+        image_url: '',
         modeling_types: [],
         has_vacancies: false
     });
@@ -52,7 +52,7 @@ const AdminAgencyManager = () => {
             application_url: agency.application_url || '',
             location: agency.location || 'London, UK',
             status: agency.status || 'active',
-            logo_url: agency.logo_url || '',
+            image_url: agency.image_url || '',
             modeling_types: agency.modeling_types || [],
             has_vacancies: agency.has_vacancies || false
         });
@@ -167,7 +167,7 @@ const AdminAgencyManager = () => {
                                 {filteredAgencies.map((agency) => (
                                     <tr key={agency.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                                         <td className="p-4 font-bold flex items-center gap-3">
-                                            {agency.logo_url && <img src={agency.logo_url} className="w-8 h-8 rounded-lg object-contain bg-white border" alt="" />}
+                                            {agency.image_url && <img src={agency.image_url} className="w-8 h-8 rounded-lg object-contain bg-white border" alt="" />}
                                             {agency.name}
                                             {agency.has_vacancies && <span className="ml-2 text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wide">Hiring</span>}
                                         </td>
@@ -223,8 +223,8 @@ const AdminAgencyManager = () => {
                                     <input className="w-full p-2 rounded-xl bg-gray-50 dark:bg-black/20 border" value={formData.application_url} onChange={e => setFormData({ ...formData, application_url: e.target.value })} />
                                 </div>
                                 <div className="col-span-1 md:col-span-2">
-                                    <label className="block text-xs font-bold uppercase mb-1">Logo URL</label>
-                                    <input className="w-full p-2 rounded-xl bg-gray-50 dark:bg-black/20 border" value={formData.logo_url} onChange={e => setFormData({ ...formData, logo_url: e.target.value })} />
+                                    <label className="block text-xs font-bold uppercase mb-1">Logo / Image URL</label>
+                                    <input className="w-full p-2 rounded-xl bg-gray-50 dark:bg-black/20 border" value={formData.image_url} onChange={e => setFormData({ ...formData, image_url: e.target.value })} />
                                 </div>
                                 <div className="col-span-1 md:col-span-2">
                                     <label className="block text-xs font-bold uppercase mb-1">Modeling Types (comma separated)</label>
