@@ -1,0 +1,1388 @@
+[
+    {
+        "name": "Models 1",
+        "website_url": "https://www.models1.co.uk/",
+        "application_url": "https://www.models1.co.uk/apply/",
+        "type": "High Fashion & Editorial",
+        "synopsis": "Europe's leading model agency based in London, representing top international talent across women's, men's, and talent boards.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Elite London",
+        "website_url": "https://www.elitemodel.co.uk/",
+        "application_url": "https://www.elitemodelmanagement.com/london/get-scouted.web",
+        "type": "High Fashion & Editorial",
+        "synopsis": "Part of the prestigious global Elite network, representing legendary supermodels and emerging high-fashion talent.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "IMG Models London",
+        "website_url": "https://www.imgmodels.com/",
+        "application_url": "https://getscouted.imgmodels.com/",
+        "type": "High Fashion",
+        "synopsis": "A world leader in talent discovery and model management, representing some of the fashion industry's most recognizable faces.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Storm Model Management",
+        "website_url": "https://www.stormmanagement.com/",
+        "application_url": "https://www.stormmanagement.com/apply-step-1/",
+        "type": "High Fashion & Editorial",
+        "synopsis": "A legendary agency famous for discovering icons like Kate Moss, specializing in high fashion, talent, and creative management.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Wilhelmina Models London",
+        "website_url": "https://www.wilhelmina.com/london/",
+        "application_url": "https://www.wilhelmina.com/become-a-model",
+        "type": "Commercial & Lifestyle",
+        "synopsis": "One of the world's most recognized model management companies, representing a diverse range of models and celebrities.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Premier Model Management",
+        "website_url": "https://www.premiermodelmanagement.com/",
+        "application_url": "https://www.premiermodelmanagement.com/become-a-model/",
+        "type": "High Fashion & Editorial",
+        "synopsis": "An iconic London agency known for its historical impact on the industry and its high-profile roster of fashion models.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Base Model & Influencer Agency",
+        "website_url": "https://www.basemodels.co.uk/",
+        "application_url": "https://www.basemodels.co.uk/become/",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "A leading commercial agency representing a diverse range of models, influencers, and actors for lifestyle campaigns.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Sandra Reynolds Model Agency",
+        "website_url": "https://www.sandrareynolds.co.uk/",
+        "application_url": "https://www.sandrareynolds.co.uk/join-our-agency",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "A highly respected agency with a 50-year history, representing commercial models, actors, and real talent across the UK.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "MiLK Management",
+        "website_url": "https://www.milkmanagement.co.uk/",
+        "application_url": "https://www.milkmanagement.co.uk/be-scouted/",
+        "type": "Commercial & Lifestyle",
+        "synopsis": "A forward-thinking agency focused on diversity and inclusion within the fashion, broadcast, and digital talent sectors.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Nevs Models",
+        "website_url": "https://www.nevsmodels.co.uk/",
+        "application_url": "https://www.nevsmodels.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "A long-established boutique agency in London providing personalized management for fashion and commercial models.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "First Model Management",
+        "website_url": "https://www.firstmodelmanagement.co.uk/",
+        "application_url": "https://www.firstmodelmanagement.co.uk/become-a-model",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Focuses on the long-term career development of its talent, representing a wide spectrum of models for global campaigns.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "BMA Models",
+        "website_url": "https://www.bmamodels.com/",
+        "application_url": "https://bmamodels.com/apply-to-join/",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "A major player in the commercial sector, representing models, actors, and specialized talent for top brands.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Nemesis Models",
+        "website_url": "https://www.nemesismodels.com/",
+        "application_url": "https://www.nemesismodels.com/join",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Manchester's premier agency representing a wide range of talent including new faces, classics, and digital influencers.",
+        "location": "Manchester, UK",
+        "status": "active"
+    },
+    {
+        "name": "Boss Model Management",
+        "website_url": "https://www.bossmodelmanagement.co.uk/",
+        "application_url": "https://www.bossmodelmanagement.co.uk/become-a-model/",
+        "type": "High Fashion & Editorial",
+        "synopsis": "A prominent Manchester-based agency with a global reach, representing top-tier models and providing casting services.",
+        "location": "Manchester, UK",
+        "status": "active"
+    },
+    {
+        "name": "Industry Model Management",
+        "website_url": "https://www.industrymodels.co.uk/",
+        "application_url": "https://www.industrymodels.co.uk/become-a-model/",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Operating in Manchester and Leeds, this agency represents premium fashion talent and creatives across the North.",
+        "location": "Manchester, UK",
+        "status": "active"
+    },
+    {
+        "name": "J'adore Models",
+        "website_url": "https://www.jadoremodels.co.uk/",
+        "application_url": "https://www.jadoremodels.co.uk/apply",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "A boutique agency focusing on fresh faces and high-end fashion, known for its creative approach to talent management.",
+        "location": "Manchester, UK",
+        "status": "active"
+    },
+    {
+        "name": "Grace and Galor",
+        "website_url": "https://www.graceandgalor.com/",
+        "application_url": "https://www.graceandgalor.com/join-us/",
+        "type": "Commercial & Lifestyle",
+        "synopsis": "Specialists in babies, children, and teenagers, Grace and Galor is a leader in the UK child modeling market.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Bonnie & Betty",
+        "website_url": "https://www.bonnieandbetty.com/",
+        "application_url": "https://www.bonnieandbetty.com/apply",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "A top-tier child model and talent agency representing diverse talent for film, TV, and photographic work.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Scallywags",
+        "website_url": "https://www.scallywags.co.uk/",
+        "application_url": "https://www.scallywags.co.uk/apply",
+        "type": "Commercial & Lifestyle",
+        "synopsis": "One of London's longest-established child agencies, known for its professional and supportive approach to young talent.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Source Models",
+        "website_url": "https://www.sourcemodels.co.uk/",
+        "application_url": "https://www.sourcemodels.co.uk/apply",
+        "type": "Commercial & Lifestyle",
+        "synopsis": "A top commercial agency specializing in lifestyle modeling and fitness talent for major national campaigns.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "Select Model Management",
+        "website_url": "https://www.selectmodel.com/london",
+        "application_url": "https://www.selectmodel.com/become-a-model",
+        "type": "High Fashion & Editorial",
+        "synopsis": "A global powerhouse in model management, Select is known for discovering many of the industry's most successful models.",
+        "location": "London, UK",
+        "status": "active"
+    },
+    {
+        "name": "IMG Models London",
+        "website_url": "https://getscouted.imgmodels.com",
+        "application_url": "https://getscouted.imgmodels.com/",
+        "type": "High Fashion & Editorial",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "The Squad Management",
+        "website_url": "https://www.thesquadmanagement.com",
+        "application_url": "https://www.thesquadmanagement.com/join",
+        "type": "High Fashion & Editorial",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "TESS Management",
+        "website_url": "https://www.tessmanagement.com",
+        "application_url": "https://www.tessmanagement.com/contact/",
+        "type": "High Fashion & Editorial",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Linden Staub",
+        "website_url": "https://www.lindenstaub.com",
+        "application_url": "https://www.lindenstaub.com/apply",
+        "type": "High Fashion & Editorial",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "PRM Agency",
+        "website_url": "https://www.prm-agency.com",
+        "application_url": "https://www.prm-agency.com/become-a-model",
+        "type": "High Fashion & Editorial",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Body London",
+        "website_url": "https://www.bodylondon.com",
+        "application_url": "https://www.bodylondon.com/join-us",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Bridge Models",
+        "website_url": "https://www.bridgemodels.co.uk",
+        "application_url": "https://www.bridgemodels.co.uk/apply",
+        "type": "High Fashion & Editorial",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Grey Model Agency",
+        "website_url": "https://greymodelagency.com",
+        "application_url": "https://greymodelagency.com/apply",
+        "type": "High Fashion & Editorial",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "IMM Models",
+        "website_url": "https://www.immmodels.com",
+        "application_url": "https://www.immmodels.com/become-a-model",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Kult London",
+        "website_url": "https://www.kultlondon.uk",
+        "application_url": "https://www.kultlondon.uk/become-a-model",
+        "type": "High Fashion & Editorial",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Profile Models",
+        "website_url": "https://www.profile-models.com",
+        "application_url": "https://www.profile-models.com/apply",
+        "type": "High Fashion & Editorial",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Established Models",
+        "website_url": "https://www.establishedmodels.com",
+        "application_url": "https://www.establishedmodels.com/become-a-model",
+        "type": "High Fashion & Editorial",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Zebedee Management",
+        "website_url": "https://www.zebedeemanagement.co.uk",
+        "application_url": "https://www.zebedeemanagement.co.uk/apply",
+        "type": "High Fashion & Editorial",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Ugly Models",
+        "website_url": "https://www.ugly.org",
+        "application_url": "https://www.ugly.org/wanabee",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "High Fashion & Editorial agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "W Model Management",
+        "website_url": "https://www.wmgmt.co.uk",
+        "application_url": "https://www.wmgmt.co.uk/apply",
+        "type": "Commercial & Lifestyle",
+        "synopsis": "Commercial & Lifestyle agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Forte Model Management",
+        "website_url": "https://www.fortemodelmanagement.com",
+        "application_url": "https://www.fortemodelmanagement.com/apply",
+        "type": "Commercial & Lifestyle",
+        "synopsis": "Commercial & Lifestyle agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Vision Models London",
+        "website_url": "https://www.vision-models.com",
+        "application_url": "https://www.vision-models.com/join-us",
+        "type": "Commercial & Lifestyle",
+        "synopsis": "Commercial & Lifestyle agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Brother Models",
+        "website_url": "https://www.brothermodels.com",
+        "application_url": "https://www.brothermodels.com/contact",
+        "type": "Commercial & Lifestyle",
+        "synopsis": "Commercial & Lifestyle agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Present Model Management",
+        "website_url": "https://www.presentmodelmanagement.com",
+        "application_url": "https://www.presentmodelmanagement.com/be-discovered",
+        "type": "Commercial & Lifestyle",
+        "synopsis": "Commercial & Lifestyle agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Fresh Agents",
+        "website_url": "https://www.freshagents.co.uk",
+        "application_url": "https://www.freshagents.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Lifestyle agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Bame Models",
+        "website_url": "https://www.bamemodels.com",
+        "application_url": "https://www.bamemodels.com/apply",
+        "type": "Commercial & Lifestyle",
+        "synopsis": "Commercial & Lifestyle agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Bizzy Kidz Agency",
+        "website_url": "https://bizzykidz.com",
+        "application_url": "https://bizzykidz.com/apply-to-join/",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Ray & Robin",
+        "website_url": "https://www.rayandrobin.com",
+        "application_url": "https://www.rayandrobin.com/apply",
+        "type": "Child & Teen",
+        "synopsis": "Commercial & Lifestyle agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Urban Angels",
+        "website_url": "https://www.urbanangelsagency.com",
+        "application_url": "https://www.urbanangelsagency.com/apply",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Manchester Model Agency (MMA)",
+        "website_url": "https://www.manchestermodelagency.com",
+        "application_url": "https://www.manchestermodelagency.com/join-us",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Mustard Models",
+        "website_url": "https://www.mustardmodels.co.uk",
+        "application_url": "https://www.mustardmodels.co.uk/apply",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Colours Agency",
+        "website_url": "https://www.coloursagency.com",
+        "application_url": "https://www.coloursagency.com/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Tartan Models",
+        "website_url": "https://www.tartanmodels.co.uk",
+        "application_url": "https://www.tartanmodels.co.uk/apply",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Gingersnap Models",
+        "website_url": "https://www.gingersnap.co.uk",
+        "application_url": "https://www.gingersnap.co.uk/become-a-model",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Catwalk Model Management",
+        "website_url": "https://www.catwalk-models.co.uk",
+        "application_url": "https://www.catwalk-models.co.uk/application-form/",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Maverick Models",
+        "website_url": "https://www.maverickmodels.co.uk",
+        "application_url": "https://www.maverickmodels.co.uk/apply",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "PHA Model Management",
+        "website_url": "https://www.pha-agency.co.uk",
+        "application_url": "https://www.pha-agency.co.uk/apply",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "VAUHAUS",
+        "website_url": "https://www.vauhaus.co.uk",
+        "application_url": "https://www.vauhaus.co.uk",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Talent Management",
+        "website_url": "https://www.talentmanagement.com",
+        "application_url": "https://www.talentmanagement.com/register/",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Junction 8 Models",
+        "website_url": "https://www.junction8model.com",
+        "application_url": "https://www.junction8model.com/register",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Kids London",
+        "website_url": "https://www.kidslondonltd.com",
+        "application_url": "https://www.kidslondonltd.com/how-to-apply",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "HF Management",
+        "website_url": "https://www.hfmgmt.co.uk",
+        "application_url": "https://www.hfmgmt.co.uk/apply",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Daisy & Dukes",
+        "website_url": "https://www.daisyanddukes.com",
+        "application_url": "https://www.daisyanddukes.com/join-us",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Ology Kids Casting",
+        "website_url": "https://www.ologykidscasting.com",
+        "application_url": "https://www.ologykidscasting.com/apply",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Uni-versal Extras",
+        "website_url": "https://www.universalextras.co.uk",
+        "application_url": "https://www.universalextras.co.uk/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Casting Collective",
+        "website_url": "https://www.castingcollective.co.uk",
+        "application_url": "https://www.castingcollective.co.uk/artistes/urgent-casting-calls",
+        "type": "TV Extras & Casting",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "ACA Models",
+        "website_url": "https://www.acamodels.com",
+        "application_url": "https://www.acamodels.com/apply",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Nova Eire",
+        "website_url": "https://www.novaeire.com",
+        "application_url": "https://www.novaeire.com/apply",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "The Extras Dept",
+        "website_url": "https://www.theextrasdept.com",
+        "application_url": "https://www.theextrasdept.com/register",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Oxygen Models",
+        "website_url": "https://www.oxygenmodels.com",
+        "application_url": "https://www.oxygenmodels.com/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Next Management London",
+        "website_url": "https://www.nextmanagement.com",
+        "application_url": "https://www.nextmanagement.com/be-discovered",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Salt Model Management",
+        "website_url": "https://www.saltmodelmanagement.com",
+        "application_url": "https://www.saltmodelmanagement.com/become-a-model",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "TTM Management",
+        "website_url": "https://www.ttmmanagement.co.uk",
+        "application_url": "https://www.ttmmanagement.co.uk/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "The Hive Management",
+        "website_url": "https://www.thehivemanagement.com",
+        "application_url": "https://www.thehivemanagement.com/be-discovered",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Salt & Pepper Models",
+        "website_url": "https://www.saltandpeppermodels.co.uk",
+        "application_url": "https://www.saltandpeppermodels.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Zone Models",
+        "website_url": "https://www.zone-models.com",
+        "application_url": "https://www.zone-models.com/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Elliott Brown Agency",
+        "website_url": "https://www.elliottbrownagency.co.uk",
+        "application_url": "https://www.elliottbrownagency.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Alphabet Kidz",
+        "website_url": "https://www.alphabetkidz.co.uk",
+        "application_url": "https://www.alphabetkidz.co.uk/apply",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Tiny Angels",
+        "website_url": "https://www.tinyangels.co.uk",
+        "application_url": "https://www.tinyangels.co.uk/apply",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "W Athletic",
+        "website_url": "http://www.wathletic.com",
+        "application_url": "http://www.wathletic.com/contact-us/",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Hired Hands Models",
+        "website_url": "https://www.hiredhandsmodels.com",
+        "application_url": "https://www.hiredhandsmodels.com/apply",
+        "type": "Niche: Parts & Fittings",
+        "synopsis": "Niche: Parts & Fittings agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Sports Models UK",
+        "website_url": "https://www.sportsmodels.co.uk",
+        "application_url": "https://www.sportsmodels.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "M Models Management",
+        "website_url": "https://www.m-models.co.uk",
+        "application_url": "https://www.m-models.co.uk/apply-now",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Mustard Model Agency",
+        "website_url": "https://www.bigmustard.co.uk",
+        "application_url": "https://www.bigmustard.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Alpha Agency",
+        "website_url": "https://www.alphaagency.co.uk",
+        "application_url": "https://www.alphaagency.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "New Idol Models",
+        "website_url": "https://www.newidolmodel.co.uk",
+        "application_url": "https://www.newidolmodel.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Emmjs Model Management",
+        "website_url": "https://www.emmjsmodelmanagement.co.uk",
+        "application_url": "https://www.emmjsmodelmanagement.co.uk/contact",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "SHH Talent",
+        "website_url": "https://www.shhtalent.com",
+        "application_url": "https://www.shhtalent.com/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Atlantis Modelling Agency",
+        "website_url": "https://www.atlantismodellingagency.co.uk",
+        "application_url": "https://www.atlantismodellingagency.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "RMG Models",
+        "website_url": "https://www.rmg-models.co.uk",
+        "application_url": "https://www.rmg-models.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Valkyrie Models",
+        "website_url": "https://www.valkyriemodels.co.uk",
+        "application_url": "https://www.valkyriemodels.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Bondi Talent",
+        "website_url": "https://www.bonditalent.co.uk",
+        "application_url": "https://www.bonditalent.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "PK Model Agency",
+        "website_url": "https://www.pkmodelagency.co.uk",
+        "application_url": "https://www.pkmodelagency.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Aspire Model Management",
+        "website_url": "http://www.aspiremodelmanagement.co.uk",
+        "application_url": "http://www.aspiremodelmanagement.co.uk/contact",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Eclipse Model Management",
+        "website_url": "https://www.eclipsemodelmanagement.co.uk",
+        "application_url": "https://www.eclipsemodelmanagement.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Mentor Model Agency",
+        "website_url": "https://www.mentormodelagency.co.uk",
+        "application_url": "https://www.mentormodelagency.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "DK Models",
+        "website_url": "https://www.dkmodels.net",
+        "application_url": "https://www.dkmodels.net/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "LMP Models",
+        "website_url": "https://www.lmpmodels.com",
+        "application_url": "https://www.lmpmodels.com/contact",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Childsplay",
+        "website_url": "https://childsplayclothing.com",
+        "application_url": "https://childsplayclothing.com/pages/model-search",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Stepping Stone Performance",
+        "website_url": "https://www.sspagency.co.uk",
+        "application_url": "https://www.sspagency.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Little Red Dog",
+        "website_url": "https://www.littlereddog.co.uk",
+        "application_url": "https://www.littlereddog.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "MA4B Baby Models",
+        "website_url": "https://www.modelagency4baby.co.uk",
+        "application_url": "https://www.modelagency4baby.co.uk/apply",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Connect Management",
+        "website_url": "https://www.connectmgt.com",
+        "application_url": "https://www.connectmgt.com/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Bee Talent",
+        "website_url": "https://www.beetalent.co.uk",
+        "application_url": "https://www.beetalent.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "TwentyTwo Talent",
+        "website_url": "https://www.twentytwotalent.co.uk",
+        "application_url": "https://www.twentytwotalent.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Brown and Mills",
+        "website_url": "https://www.brownandmills.co.uk",
+        "application_url": "https://www.brownandmills.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "BMA Artists",
+        "website_url": "https://www.bmaartists.com",
+        "application_url": "https://www.bmaartists.com/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Fit Angels",
+        "website_url": "https://www.fitangels.co.uk",
+        "application_url": "https://www.fitangels.co.uk/apply",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Fittings Division",
+        "website_url": "https://www.fittingsdivision.co.uk",
+        "application_url": "https://www.fittingsdivision.co.uk/apply",
+        "type": "Niche: Parts & Fittings",
+        "synopsis": "Niche: Parts & Fittings agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "The Bureau",
+        "website_url": "https://www.the-bureau.com",
+        "application_url": "https://www.the-bureau.com/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Artimis Fitting Models",
+        "website_url": "https://www.artimis.co.uk",
+        "application_url": "https://www.artimis.co.uk/apply",
+        "type": "Niche: Parts & Fittings",
+        "synopsis": "Niche: Parts & Fittings agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "In House Models",
+        "website_url": "https://www.inhousemodels.co.uk",
+        "application_url": "https://www.inhousemodels.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "BMA Hands",
+        "website_url": "https://www.bmahands.com",
+        "application_url": "https://www.bmahands.com/apply",
+        "type": "Niche: Parts & Fittings",
+        "synopsis": "Niche: Parts & Fittings agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Flair Talent",
+        "website_url": "https://www.flairtalent.com",
+        "application_url": "https://www.flairtalent.com/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Superior Model Management",
+        "website_url": "https://www.superiormodelmanagement.co.uk",
+        "application_url": "https://www.superiormodelmanagement.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Ray Knight Casting",
+        "website_url": "https://www.rayknight.co.uk",
+        "application_url": "https://www.rayknight.co.uk/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Two 10 Casting",
+        "website_url": "https://www.two10casting.com",
+        "application_url": "https://www.two10casting.com/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Extra People",
+        "website_url": "https://www.extra-people.com",
+        "application_url": "https://www.extra-people.com/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Piece of Cake Casting",
+        "website_url": "https://www.pieceofcakecasting.com",
+        "application_url": "https://www.pieceofcakecasting.com/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Phoenix Casting",
+        "website_url": "https://www.phoenixcasting.tv",
+        "application_url": "https://www.phoenixcasting.tv/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "ZBD Talent",
+        "website_url": "https://www.zbdtalent.com",
+        "application_url": "https://www.zbdtalent.com/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Rachel's People",
+        "website_url": "https://www.rachelspeople.co.uk",
+        "application_url": "https://www.rachelspeople.co.uk/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Bizzykidz",
+        "website_url": "https://www.bizzykidzagency.com",
+        "application_url": "https://www.bizzykidzagency.com/apply",
+        "type": "Child & Teen",
+        "synopsis": "Child & Teen agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Model Students",
+        "website_url": "https://www.modelstudents.co.uk",
+        "application_url": "https://www.modelstudents.co.uk/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Atlantis Modelling",
+        "website_url": "https://www.atlantismodelling.com",
+        "application_url": "https://www.atlantismodelling.com/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Creative Casting",
+        "website_url": "https://www.creativecasting.tv",
+        "application_url": "https://www.creativecasting.tv/register",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Envisage Casting",
+        "website_url": "https://www.envisagecastingagency.co.uk",
+        "application_url": "https://www.envisagecastingagency.co.uk/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Casting Tree",
+        "website_url": "https://www.castingtree.co.uk",
+        "application_url": "https://www.castingtree.co.uk/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Take 1 Casting",
+        "website_url": "https://www.take1casting.co.uk",
+        "application_url": "https://www.take1casting.co.uk/apply",
+        "type": "TV Extras & Casting",
+        "synopsis": "TV Extras & Casting agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Flair Events",
+        "website_url": "https://www.eventstaffing.co.uk",
+        "application_url": "https://www.eventstaffing.co.uk/join-us",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Push Promotions",
+        "website_url": "https://www.pushpromotions.co.uk",
+        "application_url": "https://www.pushpromotions.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Elpromotions",
+        "website_url": "https://www.elpromotions.co.uk",
+        "application_url": "https://www.elpromotions.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Tidy Promotions",
+        "website_url": "https://www.tidypromo.com",
+        "application_url": "https://www.tidypromo.com/join",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Executional",
+        "website_url": "https://www.executional.co.uk",
+        "application_url": "https://www.executional.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Event Staffing Agency",
+        "website_url": "https://www.eventsstaffingagency.co.uk",
+        "application_url": "https://www.eventsstaffingagency.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Mint People",
+        "website_url": "https://www.mint-people.co.uk",
+        "application_url": "https://www.mint-people.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Host Staffing",
+        "website_url": "https://www.host-staffing.co.uk",
+        "application_url": "https://www.host-staffing.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Splendid",
+        "website_url": "https://www.splendid.co.uk",
+        "application_url": "https://www.splendid.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Iconic Faces Collective",
+        "website_url": "https://www.iconicfacescollective.com",
+        "application_url": "https://www.iconicfacescollective.com/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "ZJELL Model Agency",
+        "website_url": "https://www.zjell.com",
+        "application_url": "https://www.zjell.com/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Nova Artists",
+        "website_url": "https://www.novaartists.co.uk",
+        "application_url": "https://www.novaartists.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Capulet",
+        "website_url": "https://www.capulet.co.uk",
+        "application_url": "https://www.capulet.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Gilbert & Payne",
+        "website_url": "https://www.gilbertandpayne.com",
+        "application_url": "https://www.gilbertandpayne.com/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Michelle Blair Management",
+        "website_url": "https://www.michelleblairmanagement.co.uk",
+        "application_url": "https://www.michelleblairmanagement.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Mostyn & Cross",
+        "website_url": "https://www.mostynandcross.com",
+        "application_url": "https://www.mostynandcross.com/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Nic Knight Management",
+        "website_url": "https://www.nicknightmanagement.com",
+        "application_url": "https://www.nicknightmanagement.com/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "West Model Management",
+        "website_url": "https://www.westmodelmanagement.com",
+        "application_url": "https://www.westmodelmanagement.com/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Platinum Promotions",
+        "website_url": "https://www.platinum-promotions.co.uk",
+        "application_url": "https://www.platinum-promotions.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Develop Model Management",
+        "website_url": "https://www.develop-models.com",
+        "application_url": "https://www.develop-models.com/apply",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Code 3 Models",
+        "website_url": "https://www.code3models.co.uk",
+        "application_url": "https://www.code3models.co.uk/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Perception Models",
+        "website_url": "https://www.perceptionmodels.com",
+        "application_url": "https://www.perceptionmodels.com/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Ulla Models",
+        "website_url": "https://www.ullamodels.com",
+        "application_url": "https://www.ullamodels.com/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Go-Models UK",
+        "website_url": "https://www.go-models.com",
+        "application_url": "https://www.go-models.com/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Freelancer Club",
+        "website_url": "https://www.freelancerclub.net",
+        "application_url": "https://www.freelancerclub.net/apply",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "All Talent Agency",
+        "website_url": "https://www.alltalentagency.co.uk",
+        "application_url": "https://www.alltalentagency.co.uk/apply",
+        "type": "Regional (North & Scotland)",
+        "synopsis": "Regional (North & Scotland) agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Emkai Models (94Models)",
+        "website_url": "https://www.94models.com",
+        "application_url": "https://www.94models.com/contact",
+        "type": "Micro, Boutique & Promotional",
+        "synopsis": "Micro, Boutique & Promotional agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "AS Agency",
+        "website_url": "https://www.asagency.co.uk",
+        "application_url": "https://www.asagency.co.uk/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    },
+    {
+        "name": "Fusion Management",
+        "website_url": "https://www.fusionmng.com",
+        "application_url": "https://www.fusionmng.com/apply",
+        "type": "Commercial & Niche Specialist",
+        "synopsis": "Commercial & Niche Specialist agency based in the UK.",
+        "location": "UK",
+        "status": "active"
+    }
+]
