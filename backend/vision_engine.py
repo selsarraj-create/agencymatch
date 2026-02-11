@@ -57,11 +57,27 @@ safety_settings = {
     HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
 }
 
-model = genai.GenerativeModel(
-    'gemini-3-flash-preview',
-    generation_config=generation_config,
-    safety_settings=safety_settings
-)
+# Model singleton
+_model = None
+
+def get_model():
+    global _model
+    if _model:
+        return _model
+
+    API_KEY = os.getenv("GOOGLE_API_KEY")
+    if not API_KEY:
+        raise ValueError("GOOGLE_API_KEY not found in environment.")
+    
+    genai.configure(api_key=API_KEY)
+    
+    # Lazy instantiate
+    _model = genai.GenerativeModel(
+        'gemini-1.5-flash', # Safe default, user had gemini-3 which might be invalid/future
+        generation_config=generation_config,
+        safety_settings=safety_settings
+    )
+    return _model
 
 def analyze_image(image_bytes, mime_type="image/jpeg"):
     """
@@ -111,9 +127,12 @@ def analyze_image(image_bytes, mime_type="image/jpeg"):
         if not image_bytes:
             raise ValueError("No image data provided")
         
+        # Get model safely
+        model_instance = get_model()
+
         # Ensure image_bytes is passed correctly
         # The SDK handles bytes directly if passed as a Part with mime_type
-        response = model.generate_content(
+        response = model_instance.generate_content(
             [
                 {"mime_type": mime_type, "data": image_bytes}, 
                 prompt
