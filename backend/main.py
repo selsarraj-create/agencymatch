@@ -255,9 +255,10 @@ async def generate_digitals(req: GenerateDigitalsRequest):
         if "error" in analysis_result:
              raise HTTPException(status_code=500, detail=f"Analysis failed: {analysis_result['error']}")
         
-        # Step B: Generate (Imagen 4 Ultra)
-        print("Starting Pass 2: Generation (Imagen 4 Ultra)...")
-        generated_image_obj = generate_model_portfolio(analysis_result)
+        # Step B: Generate (Imagen 4 Ultra - Strict Mode)
+        print("Starting Pass 2: Generation (Imagen 4 Ultra - Strict Mode)...")
+        # Now passing image_bytes for Img2Img locking
+        generated_image_obj = generate_model_portfolio(analysis_result, image_bytes)
         
         if not generated_image_obj:
              raise HTTPException(status_code=500, detail="Generation failed (Imagen returned None)")
