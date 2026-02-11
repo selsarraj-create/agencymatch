@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { User, Calendar, Smartphone, Save, Loader2, FileText, Mail, History as HistoryIcon, Plus, Minus } from 'lucide-react';
+import { User, Calendar, Smartphone, Save, Loader2, FileText, Mail, History as HistoryIcon, Plus, Minus, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import DeleteAccountZone from './DeleteAccountZone';
 import EmailChangeModal from './EmailChangeModal';
@@ -58,7 +58,8 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                         hips_cm: profile.hips_cm || '',
                         shoe_size_uk: profile.shoe_size_uk || '',
                         eye_color: profile.eye_color || '',
-                        hair_color: profile.hair_color || ''
+                        hair_color: profile.hair_color || '',
+                        generated_photos: profile.generated_photos || []
                     });
                 }
             } catch (error) {
@@ -415,6 +416,46 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                 </div>
 
             </form>
+
+            <div className="border-t border-gray-200 dark:border-white/10 my-8"></div>
+
+            {/* Generated Photos Section */}
+            <div>
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                    <Smartphone className="text-brand-start" /> Generated Photos
+                </h3>
+
+                {formData.generated_photos && formData.generated_photos.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        {formData.generated_photos.map((photoUrl, index) => (
+                            <div key={index} className="relative group aspect-[3/4] rounded-xl overflow-hidden bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+                                <img src={photoUrl} alt={`Generated Digital ${index + 1}`} className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                    <a
+                                        href={photoUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="bg-white text-black p-2 rounded-full hover:scale-110 transition-transform"
+                                        title="View Full Size"
+                                    >
+                                        <ExternalLink size={16} />
+                                    </a>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-8 bg-gray-50 dark:bg-white/5 rounded-2xl border border-dashed border-gray-200 dark:border-white/10 mb-8">
+                        <p className="text-text-secondary-light dark:text-text-secondary-dark text-sm">No generated photos yet.</p>
+                        <button
+                            onClick={() => window.location.href = '/photo-lab'}
+                            className="text-brand-start font-bold text-sm mt-2 hover:underline"
+                        >
+                            Go to Photo Lab
+                        </button>
+                    </div>
+                )}
+            </div>
 
             <div className="border-t border-gray-200 dark:border-white/10 my-8"></div>
 
