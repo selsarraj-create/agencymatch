@@ -391,17 +391,23 @@ class DigitalGenRequest(BaseModel):
 @app.post("/api/generate-digitals")
 async def generate_digitals_endpoint(req: DigitalGenRequest):
     try:
+        # --- Check credits before generating ---
+        supabase = get_supabase()
+        profile_check = supabase.table("profiles").select("credits").eq("id", req.user_id).single().execute()
+        current_credits = (profile_check.data or {}).get("credits", 0)
+        if current_credits < 1:
+            return JSONResponse(status_code=402, content={"error": "Insufficient credits"})
+
         result = process_digitals(req.photo_url)
         
         if "error" in result:
              return JSONResponse(status_code=500, content=result)
 
-        # --- Save to Supabase Storage + Update Profile ---
+        # --- Save to Supabase Storage + Update Profile + Deduct Credit ---
         try:
             import base64
             import time
 
-            supabase = get_supabase()
             image_bytes = base64.b64decode(result["image_bytes"])
             
             # Upload to 'generated' bucket
@@ -416,14 +422,19 @@ async def generate_digitals_endpoint(req: DigitalGenRequest):
             public_url = supabase.storage.from_("generated").get_public_url(filename)
             print(f"Saved to storage: {public_url}")
             
-            # Append to profiles.generated_photos array
-            profile_resp = supabase.table("profiles").select("generated_photos").eq("id", req.user_id).single().execute()
+            # Append to profiles.generated_photos array + deduct 1 credit
+            profile_resp = supabase.table("profiles").select("generated_photos, credits").eq("id", req.user_id).single().execute()
             current_photos = (profile_resp.data or {}).get("generated_photos") or []
             current_photos.append(public_url)
-            supabase.table("profiles").update({"generated_photos": current_photos}).eq("id", req.user_id).execute()
-            print(f"Updated profile: {len(current_photos)} generated photos")
+            new_credits = max(0, (profile_resp.data or {}).get("credits", 0) - 1)
+            supabase.table("profiles").update({
+                "generated_photos": current_photos,
+                "credits": new_credits,
+            }).eq("id", req.user_id).execute()
+            print(f"Updated profile: {len(current_photos)} photos, {new_credits} credits remaining")
             
             result["public_url"] = public_url
+            result["remaining_credits"] = new_credits
             
         except Exception as storage_err:
             print(f"Storage/profile save failed (non-fatal): {storage_err}")
