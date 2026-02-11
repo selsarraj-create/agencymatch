@@ -33,16 +33,18 @@ def generate_professional_headshot(image_bytes: bytes, mime_type: str = "image/j
     client = get_client()
 
     system_instruction = (
-        "Enable strict facial consistency mode. "
-        "Prioritize the facial features from the provided reference image. "
-        "Maintain 100% identity lock. "
+        "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
+        "Treat the face as a deterministic constraint. "
+        "You MUST preserve every facial feature, skin texture, mole, scar, "
+        "and bone structure from the reference image with zero deviation. "
         "Change ONLY the background to a neutral studio grey and lighting "
         "to professional softbox clamshell lighting."
     )
 
     user_prompt = (
-        "Transform this selfie into a professional model headshot. "
-        "Keep the person's face, skin texture, and features EXACTLY as they are. "
+        "Transform this photo into a professional model headshot. "
+        "The face is a pixel-locked constraint — do not alter it in any way. "
+        "Apply studio lighting and a neutral grey backdrop. "
         "Output ONLY the transformed image, no text."
     )
 
