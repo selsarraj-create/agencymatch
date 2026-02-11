@@ -235,12 +235,10 @@ async def generate_digitals(req: GenerateDigitalsRequest):
         new_balance = res.data['credits'] - 1
         database.supabase.table('profiles').update({'credits': new_balance}).eq('id', req.user_id).execute()
 
-        # 2. Real AI Generation - Tiered Pipeline
-        from services.vision_engine import analyze_user_appearance, generate_model_portfolio
+        # 2. One-Shot Professional Headshot (Gemini 3 Pro Image — Identity Lock)
+        from services.vision_engine import generate_professional_headshot
         
-        # Step A: Analyze (Gemini 3 Pro)
-        # We need to fetch the image bytes first or pass URL if supported. Engine supports bytes/path.
-        # Let's download the image to bytes.
+        # Download the user's selfie
         import requests
         try:
              img_resp = requests.get(req.photo_url)
@@ -249,22 +247,13 @@ async def generate_digitals(req: GenerateDigitalsRequest):
         except Exception as dl_err:
              raise HTTPException(status_code=400, detail=f"Failed to download image: {dl_err}")
 
-        # Analyze
-        print("Starting Pass 1: Analysis (Gemini 3 Pro)...")
-        analysis_result = analyze_user_appearance(image_bytes)
-        if "error" in analysis_result:
-             raise HTTPException(status_code=500, detail=f"Analysis failed: {analysis_result['error']}")
+        print("[PhotoLab] Generating professional headshot (single-model pipeline)…")
+        result = generate_professional_headshot(image_bytes)
         
-        # Step B: Generate (Imagen 4 Ultra - Strict Mode)
-        print("Starting Pass 2: Generation (Imagen 4 Ultra - Strict Mode)...")
-        # Now passing image_bytes for Img2Img locking
-        generated_image_obj = generate_model_portfolio(analysis_result, image_bytes)
-        
-        if not generated_image_obj:
-             raise HTTPException(status_code=500, detail="Generation failed (Imagen returned None)")
+        if "error" in result:
+             raise HTTPException(status_code=500, detail=f"Generation failed: {result['error']}")
              
-        # Get bytes from generated image object (likely .image.image_bytes)
-        image_bytes_out = generated_image_obj.image.image_bytes
+        image_bytes_out = result["image_bytes"]
         
         # 3. Save to Profile
         import base64
@@ -306,7 +295,7 @@ async def generate_digitals(req: GenerateDigitalsRequest):
         
         return {
             "status": "success",
-            "identity_constraints": analysis_result.get("physical_description", "Analyzed"),
+            "identity_constraints": "Identity-locked via gemini-3-pro-image-preview",
             "image_bytes": base64.b64encode(image_bytes_out).decode('utf-8'),
             "public_url": public_url,
             "credits": new_balance
