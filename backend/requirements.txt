@@ -11,3 +11,4 @@ supabase
 googlesearch-python
 beautifulsoup4
 requests
+typing-extensions

@@ -8,13 +8,15 @@ load_dotenv()
 
 # Fallback or load from environment
 # In a real scenario, ensure GOOGLE_API_KEY is in .env or passed here
+# Fallback or load from environment
+# In a real scenario, ensure GOOGLE_API_KEY is in .env or passed here
 API_KEY = os.getenv("GOOGLE_API_KEY")
-API_KEY = os.getenv("GOOGLE_API_KEY")
+
 if not API_KEY:
     # Allow running without key if just testing scaffolding, but warn.
-    print("WARNING: GOOGLE_API_KEY not found in environment.")
-
-genai.configure(api_key=API_KEY)
+    print("WARNING: GOOGLE_API_KEY not found in environment. Vision features will fail.")
+else:
+    genai.configure(api_key=API_KEY)
 
 # Define the response schema explicitly for Gemini 1.5 strict output
 class FaceGeometry(typing.TypedDict):
