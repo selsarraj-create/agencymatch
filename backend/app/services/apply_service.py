@@ -110,7 +110,7 @@ async def apply_to_agency(agency_url: str, user_data: Dict[str, Any]) -> Dict[st
         return {"status": "applied", "screenshot": screenshot_path}
 
     except Exception as e:
-        logger.error(f"Application failed: {e}")
+        logger.error(f"CRITICAL WORKER FAILURE: {str(e)}", exc_info=True)
         return {"status": "failed", "reason": str(e)}
         
     finally:

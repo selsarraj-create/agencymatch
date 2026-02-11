@@ -1,12 +1,18 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
 import uvicorn
 import shutil
 import os
+import logging
 from vision_engine import analyze_image
 import database
+from app.services.apply_service import apply_to_agency
+
+# Configure Logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -105,8 +111,35 @@ class BulkApplyRequest(BaseModel):
     user_id: str
     agency_ids: list[str]
 
+# ... existing code ...
+
+async def background_worker(user_id: str, agency_id: str, submission_id: int, user_data: dict, agency_url: str):
+    logger.info(f"🚀 WORKER STARTED processing application for {agency_id}...")
+    try:
+        # Call the actual service
+        result = await apply_to_agency(agency_url, user_data)
+        
+        # Update DB with result
+        status = 'success' if result['status'] == 'applied' else 'failed'
+        # Update agency_submissions table
+        if database.supabase:
+            database.supabase.table('agency_submissions').update({
+                'status': status,
+                'proof_screenshot_url': result.get('screenshot')
+            }).eq('id', submission_id).execute()
+            
+        logger.info(f"Worker finished for {agency_id}: {status}")
+
+    except Exception as e:
+        logger.error(f"CRITICAL WORKER FAILURE: {str(e)}", exc_info=True)
+        # Try to update DB with failure
+        if database.supabase:
+             database.supabase.table('agency_submissions').update({
+                'status': 'failed'
+            }).eq('id', submission_id).execute()
+
 @app.post("/api/apply-bulk")
-def apply_bulk(req: BulkApplyRequest):
+def apply_bulk(req: BulkApplyRequest, background_tasks: BackgroundTasks):
     if not database.supabase:
         raise HTTPException(status_code=500, detail="Database not initialized")
     
@@ -136,26 +169,39 @@ def apply_bulk(req: BulkApplyRequest):
             'description': f'Applied to {count} agencies'
         }).execute()
         
-        # Create Submissions (Mock)
+        # Fetch user data for application (Mocking for now, ideally fetch from profile)
+        user_data = {
+            "name": "Jane Doe", # Placeholder, ideally fetch from DB
+            "email": "jane@example.com",
+            # ...
+        }
+
+        # Create Submissions and trigger background tasks
         submissions = []
         for agency_id in req.agency_ids:
-            submissions.append({
+            # Insert 'processing' record
+            data = {
                 'user_id': req.user_id,
-                'status': 'success',
-                'agency_url': f"Agency ID: {agency_id}",
-                'proof_screenshot_url': "https://placehold.co/600x400/png?text=Application+Sent"
-            })
-        
-        if submissions:
-             database.supabase.table('agency_submissions').insert(submissions).execute()
+                'status': 'processing',
+                'agency_url': f"Agency ID: {agency_id}", # Ideally fetch real URL
+                'proof_screenshot_url': None
+            }
+            res = database.supabase.table('agency_submissions').insert(data).execute()
+            if res.data:
+                sub_id = res.data[0]['id']
+                # Add to background tasks
+                # Note: We need the real agency URL. For now using placeholder.
+                # In real app, we should fetch agency details.
+                agency_url = f"https://example.com/agency/{agency_id}" 
+                background_tasks.add_task(background_worker, req.user_id, agency_id, sub_id, user_data, agency_url)
              
         return {
             "status": "success",
-            "message": f"Successfully applied to {count} agencies!",
+            "message": f"Started applying to {count} agencies!",
             "new_balance": new_balance
         }
     except Exception as e:
-        print(f"Bulk Apply error: {e}")
+        logger.error(f"Bulk Apply Sync Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
