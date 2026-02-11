@@ -176,24 +176,38 @@ def apply_bulk(req: BulkApplyRequest, background_tasks: BackgroundTasks):
             # ...
         }
 
+        # Fetch agency details
+        agency_res = database.supabase.table('agencies').select('id, application_url').in_('id', req.agency_ids).execute()
+        agency_map = {item['id']: item.get('application_url') for item in agency_res.data} if agency_res.data else {}
+
         # Create Submissions and trigger background tasks
         submissions = []
         for agency_id in req.agency_ids:
+            # Get real URL
+            real_app_url = agency_map.get(agency_id)
+            
             # Insert 'processing' record
             data = {
                 'user_id': req.user_id,
                 'status': 'processing',
-                'agency_url': f"Agency ID: {agency_id}", # Ideally fetch real URL
+                'agency_url': real_app_url if real_app_url else f"Missing URL for {agency_id}",
                 'proof_screenshot_url': None
             }
             res = database.supabase.table('agency_submissions').insert(data).execute()
+            
             if res.data:
                 sub_id = res.data[0]['id']
-                # Add to background tasks
-                # Note: We need the real agency URL. For now using placeholder.
-                # In real app, we should fetch agency details.
-                agency_url = f"https://example.com/agency/{agency_id}" 
-                background_tasks.add_task(background_worker, req.user_id, agency_id, sub_id, user_data, agency_url)
+                
+                if real_app_url:
+                    # Add to background tasks with REAL URL
+                    background_tasks.add_task(background_worker, req.user_id, agency_id, sub_id, user_data, real_app_url)
+                else:
+                    # Mark as failed immediately if no URL
+                    logger.error(f"Agency {agency_id} has no application_url")
+                    database.supabase.table('agency_submissions').update({
+                        'status': 'failed',
+                        'proof_screenshot_url': 'Error: Missing application URL'
+                    }).eq('id', sub_id).execute()
              
         return {
             "status": "success",
