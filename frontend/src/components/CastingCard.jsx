@@ -59,6 +59,7 @@ const CastingCard = ({ casting, userProfile }) => {
         }
     };
 
+
     // Overall Fit
     const isGoodMatch = heightMatch && genderMatch;
 

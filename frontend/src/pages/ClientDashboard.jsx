@@ -131,20 +131,39 @@ const ClientDashboard = () => {
         setApplying(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
-            const response = await axios.post(`${API_URL}/apply-bulk`, { user_id: user.id, agency_ids: Array.from(selectedAgencies) });
-            if (response.data.status === 'success') {
-                alert(response.data.message);
-                setCredits(response.data.new_balance);
+
+            // Call Backend with Production URL
+            // const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
+            const response = await fetch('https://agencymatch-production.up.railway.app/api/apply-bulk', { // Direct to Railway
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: user.id,
+                    agency_ids: Array.from(selectedAgencies)
+                })
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                alert(data.message);
+                setCredits(data.new_balance);
                 setSelectedAgencies(new Set());
+            } else {
+                throw new Error(data.message || "Failed");
             }
         } catch (error) {
             console.error("Apply Failed:", error);
-            alert(error.response?.data?.error || "Application failed");
+            alert(error.message || "Application failed");
         } finally {
             setApplying(false);
         }
     };
+
 
     const StatusIcon = ({ status }) => {
         switch (status) {

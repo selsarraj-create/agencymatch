@@ -35,7 +35,7 @@ class Lead(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "Model Suitability Scanner API is running"}
+    return {"status": "online", "message": "AgencyMatch Backend is Running"}
 
 @app.post("/analyze")
 async def analyze_endpoint(file: UploadFile = File(...)):
