@@ -1,0 +1,305 @@
+Scanning 50 agencies...
+Found: https://www.thehivemanagement.com -> https://www.thehivemanagement.com/models/new-faces/
+Found: https://www.presentmodelmanagement.com -> https://www.presentmodelmanagement.com
+Found: https://www.boundary-london.com -> https://www.boundary-london.com
+Found: https://www.brothermodels.com -> https://www.brothermodels.com/become/
+Found: https://www.rmg-models.co.uk -> https://www.rmg-models.co.uk/register/model/
+Found: https://www.atlantismodellingagency.co.uk -> models/new-faces/women
+Found: https://www.evolvemodel.com -> https://www.evolvemodel.com/become-a-model/
+Found: https://www.flairtalent.com -> https://www.flairtalent.com/apply/
+Found: https://www.bigmustard.co.uk -> https://www.bigmustard.co.uk/apply-model-agency-based-in-bristol-uk/
+Found: https://www.modelmode.co.uk -> https://modelmode.co.uk/join-model-mode/
+Found: https://www.vauhaus.co.uk -> https://www.vauhaus.co.uk/about
+Found: https://www.modelsdirect.com -> #
+Found: https://www.maverickmodels.co.uk -> https://maverickmodels.co.uk/model-application/
+Found: https://www.coloursagency.com -> https://www.coloursagency.com/apply
+Found: https://www.modelteam.co.uk -> https://modelteam.co.uk/apply-model-team-modelling-modeling-scotland-glasgow-agency-application/
+Found: https://www.alltalentagency.co.uk -> https://www.alltalentagency.co.uk/apply
+Found: https://www.tartanmodels.co.uk -> https://www.tartanmodels.co.uk/apply
+Found: https://www.d1models.com -> https://www.d1models.com
+Found: https://www.oxygenmodels.com -> https://www.oxygenmodels.com/apply
+Found: https://www.establishedmodels.com -> https://www.establishedmodels.com/become/
+Found: https://www.duomodelmgmt.com -> https://www.duomodelmgmt.com/become-a-model/
+Found: https://www.bridgeagency.com -> https://www.bridgeagency.com/apply
+Found: https://www.1114agency.com -> https://www.1114agency.com
+Found: https://www.perceptionmodels.com -> https://www.perceptionmodels.com/contact
+Found: https://www.muumaa.com -> https://www.muumaa.com
+Found: https://www.anonmodels.com -> https://www.anonmodels.com/newfaces
+Found: https://www.thecrowdmodels.com -> https://www.thecrowdmodels.com/new-faces/
+Found: https://www.wefolk.com -> https://www.wefolk.com/contact
+Found: https://www.littleallstars.co.uk -> https://www.littleallstars.co.uk/about-little-allstars/
+Found: https://www.realpeople.co.uk -> https://www.realpeople.co.uk/about-us
+Found: https://www.onemanagement.com -> https://www.onemanagement.com/submissions/application
+Found: https://www.3mmodels.com -> https://www.3mmodels.com/become-a-model
+Found: https://www.mamimanagement.com -> https://www.mamimanagement.com
+Found: https://www.storymodelmanagement.com -> https://www.storymodelmanagement.com/women-1
+Found: https://www.namedmodels.com -> https://www.namedmodels.com/contact/
+Found: https://www.titaniummanagement.com -> mailto:contact@titaniummanagement.com
+Found: https://www.wearejem.com -> https://www.wearejem.com
+Found: https://www.scoutingfirm.com -> https://www.scoutingfirm.com
+Found: https://www.mintcasting.tv -> https://www.mintcasting.tv
+Found: https://www.nbmodelagency.com -> https://www.nbmodelagency.com
+Found: https://www.revoltmodelagency.com -> https://www.revoltmodelagency.com
+Found: https://www.xdirectn.agency -> https://www.xdirectn.agency
+Found: https://www.swaymodels.com -> https://www.swaymodels.com/development
+Found: https://www.perspectivemanagement.co.uk -> https://www.perspectivemanagement.co.uk
+Found: https://www.supamodelmanagement.com -> https://www.supamodelmanagement.com
+Found: https://www.lenisagency.com -> https://www.lenisagency.com
+Found: https://www.amckmodels.com -> https://www.amckmodels.com
+Found: https://www.katemossagency.com -> https://www.katemossagency.com
+Found: https://www.nextmanagement.com -> https://www.nextmanagement.com
+Found: https://www.kidslondonltd.com -> https://www.kidslondonltd.com
+
+--- JSON OUTPUT ---
+[
+  {
+    "name": "",
+    "website": "https://www.thehivemanagement.com",
+    "application_url": "https://www.thehivemanagement.com/models/new-faces/"
+  },
+  {
+    "name": "",
+    "website": "https://www.presentmodelmanagement.com",
+    "application_url": "https://www.presentmodelmanagement.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.boundary-london.com",
+    "application_url": "https://www.boundary-london.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.brothermodels.com",
+    "application_url": "https://www.brothermodels.com/become/"
+  },
+  {
+    "name": "",
+    "website": "https://www.rmg-models.co.uk",
+    "application_url": "https://www.rmg-models.co.uk/register/model/"
+  },
+  {
+    "name": "",
+    "website": "https://www.atlantismodellingagency.co.uk",
+    "application_url": "models/new-faces/women"
+  },
+  {
+    "name": "",
+    "website": "https://www.evolvemodel.com",
+    "application_url": "https://www.evolvemodel.com/become-a-model/"
+  },
+  {
+    "name": "",
+    "website": "https://www.flairtalent.com",
+    "application_url": "https://www.flairtalent.com/apply/"
+  },
+  {
+    "name": "",
+    "website": "https://www.bigmustard.co.uk",
+    "application_url": "https://www.bigmustard.co.uk/apply-model-agency-based-in-bristol-uk/"
+  },
+  {
+    "name": "",
+    "website": "https://www.modelmode.co.uk",
+    "application_url": "https://modelmode.co.uk/join-model-mode/"
+  },
+  {
+    "name": "",
+    "website": "https://www.vauhaus.co.uk",
+    "application_url": "https://www.vauhaus.co.uk/about"
+  },
+  {
+    "name": "",
+    "website": "https://www.modelsdirect.com",
+    "application_url": "#"
+  },
+  {
+    "name": "",
+    "website": "https://www.maverickmodels.co.uk",
+    "application_url": "https://maverickmodels.co.uk/model-application/"
+  },
+  {
+    "name": "",
+    "website": "https://www.coloursagency.com",
+    "application_url": "https://www.coloursagency.com/apply"
+  },
+  {
+    "name": "",
+    "website": "https://www.modelteam.co.uk",
+    "application_url": "https://modelteam.co.uk/apply-model-team-modelling-modeling-scotland-glasgow-agency-application/"
+  },
+  {
+    "name": "",
+    "website": "https://www.alltalentagency.co.uk",
+    "application_url": "https://www.alltalentagency.co.uk/apply"
+  },
+  {
+    "name": "",
+    "website": "https://www.tartanmodels.co.uk",
+    "application_url": "https://www.tartanmodels.co.uk/apply"
+  },
+  {
+    "name": "",
+    "website": "https://www.d1models.com",
+    "application_url": "https://www.d1models.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.oxygenmodels.com",
+    "application_url": "https://www.oxygenmodels.com/apply"
+  },
+  {
+    "name": "",
+    "website": "https://www.establishedmodels.com",
+    "application_url": "https://www.establishedmodels.com/become/"
+  },
+  {
+    "name": "",
+    "website": "https://www.duomodelmgmt.com",
+    "application_url": "https://www.duomodelmgmt.com/become-a-model/"
+  },
+  {
+    "name": "",
+    "website": "https://www.bridgeagency.com",
+    "application_url": "https://www.bridgeagency.com/apply"
+  },
+  {
+    "name": "",
+    "website": "https://www.1114agency.com",
+    "application_url": "https://www.1114agency.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.perceptionmodels.com",
+    "application_url": "https://www.perceptionmodels.com/contact"
+  },
+  {
+    "name": "",
+    "website": "https://www.muumaa.com",
+    "application_url": "https://www.muumaa.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.anonmodels.com",
+    "application_url": "https://www.anonmodels.com/newfaces"
+  },
+  {
+    "name": "",
+    "website": "https://www.thecrowdmodels.com",
+    "application_url": "https://www.thecrowdmodels.com/new-faces/"
+  },
+  {
+    "name": "",
+    "website": "https://www.wefolk.com",
+    "application_url": "https://www.wefolk.com/contact"
+  },
+  {
+    "name": "",
+    "website": "https://www.littleallstars.co.uk",
+    "application_url": "https://www.littleallstars.co.uk/about-little-allstars/"
+  },
+  {
+    "name": "",
+    "website": "https://www.realpeople.co.uk",
+    "application_url": "https://www.realpeople.co.uk/about-us"
+  },
+  {
+    "name": "",
+    "website": "https://www.onemanagement.com",
+    "application_url": "https://www.onemanagement.com/submissions/application"
+  },
+  {
+    "name": "",
+    "website": "https://www.3mmodels.com",
+    "application_url": "https://www.3mmodels.com/become-a-model"
+  },
+  {
+    "name": "",
+    "website": "https://www.mamimanagement.com",
+    "application_url": "https://www.mamimanagement.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.storymodelmanagement.com",
+    "application_url": "https://www.storymodelmanagement.com/women-1"
+  },
+  {
+    "name": "",
+    "website": "https://www.namedmodels.com",
+    "application_url": "https://www.namedmodels.com/contact/"
+  },
+  {
+    "name": "",
+    "website": "https://www.titaniummanagement.com",
+    "application_url": "mailto:contact@titaniummanagement.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.wearejem.com",
+    "application_url": "https://www.wearejem.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.scoutingfirm.com",
+    "application_url": "https://www.scoutingfirm.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.mintcasting.tv",
+    "application_url": "https://www.mintcasting.tv"
+  },
+  {
+    "name": "",
+    "website": "https://www.nbmodelagency.com",
+    "application_url": "https://www.nbmodelagency.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.revoltmodelagency.com",
+    "application_url": "https://www.revoltmodelagency.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.xdirectn.agency",
+    "application_url": "https://www.xdirectn.agency"
+  },
+  {
+    "name": "",
+    "website": "https://www.swaymodels.com",
+    "application_url": "https://www.swaymodels.com/development"
+  },
+  {
+    "name": "",
+    "website": "https://www.perspectivemanagement.co.uk",
+    "application_url": "https://www.perspectivemanagement.co.uk"
+  },
+  {
+    "name": "",
+    "website": "https://www.supamodelmanagement.com",
+    "application_url": "https://www.supamodelmanagement.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.lenisagency.com",
+    "application_url": "https://www.lenisagency.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.amckmodels.com",
+    "application_url": "https://www.amckmodels.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.katemossagency.com",
+    "application_url": "https://www.katemossagency.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.nextmanagement.com",
+    "application_url": "https://www.nextmanagement.com"
+  },
+  {
+    "name": "",
+    "website": "https://www.kidslondonltd.com",
+    "application_url": "https://www.kidslondonltd.com"
+  }
+]

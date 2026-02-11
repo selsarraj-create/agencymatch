@@ -48,6 +48,7 @@ def get_supabase() -> Client:
     key = (
         os.getenv('BACKEND_SERVICE_KEY') or
         os.getenv('SUPABASE_SERVICE_ROLE_KEY') or 
+        os.getenv('VITE_SUPABASE_SERVICE_ROLE_KEY') or
         os.getenv('VITE_SUPABASE_ANON_KEY') or 
         os.getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY') or 
         os.getenv('SUPABASE_ANON_KEY') or 

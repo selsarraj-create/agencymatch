@@ -1,0 +1,254 @@
+Scraping 25 agencies (FAST MODE)...
+Visiting Present Model Management...
+Visiting Boundary London...
+Visiting 11:14 Agency...
+Visiting Muumaa...
+Visiting JEM Models...
+Skipping JEM Models: Page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://www.wearejem.com/
+Call log:
+  - navigating to "https://www.wearejem.com/", waiting until "domcontentloaded"
+
+Visiting The Scouting Firm...
+Skipping The Scouting Firm: Page.goto: Navigation to "https://www.scoutingfirm.com/" is interrupted by another navigation to "chrome-error://chromewebdata/"
+Call log:
+  - navigating to "https://www.scoutingfirm.com/", waiting until "domcontentloaded"
+
+Visiting Mint Casting...
+Skipping Mint Casting: Page.goto: Navigation to "https://www.mintcasting.tv/" is interrupted by another navigation to "https://www.scoutingfirm.com/"
+Call log:
+  - navigating to "https://www.mintcasting.tv/", waiting until "domcontentloaded"
+
+Visiting NB Model Agency...
+Skipping NB Model Agency: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.nbmodelagency.com/
+Call log:
+  - navigating to "https://www.nbmodelagency.com/", waiting until "domcontentloaded"
+
+Visiting Revolt Model Agency...
+Skipping Revolt Model Agency: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.revoltmodelagency.com/
+Call log:
+  - navigating to "https://www.revoltmodelagency.com/", waiting until "domcontentloaded"
+
+Visiting XDIRECTN...
+Visiting Perspective Management...
+Visiting Supa Model Management...
+Skipping Supa Model Management: Page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://www.supamodelmanagement.com/
+Call log:
+  - navigating to "https://www.supamodelmanagement.com/", waiting until "domcontentloaded"
+
+Visiting Leni's Agency...
+Skipping Leni's Agency: Page.goto: Navigation to "https://www.lenisagency.com/" is interrupted by another navigation to "chrome-error://chromewebdata/"
+Call log:
+  - navigating to "https://www.lenisagency.com/", waiting until "domcontentloaded"
+
+Visiting AMCK Models...
+Skipping AMCK Models: Page.goto: net::ERR_CERT_COMMON_NAME_INVALID at https://www.amckmodels.com/
+Call log:
+  - navigating to "https://www.amckmodels.com/", waiting until "domcontentloaded"
+
+Visiting Kate Moss Agency...
+Skipping Kate Moss Agency: Page.goto: Navigation to "https://www.katemossagency.com/" is interrupted by another navigation to "chrome-error://chromewebdata/"
+Call log:
+  - navigating to "https://www.katemossagency.com/", waiting until "domcontentloaded"
+
+Visiting Next Management London...
+Skipping Next Management London: Page.goto: Navigation to "https://www.nextmanagement.com/" is interrupted by another navigation to "https://www.katemossagency.com/"
+Call log:
+  - navigating to "https://www.nextmanagement.com/", waiting until "domcontentloaded"
+
+Visiting Kids London...
+Skipping Kids London: Page.goto: Navigation to "https://www.kidslondonltd.com/" is interrupted by another navigation to "https://nextmanagement.com/"
+Call log:
+  - navigating to "https://www.kidslondonltd.com/", waiting until "domcontentloaded"
+
+Visiting D1 Models...
+Skipping D1 Models: Page.goto: Navigation to "https://www.d1models.com/" is interrupted by another navigation to "https://kidslondonltd.com/"
+Call log:
+  - navigating to "https://www.d1models.com/", waiting until "domcontentloaded"
+
+Visiting Mami Management...
+Skipping Mami Management: Page.goto: Navigation to "https://www.mamimanagement.com/" is interrupted by another navigation to "https://www.d1models.com/"
+Call log:
+  - navigating to "https://www.mamimanagement.com/", waiting until "domcontentloaded"
+
+Visiting The Hive Management...
+Skipping The Hive Management: Page.goto: Navigation to "https://www.thehivemanagement.com/" is interrupted by another navigation to "https://www.mamimanagement.com/"
+Call log:
+  - navigating to "https://www.thehivemanagement.com/", waiting until "domcontentloaded"
+
+Visiting Brother Models...
+Skipping Brother Models: Page.goto: Navigation to "https://www.brothermodels.com/" is interrupted by another navigation to "https://www.thehivemanagement.com/"
+Call log:
+  - navigating to "https://www.brothermodels.com/", waiting until "domcontentloaded"
+
+Visiting RMG Models...
+Skipping RMG Models: Page.goto: Navigation to "https://www.rmg-models.co.uk/" is interrupted by another navigation to "https://www.brothermodels.com/"
+Call log:
+  - navigating to "https://www.rmg-models.co.uk/", waiting until "domcontentloaded"
+
+Visiting Atlantis Modelling...
+Skipping Atlantis Modelling: Page.goto: Navigation to "https://www.atlantismodellingagency.co.uk/" is interrupted by another navigation to "https://www.rmg-models.co.uk/"
+Call log:
+  - navigating to "https://www.atlantismodellingagency.co.uk/", waiting until "domcontentloaded"
+
+Visiting Evolve Model...
+Skipping Evolve Model: Page.goto: Navigation to "https://www.evolvemodel.com/" is interrupted by another navigation to "https://www.atlantismodellingagency.co.uk/"
+Call log:
+  - navigating to "https://www.evolvemodel.com/", waiting until "domcontentloaded"
+
+Visiting Flair Talent...
+Skipping Flair Talent: Page.goto: Navigation to "https://www.flairtalent.com/" is interrupted by another navigation to "https://www.evolvemodel.com/"
+Call log:
+  - navigating to "https://www.flairtalent.com/", waiting until "domcontentloaded"
+
+[
+  {
+    "name": "Present Model Management",
+    "website": "https://www.presentmodelmanagement.com",
+    "application_url": "https://www.presentmodelmanagement.com",
+    "synopsis": "A UK-based modeling agency."
+  },
+  {
+    "name": "Boundary London",
+    "website": "https://www.boundary-london.com",
+    "application_url": "https://www.boundary-london.com/become-a-model/",
+    "synopsis": "A UK-based modeling agency."
+  },
+  {
+    "name": "11:14 Agency",
+    "website": "https://www.1114agency.com",
+    "application_url": "https://www.1114agency.com",
+    "synopsis": "A UK-based modeling agency."
+  },
+  {
+    "name": "Muumaa",
+    "website": "https://www.muumaa.com",
+    "application_url": "https://www.muumaa.com",
+    "synopsis": "A UK-based modeling agency."
+  },
+  {
+    "name": "JEM Models",
+    "website": "https://www.wearejem.com",
+    "application_url": "https://www.wearejem.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "The Scouting Firm",
+    "website": "https://www.scoutingfirm.com",
+    "application_url": "https://www.scoutingfirm.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "Mint Casting",
+    "website": "https://www.mintcasting.tv",
+    "application_url": "https://www.mintcasting.tv",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "NB Model Agency",
+    "website": "https://www.nbmodelagency.com",
+    "application_url": "https://www.nbmodelagency.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "Revolt Model Agency",
+    "website": "https://www.revoltmodelagency.com",
+    "application_url": "https://www.revoltmodelagency.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "XDIRECTN",
+    "website": "https://www.xdirectn.agency",
+    "application_url": "https://www.xdirectn.agency",
+    "synopsis": "A world-class management and casting agency championing diverse talents across fashion, digital media and broadcast."
+  },
+  {
+    "name": "Perspective Management",
+    "website": "https://www.perspectivemanagement.co.uk",
+    "application_url": "https://www.perspectivemanagement.co.uk",
+    "synopsis": "Prolific manager Richard Habberley founded London based agency Perspective Management in 2022. Described as the super-agent to the supermodels his portfolio has contained nearly every superstar in the modelling sphere over the last 35 years"
+  },
+  {
+    "name": "Supa Model Management",
+    "website": "https://www.supamodelmanagement.com",
+    "application_url": "https://www.supamodelmanagement.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "Leni's Agency",
+    "website": "https://www.lenisagency.com",
+    "application_url": "https://www.lenisagency.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "AMCK Models",
+    "website": "https://www.amckmodels.com",
+    "application_url": "https://www.amckmodels.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "Kate Moss Agency",
+    "website": "https://www.katemossagency.com",
+    "application_url": "https://www.katemossagency.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "Next Management London",
+    "website": "https://www.nextmanagement.com",
+    "application_url": "https://www.nextmanagement.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "Kids London",
+    "website": "https://www.kidslondonltd.com",
+    "application_url": "https://www.kidslondonltd.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "D1 Models",
+    "website": "https://www.d1models.com",
+    "application_url": "https://www.d1models.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "Mami Management",
+    "website": "https://www.mamimanagement.com",
+    "application_url": "https://www.mamimanagement.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "The Hive Management",
+    "website": "https://www.thehivemanagement.com",
+    "application_url": "https://www.thehivemanagement.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "Brother Models",
+    "website": "https://www.brothermodels.com",
+    "application_url": "https://www.brothermodels.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "RMG Models",
+    "website": "https://www.rmg-models.co.uk",
+    "application_url": "https://www.rmg-models.co.uk",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "Atlantis Modelling",
+    "website": "https://www.atlantismodellingagency.co.uk",
+    "application_url": "https://www.atlantismodellingagency.co.uk",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "Evolve Model",
+    "website": "https://www.evolvemodel.com",
+    "application_url": "https://www.evolvemodel.com",
+    "synopsis": "UK agency."
+  },
+  {
+    "name": "Flair Talent",
+    "website": "https://www.flairtalent.com",
+    "application_url": "https://www.flairtalent.com",
+    "synopsis": "UK agency."
+  }
+]
