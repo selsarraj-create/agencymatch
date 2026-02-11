@@ -42,9 +42,13 @@ def generate_professional_headshot(image_bytes: bytes, mime_type: str = "image/j
     )
 
     user_prompt = (
-        "Transform this photo into a professional model headshot. "
-        "The face is a pixel-locked constraint — do not alter it in any way. "
-        "Apply studio lighting and a neutral grey backdrop. "
+        "INSTRUCTION: PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
+        "Maintain 100% facial structure. "
+        "TASK: Remove all accessories including headphones, earrings, and necklaces. "
+        "Change current clothing to a plain, well-fitted white t-shirt. "
+        "Replace background with a neutral studio grey wall. "
+        "Apply soft, natural-style studio lighting. "
+        "Output aspect ratio must be 3:4 portrait format. "
         "Output ONLY the transformed image, no text."
     )
 

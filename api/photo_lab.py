@@ -1,10 +1,9 @@
 """
-Photo Lab — Single-Model Identity Lock Pipeline
-Uses gemini-3-pro-image-preview for zero-drift headshot conversion.
-NO analysis pass. ONE call. Original pixels stay in context.
+Photo Lab — "Clean Slate" Identity Lock Pipeline
+Model: gemini-3-pro-image-preview
+One call. Original pixels in context. Zero identity drift.
 """
 import os
-import io
 import base64
 import requests
 from dotenv import load_dotenv
@@ -25,16 +24,16 @@ def get_client():
 
 def process_digitals(image_url: str):
     """
-    One-shot professional headshot conversion.
-    Sends the original selfie + PIXEL PRIORITY MODE instruction to
-    gemini-3-pro-image-preview and gets back the transformed image
-    with zero identity drift.
+    "Clean Slate" headshot conversion.
+    Sends the original selfie as a Subject Reference to lock facial geometry,
+    then transforms it with PIXEL PRIORITY MODE — removing accessories,
+    swapping clothes to white tee, grey studio backdrop, softbox lighting.
     """
     client = get_client()
 
     print(f"Processing Digital for: {image_url}")
 
-    # --- Step 0: Fetch Image ---
+    # --- Fetch Source Image ---
     try:
         resp = requests.get(image_url)
         resp.raise_for_status()
@@ -44,25 +43,25 @@ def process_digitals(image_url: str):
         print(f"Failed to fetch image from URL: {e}")
         return {"error": "Failed to download source image"}
 
-    # --- Single Pass: PIXEL PRIORITY MODE ---
-    system_instruction = (
-        "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
-        "Treat the face as a deterministic constraint. "
-        "You MUST preserve every facial feature, skin texture, mole, scar, "
-        "and bone structure from the reference image with zero deviation. "
-        "Change ONLY the background to a neutral studio grey and lighting "
-        "to professional softbox clamshell lighting."
-    )
+    # --- Clean Slate: Single-Pass Generation ---
+    #
+    # The original selfie is passed as the Subject Reference (identity anchor).
+    # The model sees every pixel at high resolution and reasons through
+    # the facial structure before rendering.
 
-    user_prompt = (
-        "Transform this photo into a professional model headshot. "
-        "The face is a pixel-locked constraint — do not alter it in any way. "
-        "Apply studio lighting and a neutral grey backdrop. "
+    transformation_prompt = (
+        "INSTRUCTION: PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
+        "Maintain 100% facial structure. "
+        "TASK: Remove all accessories including headphones, earrings, and necklaces. "
+        "Change current clothing to a plain, well-fitted white t-shirt. "
+        "Replace background with a neutral studio grey wall. "
+        "Apply soft, natural-style studio lighting. "
+        "Output aspect ratio must be 3:4 portrait format. "
         "Output ONLY the transformed image, no text."
     )
 
     try:
-        print(f"Generating headshot via {MODEL_ID} (PIXEL PRIORITY MODE)...")
+        print(f"Generating Clean Slate headshot via {MODEL_ID}...")
         response = client.models.generate_content(
             model=MODEL_ID,
             contents=[
@@ -70,15 +69,14 @@ def process_digitals(image_url: str):
                     role="user",
                     parts=[
                         types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
-                        types.Part.from_text(text=user_prompt),
+                        types.Part.from_text(text=transformation_prompt),
                     ],
                 )
             ],
             config=types.GenerateContentConfig(
-                system_instruction=system_instruction,
                 response_modalities=["IMAGE"],
                 thinking_config=types.ThinkingConfig(
-                    thinkingBudget=8192,
+                    thinkingBudget=8192,  # Equivalent to ThinkingLevel.HIGH
                 ),
             ),
         )
@@ -88,19 +86,18 @@ def process_digitals(image_url: str):
             for part in response.candidates[0].content.parts:
                 if part.inline_data and part.inline_data.mime_type.startswith("image/"):
                     out_bytes = part.inline_data.data
-                    print(f"Success — {len(out_bytes):,} bytes generated")
+                    print(f"Clean Slate success — {len(out_bytes):,} bytes generated")
                     return {
                         "status": "success",
-                        "identity_constraints": "Identity-locked via PIXEL PRIORITY MODE",
+                        "identity_constraints": "Identity-locked via PIXEL PRIORITY MODE (Clean Slate)",
                         "image_bytes": base64.b64encode(out_bytes).decode("utf-8"),
                         "mime_type": part.inline_data.mime_type,
                     }
 
-        # Model returned text instead of image
         text_out = response.text if response.text else "No content"
         print(f"Model returned text instead of image: {text_out[:200]}")
         return {"error": f"Model returned text: {text_out[:100]}..."}
 
     except Exception as e:
-        print(f"Generation failed: {e}")
+        print(f"Clean Slate generation failed: {e}")
         return {"error": f"Generation failed: {str(e)}"}
