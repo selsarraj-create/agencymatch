@@ -8,16 +8,29 @@ load_dotenv()
 
 # Initialize Supabase Client
 # Initialize Supabase Client
+# Initialize Supabase Client
 url: str = os.environ.get("SUPABASE_URL") or os.environ.get("VITE_SUPABASE_URL")
 key: str = (os.environ.get("SUPABASE_SERVICE_KEY") or 
             os.environ.get("SUPABASE_KEY") or 
-            os.environ.get("VITE_SUPABASE_SERVICE_ROLE_KEY"))
+            os.environ.get("VITE_SUPABASE_SERVICE_ROLE_KEY") or 
+            os.environ.get("VITE_SUPABASE_ANON_KEY"))
+
+if not url:
+    print("CRITICAL ERROR: Supabase URL not found in env vars (checked SUPABASE_URL, VITE_SUPABASE_URL)")
+if not key:
+    print("CRITICAL ERROR: Supabase Key not found in env vars (checked SUPABASE_SERVICE_KEY, SUPABASE_KEY, VITE_SUPABASE_SERVICE_ROLE_KEY, VITE_SUPABASE_ANON_KEY)")
 
 if not url or not key:
-    print("WARNING: SUPABASE_URL or SUPABASE_KEY (or VITE_ equivalents) not found in environment.")
+    print("WARNING: Database not initialized due to missing config.")
     supabase = None
 else:
-    supabase: Client = create_client(url, key)
+    try:
+        print(f"Initializing Supabase with URL: {url} and Key length: {len(key)}")
+        supabase: Client = create_client(url, key)
+        print("Supabase client initialized successfully.")
+    except Exception as e:
+        print(f"Failed to initialize Supabase client: {e}")
+        supabase = None
 
 def init_db():
     # Supabase is managed externally, no need to create tables here usually.
