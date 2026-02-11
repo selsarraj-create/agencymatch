@@ -6,7 +6,8 @@ import uvicorn
 import shutil
 import os
 import logging
-from vision_engine import analyze_image
+import datetime
+from services.vision_engine import analyze_image
 import database
 from app.services.apply_service import apply_to_agency
 
@@ -234,51 +235,67 @@ async def generate_digitals(req: GenerateDigitalsRequest):
         new_balance = res.data['credits'] - 1
         database.supabase.table('profiles').update({'credits': new_balance}).eq('id', req.user_id).execute()
 
-        # 2. Mock Generation (Replace with real AI call later)
-        # For now, we'll just return the input image modified or a placeholder
-        # In a real scenario, we would download req.photo_url, process it, and upload to 'generated' bucket
+        # 2. Real AI Generation - Tiered Pipeline
+        from services.vision_engine import analyze_user_appearance, generate_model_portfolio
         
-        # MOCK RESULT
-        import base64
+        # Step A: Analyze (Gemini 3 Pro)
+        # We need to fetch the image bytes first or pass URL if supported. Engine supports bytes/path.
+        # Let's download the image to bytes.
         import requests
-        
-        # Determine output URL (Mocking a generated image)
-        # Using a placehold.co image for demo purposes if we can't process
-        # But let's try to actually fetch the input and return it as base64 to simulate processing
-        
         try:
-            # Fetch input image to demonstrate we can access it
-            img_resp = requests.get(req.photo_url)
-            if img_resp.status_code == 200:
-                # Convert to base64 for frontend display (as requested by frontend logic)
-                image_bytes = base64.b64encode(img_resp.content).decode('utf-8')
-            else:
-                raise Exception("Failed to fetch input image")
-        except:
-             # Fallback
-             image_bytes = "" # Frontend handles this?
+             img_resp = requests.get(req.photo_url)
+             img_resp.raise_for_status()
+             image_bytes = img_resp.content
+        except Exception as dl_err:
+             raise HTTPException(status_code=400, detail=f"Failed to download image: {dl_err}")
+
+        # Analyze
+        print("Starting Pass 1: Analysis (Gemini 3 Pro)...")
+        analysis_result = analyze_user_appearance(image_bytes)
+        if "error" in analysis_result:
+             raise HTTPException(status_code=500, detail=f"Analysis failed: {analysis_result['error']}")
+        
+        # Step B: Generate (Imagen 4 Ultra)
+        print("Starting Pass 2: Generation (Imagen 4 Ultra)...")
+        generated_image_obj = generate_model_portfolio(analysis_result)
+        
+        if not generated_image_obj:
+             raise HTTPException(status_code=500, detail="Generation failed (Imagen returned None)")
+             
+        # Get bytes from generated image object (likely .image.image_bytes)
+        image_bytes_out = generated_image_obj.image.image_bytes
         
         # 3. Save to Profile
-        # We need to store the RESULT URL. pass for now as we are returning bytes.
-        # But user wants it saved.
-        # Let's save a "mock" URL to the profile
-        mock_generated_url = req.photo_url # Just echoing for now as we didn't actually generate a new file in storage
+        import base64
         
-        # Append to generated_photos array
+        # Upload generated image to Supabase 'generated' bucket
+        generated_filename = f"{req.user_id}/{datetime.datetime.now().timestamp()}_digital.jpg"
+        
+        # Iterate to upload
         try:
-            # Get current array
-            p_res = database.supabase.table('profiles').select('generated_photos').eq('id', req.user_id).single().execute()
-            current_photos = p_res.data.get('generated_photos') or []
-            current_photos.append(mock_generated_url)
-            
-            database.supabase.table('profiles').update({'generated_photos': current_photos}).eq('id', req.user_id).execute()
-        except Exception as db_e:
-            logger.error(f"Failed to save generated photo to profile: {db_e}")
-
+             database.supabase.storage.from_("generated").upload(
+                 file=image_bytes_out,
+                 path=generated_filename,
+                 file_options={"content-type": "image/jpeg"}
+             )
+             
+             # Get Public URL
+             public_url = database.supabase.storage.from_("generated").get_public_url(generated_filename)
+             
+             # Save to profile
+             p_res = database.supabase.table('profiles').select('generated_photos').eq('id', req.user_id).single().execute()
+             current_photos = p_res.data.get('generated_photos') or []
+             current_photos.append(public_url)
+             
+             database.supabase.table('profiles').update({'generated_photos': current_photos}).eq('id', req.user_id).execute()
+             
+        except Exception as upload_err:
+             logger.error(f"Failed to upload generated image: {upload_err}")
+        
         return {
             "status": "success",
-            "identity_constraints": "Eye Distance: 64mm | Jawline: Sharp | Skin Tone: Type III",
-            "image_bytes": image_bytes, # Frontend expects this for display
+            "identity_constraints": analysis_result.get("physical_description", "Analyzed"),
+            "image_bytes": base64.b64encode(image_bytes_out).decode('utf-8'), 
             "credits": new_balance
         }
 

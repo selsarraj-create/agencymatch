@@ -48,7 +48,7 @@ def process_digitals(image_url: str):
     try:
         # Using Gemini 1.5 Flash (or Pro) for text analysis as it's highly capable
         analysis_response = client.models.generate_content(
-            model="gemini-2.0-flash-exp", # Using latest fast model
+            model="gemini-2.0-flash", # Using latest fast model
             contents=[
                 types.Content(
                     role="user",
@@ -155,26 +155,31 @@ def process_digitals(image_url: str):
         # (derived from constraints) effectively treating it as Text-to-Image constrained by the analysis. 
         # This is the "Identity Anchor" technique.
         
-        generation_response = client.models.generate_images(
-            model='imagen-3.0-generate-001',
-            prompt=generation_prompt,
-            config=types.GenerateImagesConfig(
-                number_of_images=1,
-                aspect_ratio="3:4", # Portrait for polaroid
-                safety_filter_level="block_none",
-                person_generation="allow_adult"
-            )
+        # Switch to generate_content as generate_images is not supported for this model
+        print(f"Calling generate_content on gemini-3-pro-image-preview...")
+        generation_response = client.models.generate_content(
+            model='gemini-3-pro-image-preview',
+            contents=generation_prompt
         )
+
+        # Handle Response
+        image_bytes = None
+        if generation_response.parts:
+            for part in generation_response.parts:
+                 if part.inline_data:
+                     image_bytes = part.inline_data.data
+                     break
         
-        generated_image = generation_response.generated_images[0]
-        
-        # Return the image bytes or url
-        # The SDK returns `generated_images[0].image.image_bytes` usually
-        
+        if not image_bytes:
+             # Fallback/Error
+             text_content = generation_response.text if generation_response.text else "No content"
+             print(f"Model output text: {text_content}")
+             return {"error": f"Model returned text: {text_content[:100]}..."}
+
         return {
             "status": "success",
             "identity_constraints": identity_constraints,
-            "image_bytes": base64.b64encode(generated_image.image.image_bytes).decode('utf-8'),
+            "image_bytes": base64.b64encode(image_bytes).decode('utf-8'),
             "mime_type": "image/jpeg"
         }
 
