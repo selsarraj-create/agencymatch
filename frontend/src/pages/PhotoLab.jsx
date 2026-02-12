@@ -101,7 +101,7 @@ const GuideModal = ({ isOpen, onClose }) => {
 };
 
 /* ─── Upload Box Component ─────────────────────────────────────────── */
-const UploadBox = ({ label, preview, silhouette: Silhouette, onFileSelect, onClear, error: fileError }) => {
+const UploadBox = ({ label, preview, silhouette: Silhouette, onFileSelect, onClear, error: fileError, auditing, auditStatus }) => {
     const inputRef = useRef(null);
 
     return (
@@ -116,9 +116,19 @@ const UploadBox = ({ label, preview, silhouette: Silhouette, onFileSelect, onCle
                     >
                         <X size={14} />
                     </button>
-                    <div className="absolute bottom-2 left-2 flex items-center gap-1 text-[10px] text-green-100 font-bold bg-green-600/80 px-2 py-0.5 rounded-full backdrop-blur-sm">
-                        <CheckCircle size={10} /> Ready
-                    </div>
+                    {auditing ? (
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1 text-[10px] text-blue-100 font-bold bg-blue-600/80 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                            <Loader2 size={10} className="animate-spin" /> Analyzing...
+                        </div>
+                    ) : auditStatus === false ? (
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1 text-[10px] text-red-100 font-bold bg-red-600/80 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                            <XCircle size={10} /> Action Needed
+                        </div>
+                    ) : (
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1 text-[10px] text-green-100 font-bold bg-green-600/80 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                            <CheckCircle size={10} /> Ready
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div
@@ -192,7 +202,11 @@ const PhotoLab = ({ isEmbedded = false }) => {
     const navigate = useNavigate();
     const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
 
-    const bothReady = portraitRef?.url && fullBodyRef?.url;
+    // Derived state: ready only if both uploaded, audits complete, and no blocking issues
+    const bothReady = portraitRef?.url && fullBodyRef?.url &&
+        !auditingPortrait && !auditingFullBody &&
+        portraitAudit?.can_proceed !== false &&
+        fullBodyAudit?.can_proceed !== false;
 
     useEffect(() => { checkUser(); }, []);
 
@@ -372,6 +386,8 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                 onFileSelect={(file) => validateAndUpload(file, setPortraitRef, setPortraitError, setPortraitAudit, setAuditingPortrait)}
                                 onClear={() => { setPortraitRef(null); setPortraitAudit(null); }}
                                 error={portraitError}
+                                auditing={auditingPortrait}
+                                auditStatus={portraitAudit?.can_proceed}
                             />
                             <UploadBox
                                 label="Full Body"
@@ -380,6 +396,8 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                 onFileSelect={(file) => validateAndUpload(file, setFullBodyRef, setFullBodyError, setFullBodyAudit, setAuditingFullBody)}
                                 onClear={() => { setFullBodyRef(null); setFullBodyAudit(null); }}
                                 error={fullBodyError}
+                                auditing={auditingFullBody}
+                                auditStatus={fullBodyAudit?.can_proceed}
                             />
                         </div>
 
@@ -387,7 +405,6 @@ const PhotoLab = ({ isEmbedded = false }) => {
                         {[{ audit: portraitAudit, auditing: auditingPortrait, label: 'Portrait', setter: setPortraitRef, auditSetter: setPortraitAudit },
                         { audit: fullBodyAudit, auditing: auditingFullBody, label: 'Full Body', setter: setFullBodyRef, auditSetter: setFullBodyAudit }
                         ].map(({ audit, auditing, label, setter, auditSetter }) => {
-                            if (audit) console.warn(`[PhotoLab] Rendering ${label}: can_proceed=${audit.can_proceed}`, audit);
                             // ── Unusable photo (can_proceed = false) ── RED warning
                             if (audit && audit.can_proceed === false) return (
                                 <div
