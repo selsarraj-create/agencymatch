@@ -375,10 +375,7 @@ async def analyze_endpoint(file: UploadFile = File(...)):
             
         return result
     except Exception as e:
-        # Return partial result if available, or error structure
-        # If we have a partial result with score 0, return it
-        return result
-    except Exception as e:
+        print(f"Analyze Error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 # --- Photo Lab Endpoints ---
