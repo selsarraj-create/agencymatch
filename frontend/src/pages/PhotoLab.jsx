@@ -167,6 +167,12 @@ const PhotoLab = ({ isEmbedded = false }) => {
     const [portraitError, setPortraitError] = useState(null);
     const [fullBodyError, setFullBodyError] = useState(null);
 
+    // Audit state
+    const [portraitAudit, setPortraitAudit] = useState(null);   // { score, issues, can_proceed }
+    const [fullBodyAudit, setFullBodyAudit] = useState(null);
+    const [auditingPortrait, setAuditingPortrait] = useState(false);
+    const [auditingFullBody, setAuditingFullBody] = useState(false);
+
     const [generatedImage, setGeneratedImage] = useState(null);
     const [identityConstraints, setIdentityConstraints] = useState(null);
     const [error, setError] = useState(null);
@@ -224,8 +230,9 @@ const PhotoLab = ({ isEmbedded = false }) => {
     const MAX_SIZE = 5 * 1024 * 1024; // 5MB
     const ALLOWED_TYPES = ['image/jpeg', 'image/png'];
 
-    const validateAndUpload = async (file, setter, setErr) => {
+    const validateAndUpload = async (file, setter, setErr, setAudit, setAuditing) => {
         setErr(null);
+        setAudit(null);
         if (!file) return;
         if (!ALLOWED_TYPES.includes(file.type)) {
             setErr('JPEG or PNG only');
@@ -245,6 +252,18 @@ const PhotoLab = ({ isEmbedded = false }) => {
             if (uploadError) throw uploadError;
             const { data: { publicUrl } } = supabase.storage.from('uploads').getPublicUrl(fileName);
             setter({ preview, url: publicUrl });
+
+            // Fire audit in background (non-blocking)
+            setAuditing(true);
+            try {
+                const auditRes = await axios.post(`${API_URL}/audit-image`, { image_url: publicUrl });
+                setAudit(auditRes.data);
+            } catch (auditErr) {
+                console.warn('Audit failed (non-blocking):', auditErr);
+                setAudit({ score: 5, issues: [], can_proceed: true });
+            } finally {
+                setAuditing(false);
+            }
         } catch (e) {
             console.error("Upload failed", e);
             setErr('Upload failed');
@@ -291,6 +310,8 @@ const PhotoLab = ({ isEmbedded = false }) => {
         setIdentityConstraints(null);
         setPortraitRef(null);
         setFullBodyRef(null);
+        setPortraitAudit(null);
+        setFullBodyAudit(null);
         setError(null);
     };
 
@@ -348,19 +369,70 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                 label="Portrait"
                                 preview={portraitRef?.preview}
                                 silhouette={PortraitSilhouette}
-                                onFileSelect={(file) => validateAndUpload(file, setPortraitRef, setPortraitError)}
-                                onClear={() => setPortraitRef(null)}
+                                onFileSelect={(file) => validateAndUpload(file, setPortraitRef, setPortraitError, setPortraitAudit, setAuditingPortrait)}
+                                onClear={() => { setPortraitRef(null); setPortraitAudit(null); }}
                                 error={portraitError}
                             />
                             <UploadBox
                                 label="Full Body"
                                 preview={fullBodyRef?.preview}
                                 silhouette={FullBodySilhouette}
-                                onFileSelect={(file) => validateAndUpload(file, setFullBodyRef, setFullBodyError)}
-                                onClear={() => setFullBodyRef(null)}
+                                onFileSelect={(file) => validateAndUpload(file, setFullBodyRef, setFullBodyError, setFullBodyAudit, setAuditingFullBody)}
+                                onClear={() => { setFullBodyRef(null); setFullBodyAudit(null); }}
                                 error={fullBodyError}
                             />
                         </div>
+
+                        {/* Pro-Tip Nudge Cards */}
+                        {[{ audit: portraitAudit, auditing: auditingPortrait, label: 'Portrait', setter: setPortraitRef, auditSetter: setPortraitAudit },
+                        { audit: fullBodyAudit, auditing: auditingFullBody, label: 'Full Body', setter: setFullBodyRef, auditSetter: setFullBodyAudit }
+                        ].map(({ audit, auditing, label, setter, auditSetter }) => (
+                            audit && audit.score < 6 && audit.can_proceed ? (
+                                <motion.div
+                                    key={label}
+                                    initial={{ opacity: 0, y: -8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mt-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/30 rounded-xl p-3"
+                                >
+                                    <div className="flex items-start gap-2">
+                                        <span className="text-lg mt-0.5">🌟</span>
+                                        <div className="flex-1">
+                                            <p className="text-xs font-bold text-amber-800 dark:text-amber-300 mb-1">
+                                                Pro-Tip — {label}
+                                            </p>
+                                            <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
+                                                {audit.issues?.includes('too_dark')
+                                                    ? "Looking good! Just a heads-up: the lighting is a bit dim. For the most realistic studio look, try a photo with natural light facing you."
+                                                    : audit.issues?.includes('blurry')
+                                                        ? "Looking good! This one's a tiny bit blurry. For the sharpest result, try holding steady or using a well-lit spot."
+                                                        : audit.issues?.includes('obstructed')
+                                                            ? "Looking good! Part of the face seems slightly covered. For the best identity lock, make sure nothing blocks your features."
+                                                            : "Looking good! For even better results, try a cleaner, well-lit photo."}
+                                                {" "}Want to try another, or go with this one?
+                                            </p>
+                                            <div className="flex gap-2 mt-2">
+                                                <button
+                                                    onClick={() => { setter(null); auditSetter(null); }}
+                                                    className="text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-800/20 px-3 py-1 rounded-full hover:bg-amber-200 dark:hover:bg-amber-800/40 transition-colors"
+                                                >
+                                                    Try Another
+                                                </button>
+                                                <button
+                                                    onClick={() => auditSetter({ ...audit, score: 10 })}
+                                                    className="text-[10px] font-bold text-amber-600 dark:text-amber-500 px-3 py-1 rounded-full hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                                                >
+                                                    Go With This One
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ) : audit === null && auditing ? (
+                                <div key={label} className="mt-3 flex items-center gap-2 text-[11px] text-text-secondary-light dark:text-text-secondary-dark">
+                                    <Loader2 size={12} className="animate-spin" /> Checking {label.toLowerCase()} quality...
+                                </div>
+                            ) : null
+                        ))}
                     </div>
 
                     {/* Generate Button */}

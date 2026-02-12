@@ -382,7 +382,20 @@ async def analyze_endpoint(file: UploadFile = File(...)):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 # --- Photo Lab Endpoints ---
-from api.photo_lab import process_digitals, process_digitals_dual
+from api.photo_lab import process_digitals, process_digitals_dual, audit_image_quality
+
+class AuditImageRequest(BaseModel):
+    image_url: str
+
+@app.post("/api/audit-image")
+async def audit_image_endpoint(req: AuditImageRequest):
+    try:
+        result = audit_image_quality(req.image_url)
+        return result
+    except Exception as e:
+        print(f"Audit Error: {e}")
+        # Fail open
+        return {"score": 5, "issues": [], "can_proceed": True}
 
 class DigitalGenRequest(BaseModel):
     photo_url: str

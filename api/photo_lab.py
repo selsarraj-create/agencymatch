@@ -13,6 +13,89 @@ from google.genai import types
 load_dotenv()
 
 GEMINI_MODEL = "gemini-3-pro-image-preview"
+AUDIT_MODEL = "gemini-2.5-flash"
+
+
+def audit_image_quality(image_url: str) -> dict:
+    """
+    Image Quality Auditor for Model Digital suitability.
+
+    Analyzes brightness, clarity, and facial obstructions.
+    Returns: { "score": 1-10, "issues": [...], "can_proceed": bool }
+    """
+    client = get_client()
+    print(f"[AUDIT] Auditing image: {image_url}")
+
+    # ── Fetch image ──────────────────────────────────────────────────
+    try:
+        resp = requests.get(image_url, timeout=15)
+        resp.raise_for_status()
+        image_bytes = resp.content
+        mime = resp.headers.get("content-type", "image/jpeg").split(";")[0]
+        print(f"[AUDIT] Downloaded: {len(image_bytes):,} bytes, {mime}")
+    except Exception as e:
+        print(f"[AUDIT] Fetch failed: {e}")
+        return {"score": 0, "issues": ["fetch_failed"], "can_proceed": False}
+
+    # ── Ask Gemini to audit ──────────────────────────────────────────
+    system = (
+        "You are an Image Quality Auditor for a model digitals platform. "
+        "Analyze the uploaded photo for suitability as a reference image "
+        "for AI-generated model digitals. Be LENIENT — if the AI can "
+        "identify facial features, the photo is good enough."
+    )
+
+    prompt = (
+        "Analyze this photo for Model Digital suitability.\n\n"
+        "CRITERIA:\n"
+        "1. Brightness: Is the face underexposed or too dark?\n"
+        "2. Clarity: Is there significant motion blur?\n"
+        "3. Obstructions: Is the face clearly visible, or are there "
+        "large objects/hands/sunglasses blocking it?\n\n"
+        "RULES:\n"
+        "- Be lenient. If the photo is 'good enough' for the AI to "
+        "identify features, set can_proceed to true even if score is low.\n"
+        "- Only set can_proceed to false for truly unusable photos "
+        "(face completely hidden, extreme blur, pitch black).\n\n"
+        "Respond with ONLY a valid JSON object, no markdown fences:\n"
+        '{ "score": <1-10>, "issues": [<zero or more of: '
+        '"too_dark", "blurry", "obstructed">], "can_proceed": <true/false> }'
+    )
+
+    try:
+        response = client.models.generate_content(
+            model=AUDIT_MODEL,
+            contents=[
+                types.Content(
+                    role="user",
+                    parts=[
+                        types.Part.from_bytes(data=image_bytes, mime_type=mime),
+                        types.Part.from_text(text=prompt),
+                    ],
+                )
+            ],
+            config=types.GenerateContentConfig(
+                system_instruction=system,
+                response_modalities=["TEXT"],
+            ),
+        )
+
+        raw = response.text.strip()
+        # Strip markdown code fences if present
+        if raw.startswith("```"):
+            raw = raw.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+
+        import json as _json
+        result = _json.loads(raw)
+        print(f"[AUDIT] Result: score={result.get('score')}, "
+              f"issues={result.get('issues')}, "
+              f"can_proceed={result.get('can_proceed')}")
+        return result
+
+    except Exception as e:
+        print(f"[AUDIT] Gemini audit failed: {e}")
+        # Fail open — let the user proceed
+        return {"score": 5, "issues": [], "can_proceed": True}
 
 
 def get_client():
