@@ -383,11 +383,47 @@ const PhotoLab = ({ isEmbedded = false }) => {
                             />
                         </div>
 
-                        {/* Pro-Tip Nudge Cards */}
+                        {/* Quality Feedback Cards */}
                         {[{ audit: portraitAudit, auditing: auditingPortrait, label: 'Portrait', setter: setPortraitRef, auditSetter: setPortraitAudit },
                         { audit: fullBodyAudit, auditing: auditingFullBody, label: 'Full Body', setter: setFullBodyRef, auditSetter: setFullBodyAudit }
-                        ].map(({ audit, auditing, label, setter, auditSetter }) => (
-                            audit && audit.score < 6 && audit.can_proceed ? (
+                        ].map(({ audit, auditing, label, setter, auditSetter }) => {
+                            // ── Unusable photo (can_proceed = false) ── RED warning
+                            if (audit && !audit.can_proceed) return (
+                                <motion.div
+                                    key={label}
+                                    initial={{ opacity: 0, y: -8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mt-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-700/30 rounded-xl p-3"
+                                >
+                                    <div className="flex items-start gap-2">
+                                        <span className="text-lg mt-0.5">⚠️</span>
+                                        <div className="flex-1">
+                                            <p className="text-xs font-bold text-red-800 dark:text-red-300 mb-1">
+                                                {label} — Photo Not Usable
+                                            </p>
+                                            <p className="text-[11px] text-red-700 dark:text-red-400 leading-relaxed">
+                                                {audit.issues?.includes('obstructed') && audit.issues?.includes('too_dark')
+                                                    ? "We can't clearly see the face here — it looks too dark and partially blocked. Try a well-lit photo with your face fully visible."
+                                                    : audit.issues?.includes('obstructed')
+                                                        ? "The face is blocked or hidden in this photo. Make sure your full face is clearly visible with no sunglasses, hands, or objects in the way."
+                                                        : audit.issues?.includes('too_dark')
+                                                            ? "This photo is too dark for us to identify facial features. Try again with natural light facing you."
+                                                            : audit.issues?.includes('blurry')
+                                                                ? "This photo is too blurry for a clean identity lock. Try holding still in a well-lit area."
+                                                                : "This photo isn't usable for generation. Please try a clearer, well-lit photo."}
+                                            </p>
+                                            <button
+                                                onClick={() => { setter(null); auditSetter(null); }}
+                                                className="mt-2 text-[10px] font-bold text-white bg-red-500 hover:bg-red-600 px-4 py-1.5 rounded-full transition-colors"
+                                            >
+                                                Upload a Different Photo
+                                            </button>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            );
+                            // ── Low score but usable (can_proceed = true) ── AMBER nudge
+                            if (audit && audit.score < 6 && audit.can_proceed) return (
                                 <motion.div
                                     key={label}
                                     initial={{ opacity: 0, y: -8 }}
@@ -427,12 +463,15 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                         </div>
                                     </div>
                                 </motion.div>
-                            ) : audit === null && auditing ? (
+                            );
+                            // ── Auditing spinner
+                            if (audit === null && auditing) return (
                                 <div key={label} className="mt-3 flex items-center gap-2 text-[11px] text-text-secondary-light dark:text-text-secondary-dark">
                                     <Loader2 size={12} className="animate-spin" /> Checking {label.toLowerCase()} quality...
                                 </div>
-                            ) : null
-                        ))}
+                            );
+                            return null;
+                        })}
                     </div>
 
                     {/* Generate Button */}
