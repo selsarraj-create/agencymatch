@@ -284,7 +284,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
     ];
 
     const navigate = useNavigate();
-    const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
+    const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000/api';
 
     // Derived state: ready only if both uploaded, audits complete, and no blocking issues
     const bothReady = portraitRef?.url && fullBodyRef?.url &&
