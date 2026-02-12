@@ -387,12 +387,11 @@ const PhotoLab = ({ isEmbedded = false }) => {
                         {[{ audit: portraitAudit, auditing: auditingPortrait, label: 'Portrait', setter: setPortraitRef, auditSetter: setPortraitAudit },
                         { audit: fullBodyAudit, auditing: auditingFullBody, label: 'Full Body', setter: setFullBodyRef, auditSetter: setFullBodyAudit }
                         ].map(({ audit, auditing, label, setter, auditSetter }) => {
+                            if (audit) console.warn(`[PhotoLab] Rendering ${label}: can_proceed=${audit.can_proceed}`, audit);
                             // ── Unusable photo (can_proceed = false) ── RED warning
-                            if (audit && !audit.can_proceed) return (
-                                <motion.div
+                            if (audit && audit.can_proceed === false) return (
+                                <div
                                     key={label}
-                                    initial={{ opacity: 0, y: -8 }}
-                                    animate={{ opacity: 1, y: 0 }}
                                     className="mt-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-700/30 rounded-xl p-3"
                                 >
                                     <div className="flex items-start gap-2">
@@ -402,15 +401,17 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                                 {label} — Photo Not Usable
                                             </p>
                                             <p className="text-[11px] text-red-700 dark:text-red-400 leading-relaxed">
-                                                {audit.issues?.includes('obstructed') && audit.issues?.includes('too_dark')
-                                                    ? "We can't clearly see the face here — it looks too dark and partially blocked. Try a well-lit photo with your face fully visible."
-                                                    : audit.issues?.includes('obstructed')
-                                                        ? "The face is blocked or hidden in this photo. Make sure your full face is clearly visible with no sunglasses, hands, or objects in the way."
-                                                        : audit.issues?.includes('too_dark')
-                                                            ? "This photo is too dark for us to identify facial features. Try again with natural light facing you."
-                                                            : audit.issues?.includes('blurry')
-                                                                ? "This photo is too blurry for a clean identity lock. Try holding still in a well-lit area."
-                                                                : "This photo isn't usable for generation. Please try a clearer, well-lit photo."}
+                                                {audit.issues?.includes('no_face')
+                                                    ? "This doesn't appear to be a photo of a person. Please upload a clear photo of yourself — selfies and headshots work great!"
+                                                    : audit.issues?.includes('obstructed') && audit.issues?.includes('too_dark')
+                                                        ? "We can't clearly see the face here — it looks too dark and partially blocked. Try a well-lit photo with your face fully visible."
+                                                        : audit.issues?.includes('obstructed')
+                                                            ? "The face is blocked or hidden in this photo. Make sure your full face is clearly visible with no sunglasses, hands, or objects in the way."
+                                                            : audit.issues?.includes('too_dark')
+                                                                ? "This photo is too dark for us to identify facial features. Try again with natural light facing you."
+                                                                : audit.issues?.includes('blurry')
+                                                                    ? "This photo is too blurry for a clean identity lock. Try holding still in a well-lit area."
+                                                                    : "This photo isn't usable for generation. Please try a clearer, well-lit photo."}
                                             </p>
                                             <button
                                                 onClick={() => { setter(null); auditSetter(null); }}
@@ -420,14 +421,12 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                             </button>
                                         </div>
                                     </div>
-                                </motion.div>
+                                </div>
                             );
                             // ── Low score but usable (can_proceed = true) ── AMBER nudge
                             if (audit && audit.score < 6 && audit.can_proceed) return (
-                                <motion.div
+                                <div
                                     key={label}
-                                    initial={{ opacity: 0, y: -8 }}
-                                    animate={{ opacity: 1, y: 0 }}
                                     className="mt-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/30 rounded-xl p-3"
                                 >
                                     <div className="flex items-start gap-2">
@@ -462,7 +461,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                             </div>
                                         </div>
                                     </div>
-                                </motion.div>
+                                </div>
                             );
                             // ── Auditing spinner
                             if (audit === null && auditing) return (
