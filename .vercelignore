@@ -1,6 +1,5 @@
-# Test artifacts
-*.jpg
-*.png
+# Test artifacts (root-level only)
+test_*.jpg
 test_*.py
 check_*.py
 debug_*.py
