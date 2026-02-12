@@ -302,14 +302,16 @@ const PhotoLab = ({ isEmbedded = false }) => {
             if (profile.height) {
                 // Try to parse existing height
                 const h = profile.height.toLowerCase();
-                if (h.includes('cm')) {
+                if (h.includes('cm') && !h.includes("'")) {
                     setHeightUnit('cm');
                     setHeightCm(h.replace('cm', '').trim());
                 } else if (h.includes("'")) {
                     setHeightUnit('ft');
-                    const [f, i] = h.split("'");
-                    setHeightFt(f.trim());
-                    setHeightIn(i.replace('"', '').trim());
+                    const parts = h.split("'");
+                    const f = parts[0].trim();
+                    const i = parts[1] ? parts[1].replace('"', '').trim() : '0';
+                    setHeightFt(f);
+                    setHeightIn(i);
                 } else {
                     // Fallback assume cm if just number
                     setHeightCm(h.trim());
@@ -421,14 +423,41 @@ const PhotoLab = ({ isEmbedded = false }) => {
     };
 
     /* ── Stats Handlers ───────────────────────────────────────────── */
+    const toggleHeightUnit = (newUnit) => {
+        if (newUnit === heightUnit) return;
+        setHeightUnit(newUnit);
+
+        if (newUnit === 'ft') {
+            // CM -> FT/IN
+            if (heightCm) {
+                const cmVal = parseFloat(heightCm);
+                if (!isNaN(cmVal) && cmVal > 0) {
+                    const totalInches = cmVal / 2.54;
+                    const ft = Math.floor(totalInches / 12);
+                    const inches = Math.round(totalInches % 12);
+                    setHeightFt(ft.toString());
+                    setHeightIn(inches.toString());
+                }
+            }
+        } else {
+            // FT/IN -> CM
+            const ftVal = parseFloat(heightFt) || 0;
+            const inVal = parseFloat(heightIn) || 0;
+            if (ftVal > 0 || inVal > 0) {
+                const cm = Math.round((ftVal * 30.48) + (inVal * 2.54));
+                setHeightCm(cm.toString());
+            }
+        }
+    };
+
     const handleAnalyzeStats = async () => {
         let heightVal = heightCm;
 
         if (heightUnit === 'ft') {
             if (!heightFt) { alert("Please enter feet."); return; }
             // Convert to cm: 1 ft = 30.48 cm, 1 in = 2.54 cm
-            const ft = parseInt(heightFt) || 0;
-            const inch = parseInt(heightIn) || 0;
+            const ft = parseFloat(heightFt) || 0;
+            const inch = parseFloat(heightIn) || 0;
             heightVal = Math.round((ft * 30.48) + (inch * 2.54));
         }
 
@@ -556,13 +585,13 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                     <label className="text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark">Your Height</label>
                                     <div className="flex bg-gray-200 dark:bg-black/40 rounded-lg p-0.5">
                                         <button
-                                            onClick={() => setHeightUnit('ft')}
+                                            onClick={() => toggleHeightUnit('ft')}
                                             className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${heightUnit === 'ft' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-gray-500'}`}
                                         >
                                             FT
                                         </button>
                                         <button
-                                            onClick={() => setHeightUnit('cm')}
+                                            onClick={() => toggleHeightUnit('cm')}
                                             className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${heightUnit === 'cm' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-gray-500'}`}
                                         >
                                             CM
@@ -574,8 +603,12 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                     <div className="relative">
                                         <input
                                             type="number"
+                                            min="0"
                                             value={heightCm}
-                                            onChange={(e) => setHeightCm(e.target.value)}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val >= 0) setHeightCm(val);
+                                            }}
                                             placeholder="175"
                                             className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
                                         />
@@ -586,8 +619,12 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                         <div className="relative flex-1">
                                             <input
                                                 type="number"
+                                                min="0"
                                                 value={heightFt}
-                                                onChange={(e) => setHeightFt(e.target.value)}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (val >= 0) setHeightFt(val);
+                                                }}
                                                 placeholder="5"
                                                 className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
                                             />
@@ -596,8 +633,12 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                         <div className="relative flex-1">
                                             <input
                                                 type="number"
+                                                min="0"
                                                 value={heightIn}
-                                                onChange={(e) => setHeightIn(e.target.value)}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (val >= 0) setHeightIn(val);
+                                                }}
                                                 placeholder="9"
                                                 className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
                                             />
