@@ -5,7 +5,12 @@ import base64
 import requests
 import typing_extensions as typing
 from dotenv import load_dotenv
-from PIL import Image
+try:
+    from PIL import Image
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
+    print("WARNING: Pillow not installed. Image optimization disabled.")
 import io
 
 load_dotenv()
@@ -14,6 +19,8 @@ load_dotenv()
 def optimize_image(image_bytes, max_size=800, quality=80):
     try:
         if not image_bytes:
+            return image_bytes
+        if not HAS_PIL:
             return image_bytes
             
         print(f"Optimizing image. Original size: {len(image_bytes)} bytes")

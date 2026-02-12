@@ -8,3 +8,4 @@ requests
 typing_extensions
 stripe
 google-genai
+Pillow
