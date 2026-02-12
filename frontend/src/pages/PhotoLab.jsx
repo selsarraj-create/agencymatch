@@ -469,13 +469,13 @@ const PhotoLab = ({ isEmbedded = false }) => {
         setAnalyzingStats(true);
         setAnalysisProgress(0);
 
-        // Simulate progress
+        // Simulate progress (Slower: reaches 90% in ~18 seconds)
         const interval = setInterval(() => {
             setAnalysisProgress(prev => {
                 if (prev >= 90) return prev;
-                return prev + 10;
+                return prev + 1;
             });
-        }, 500);
+        }, 200);
 
         try {
             const response = await axios.post(`${API_URL}/analyze-stats`, {

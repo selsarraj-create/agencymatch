@@ -317,7 +317,7 @@ const ProfileEditor = ({ userId, onUpdate }) => {
 
                         {/* Bust */}
                         <div>
-                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Bust (cm)</label>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Bust/Chest (cm)</label>
                             <input
                                 type="number"
                                 name="bust_cm"
