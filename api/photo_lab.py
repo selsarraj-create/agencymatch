@@ -178,3 +178,183 @@ def process_digitals(image_url: str):
         "mime_type": intermediate_mime,
         "fallback": True,
     }
+
+
+def process_digitals_dual(portrait_url: str, fullbody_url: str):
+    """
+    Multi-Reference Identity Lock pipeline using Gemini 3 Pro.
+
+    Accepts two reference images:
+      - Reference_1 (Portrait): face/identity — absolute constraint
+      - Reference_2 (Full Body): body proportions and scale
+
+    Step 1: Gemini 3 Pro merges both references into a single
+            full-length model digital with identity lock.
+    Step 2: Texture refinement pass for DSLR-quality output.
+    """
+    client = get_client()
+    print(f"[DUAL] Processing — Portrait: {portrait_url}, Body: {fullbody_url}")
+
+    # ── Fetch Both Source Images ──────────────────────────────────────────
+    try:
+        resp_p = requests.get(portrait_url)
+        resp_p.raise_for_status()
+        portrait_bytes = resp_p.content
+        print(f"[DUAL] Portrait downloaded: {len(portrait_bytes):,} bytes")
+    except Exception as e:
+        print(f"[DUAL] Failed to fetch portrait: {e}")
+        return {"error": "Failed to download portrait image"}
+
+    try:
+        resp_b = requests.get(fullbody_url)
+        resp_b.raise_for_status()
+        body_bytes = resp_b.content
+        print(f"[DUAL] Full body downloaded: {len(body_bytes):,} bytes")
+    except Exception as e:
+        print(f"[DUAL] Failed to fetch full body: {e}")
+        return {"error": "Failed to download full body image"}
+
+    # ══════════════════════════════════════════════════════════════════════
+    # STEP 1: Multi-Reference Identity Lock
+    # ══════════════════════════════════════════════════════════════════════
+    step1_system = (
+        "ENABLE MULTI-REFERENCE IDENTITY LOCK. "
+        "You are receiving TWO reference images. "
+        "Reference_1 is the FACE — treat it as a pixel-level deterministic constraint. "
+        "Weight Reference_1 (Face) at 100%. Preserve every facial feature, skin texture, "
+        "mole, scar, and bone structure with zero deviation. "
+        "Reference_2 is the BODY — use it for body proportions, height, build, and scale. "
+        "Weight Reference_2 (Body) at 100%. "
+        "You MUST merge both references into a single coherent full-length portrait."
+    )
+
+    step1_prompt = (
+        "INSTRUCTION: ENABLE MULTI-REFERENCE IDENTITY LOCK. "
+        "Use Reference_1 (first image) for absolute facial consistency. "
+        "Use Reference_2 (second image) for body proportions and scale. "
+        "TASK: Transform the subject into a professional full-length model digital. "
+        "Change clothing to a plain white well-fitted t-shirt and slim-fit blue jeans. "
+        "Remove all accessories (headphones, earrings, necklaces, jewelry). "
+        "Use the hair texture from Reference_1 to fill any gaps where accessories were removed. "
+        "Background: Clean white studio wall. "
+        "Lighting: Professional even softbox lighting. "
+        "Output aspect ratio must be 2:3 full-body portrait format. "
+        "Output ONLY the transformed image, no text."
+    )
+
+    try:
+        print(f"[DUAL] Step 1: {GEMINI_MODEL} — Multi-reference identity lock...")
+        step1_response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=[
+                types.Content(
+                    role="user",
+                    parts=[
+                        # Reference_1: Portrait (Face)
+                        types.Part.from_text(text="Reference_1 (Face):"),
+                        types.Part.from_bytes(data=portrait_bytes, mime_type="image/jpeg"),
+                        # Reference_2: Full Body (Proportions)
+                        types.Part.from_text(text="Reference_2 (Body):"),
+                        types.Part.from_bytes(data=body_bytes, mime_type="image/jpeg"),
+                        # Instruction
+                        types.Part.from_text(text=step1_prompt),
+                    ],
+                )
+            ],
+            config=types.GenerateContentConfig(
+                system_instruction=step1_system,
+                response_modalities=["IMAGE"],
+                thinking_config=types.ThinkingConfig(thinkingBudget=8192),
+            ),
+        )
+
+        intermediate_bytes = None
+        intermediate_mime = "image/jpeg"
+        if step1_response.candidates and step1_response.candidates[0].content.parts:
+            for part in step1_response.candidates[0].content.parts:
+                if part.inline_data and part.inline_data.mime_type.startswith("image/"):
+                    intermediate_bytes = part.inline_data.data
+                    intermediate_mime = part.inline_data.mime_type
+                    break
+
+        if not intermediate_bytes:
+            text_out = step1_response.text if step1_response.text else "No content"
+            print(f"[DUAL] Step 1 failed — text: {text_out[:200]}")
+            return {"error": f"Step 1 returned text: {text_out[:100]}"}
+
+        print(f"[DUAL] Step 1 complete — {len(intermediate_bytes):,} bytes")
+
+    except Exception as e:
+        print(f"[DUAL] Step 1 failed: {e}")
+        return {"error": f"Step 1 (Multi-Ref) failed: {str(e)}"}
+
+    # ══════════════════════════════════════════════════════════════════════
+    # STEP 2: Texture Refinement — DSLR 4K Quality
+    # ══════════════════════════════════════════════════════════════════════
+    step2_system = (
+        "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
+        "Do NOT change the person's identity, facial structure, expression, or body proportions. "
+        "This image has already been identity-locked from two references."
+    )
+
+    step2_prompt = (
+        "REFINEMENT PASS. This full-length digital has been identity-locked. "
+        "DO NOT change the face, body proportions, clothing, or identity. "
+        "TASK: Enhance to 4K DSLR studio quality. "
+        "Apply realistic skin texture — visible pores, natural imperfections. "
+        "Enhance fabric detail on the white t-shirt and blue jeans — visible weave and stitching. "
+        "Apply softbox clamshell lighting with natural catchlights in the eyes. "
+        "Sharpen focus on the subject with subtle shallow depth of field. "
+        "The background must remain a clean white studio wall. "
+        "Output aspect ratio must be 2:3 full-body portrait format. "
+        "Output ONLY the refined image, no text."
+    )
+
+    try:
+        print(f"[DUAL] Step 2: {GEMINI_MODEL} — 4K texture refinement...")
+        step2_response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=[
+                types.Content(
+                    role="user",
+                    parts=[
+                        types.Part.from_bytes(data=intermediate_bytes, mime_type=intermediate_mime),
+                        types.Part.from_text(text=step2_prompt),
+                    ],
+                )
+            ],
+            config=types.GenerateContentConfig(
+                system_instruction=step2_system,
+                response_modalities=["IMAGE"],
+                thinking_config=types.ThinkingConfig(thinkingBudget=8192),
+            ),
+        )
+
+        if step2_response.candidates and step2_response.candidates[0].content.parts:
+            for part in step2_response.candidates[0].content.parts:
+                if part.inline_data and part.inline_data.mime_type.startswith("image/"):
+                    final_bytes = part.inline_data.data
+                    final_mime = part.inline_data.mime_type
+                    print(f"[DUAL] Step 2 complete — {len(final_bytes):,} bytes")
+                    return {
+                        "status": "success",
+                        "identity_constraints": "Multi-Ref: face lock (Ref_1) + body (Ref_2) → DSLR refinement",
+                        "image_bytes": base64.b64encode(final_bytes).decode("utf-8"),
+                        "mime_type": final_mime,
+                    }
+
+        text_out = step2_response.text if step2_response.text else "No content"
+        print(f"[DUAL] Step 2 returned text — fallback: {text_out[:200]}")
+
+    except Exception as e:
+        print(f"[DUAL] Step 2 failed — fallback: {e}")
+
+    # Fallback: return Step 1 output
+    return {
+        "status": "success",
+        "identity_constraints": "Multi-Ref identity lock (Step 2 fallback)",
+        "image_bytes": base64.b64encode(intermediate_bytes).decode("utf-8"),
+        "mime_type": intermediate_mime,
+        "fallback": True,
+    }
+

@@ -382,7 +382,7 @@ async def analyze_endpoint(file: UploadFile = File(...)):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 # --- Photo Lab Endpoints ---
-from api.photo_lab import process_digitals
+from api.photo_lab import process_digitals, process_digitals_dual
 
 class DigitalGenRequest(BaseModel):
     photo_url: str
@@ -444,6 +444,67 @@ async def generate_digitals_endpoint(req: DigitalGenRequest):
         
     except Exception as e:
         print(f"Generate Digitals Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+class DualDigitalGenRequest(BaseModel):
+    portrait_url: str
+    fullbody_url: str
+    user_id: str
+
+@app.post("/api/generate-digitals-dual")
+async def generate_digitals_dual_endpoint(req: DualDigitalGenRequest):
+    try:
+        # --- Check credits ---
+        supabase = get_supabase()
+        profile_check = supabase.table("profiles").select("credits").eq("id", req.user_id).single().execute()
+        current_credits = (profile_check.data or {}).get("credits", 0)
+        if current_credits < 1:
+            return JSONResponse(status_code=402, content={"error": "Insufficient credits"})
+
+        result = process_digitals_dual(req.portrait_url, req.fullbody_url)
+
+        if "error" in result:
+             return JSONResponse(status_code=500, content=result)
+
+        # --- Save to Supabase Storage + Update Profile + Deduct Credit ---
+        try:
+            import base64
+            import time
+
+            image_bytes = base64.b64decode(result["image_bytes"])
+
+            filename = f"{req.user_id}/{int(time.time())}_dual_digital.jpg"
+            supabase.storage.from_("generated").upload(
+                file=image_bytes,
+                path=filename,
+                file_options={"content-type": "image/jpeg"}
+            )
+
+            public_url = supabase.storage.from_("generated").get_public_url(filename)
+            print(f"[DUAL] Saved to storage: {public_url}")
+
+            profile_resp = supabase.table("profiles").select("generated_photos, credits").eq("id", req.user_id).single().execute()
+            current_photos = (profile_resp.data or {}).get("generated_photos") or []
+            current_photos.append(public_url)
+            new_credits = max(0, (profile_resp.data or {}).get("credits", 0) - 1)
+            supabase.table("profiles").update({
+                "generated_photos": current_photos,
+                "credits": new_credits,
+            }).eq("id", req.user_id).execute()
+            print(f"[DUAL] Updated profile: {len(current_photos)} photos, {new_credits} credits remaining")
+
+            result["public_url"] = public_url
+            result["remaining_credits"] = new_credits
+
+        except Exception as storage_err:
+            print(f"[DUAL] Storage failed (non-fatal): {storage_err}")
+            result["storage_warning"] = str(storage_err)
+
+        return result
+
+    except Exception as e:
+        print(f"[DUAL] Generate Digitals Error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
