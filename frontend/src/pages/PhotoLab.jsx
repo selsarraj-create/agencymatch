@@ -248,9 +248,11 @@ const PhotoLab = ({ isEmbedded = false }) => {
     const [heightFt, setHeightFt] = useState('');
     const [heightIn, setHeightIn] = useState('');
 
+
     const [statsResult, setStatsResult] = useState(null);
     const [showStatsModal, setShowStatsModal] = useState(false);
     const [analyzingStats, setAnalyzingStats] = useState(false);
+    const [analysisProgress, setAnalysisProgress] = useState(0);
     const [savingStats, setSavingStats] = useState(false);
 
     // Dual reference state
@@ -465,6 +467,16 @@ const PhotoLab = ({ isEmbedded = false }) => {
         if (!bothReady) { alert("Please upload both photos first."); return; }
 
         setAnalyzingStats(true);
+        setAnalysisProgress(0);
+
+        // Simulate progress
+        const interval = setInterval(() => {
+            setAnalysisProgress(prev => {
+                if (prev >= 90) return prev;
+                return prev + 10;
+            });
+        }, 500);
+
         try {
             const response = await axios.post(`${API_URL}/analyze-stats`, {
                 portrait_url: portraitRef.url,
@@ -474,13 +486,23 @@ const PhotoLab = ({ isEmbedded = false }) => {
 
             if (response.data.error) throw new Error(response.data.error);
 
-            setStatsResult(response.data);
-            setShowStatsModal(true);
+            clearInterval(interval);
+            setAnalysisProgress(100);
+
+            // Short delay to show 100%
+            setTimeout(() => {
+                setStatsResult(response.data);
+                setShowStatsModal(true);
+                setAnalyzingStats(false);
+                setAnalysisProgress(0);
+            }, 500);
+
         } catch (e) {
+            clearInterval(interval);
             console.error("Stats Error:", e);
             alert("Failed to analyze stats. Please ensure photos are clear.");
-        } finally {
             setAnalyzingStats(false);
+            setAnalysisProgress(0);
         }
     };
 
@@ -651,10 +673,29 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                 <button
                                     onClick={handleAnalyzeStats}
                                     disabled={analyzingStats || (heightUnit === 'cm' ? !heightCm : !heightFt)}
-                                    className="h-[46px] px-4 bg-brand-start/10 hover:bg-brand-start/20 text-brand-start rounded-xl font-bold text-sm transition-colors flex items-center gap-2 disabled:opacity-50"
+                                    className="relative h-[46px] px-6 bg-brand-start/10 hover:bg-brand-start/20 text-brand-start rounded-xl font-bold text-sm transition-all flex items-center gap-2 disabled:opacity-50 overflow-hidden"
                                 >
-                                    {analyzingStats ? <Loader2 size={16} className="animate-spin" /> : <ScanFace size={18} />}
-                                    Auto-Measure
+                                    {/* Progress Fill */}
+                                    {analyzingStats && (
+                                        <div
+                                            className="absolute left-0 top-0 bottom-0 bg-brand-start/20 transition-all duration-300 ease-out"
+                                            style={{ width: `${analysisProgress}%` }}
+                                        />
+                                    )}
+
+                                    <div className="relative z-10 flex items-center gap-2">
+                                        {analyzingStats ? (
+                                            <>
+                                                <Loader2 size={16} className="animate-spin" />
+                                                Analyzing {analysisProgress}%
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ScanFace size={18} />
+                                                Auto-Measure
+                                            </>
+                                        )}
+                                    </div>
                                 </button>
                             )}
                         </div>
