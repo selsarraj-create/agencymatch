@@ -444,6 +444,15 @@ async def generate_digitals_endpoint(req: DigitalGenRequest):
                 "generated_photos": current_photos,
                 "credits": new_credits,
             }).eq("id", req.user_id).execute()
+
+            # --- Log Transaction ---
+            supabase.table('transactions').insert({
+                'user_id': req.user_id,
+                'amount': -1,
+                'type': 'spend',
+                'description': 'Professional Headshot Generation'
+            }).execute()
+
             print(f"Updated profile: {len(current_photos)} photos, {new_credits} credits remaining")
             
             result["public_url"] = public_url
@@ -533,6 +542,15 @@ async def generate_digitals_dual_endpoint(req: DualDigitalGenRequest):
                 "generated_photos": current_photos,
                 "credits": new_credits,
             }).eq("id", req.user_id).execute()
+
+            # --- Log Transaction ---
+            supabase.table('transactions').insert({
+                'user_id': req.user_id,
+                'amount': -5,
+                'type': 'spend',
+                'description': 'Dual Digital Generation (Headshot + Full Body)'
+            }).execute()
+
             print(f"[DUAL] Updated profile: added {len(urls_to_add)} photos, {new_credits} credits remaining")
 
             result["remaining_credits"] = new_credits
