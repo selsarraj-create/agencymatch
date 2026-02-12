@@ -7,6 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '../components/ThemeToggle';
 import DashboardLayout from '../components/DashboardLayout';
 
+import guideCorrectImg from '../assets/guide_correct.png';
+import guideIncorrectImg from '../assets/guide_incorrect.png';
+
 /* ─── Ghost Silhouette SVGs ──────────────────────────────────────────── */
 const PortraitSilhouette = () => (
     <svg viewBox="0 0 120 160" fill="none" className="w-20 h-28 opacity-[0.08] dark:opacity-[0.06]">
@@ -67,7 +70,7 @@ const GuideModal = ({ isOpen, onClose }) => {
                             <span className="font-bold text-green-700 dark:text-green-400">Correct</span>
                         </div>
                         <div className="flex gap-4">
-                            <img src="/assets/guide_correct.png" alt="Correct Example" className="w-24 h-32 object-cover rounded-lg border border-green-200 dark:border-green-800/30" />
+                            <img src={guideCorrectImg} alt="Correct Example" className="w-24 h-32 object-cover rounded-lg border border-green-200 dark:border-green-800/30" />
                             <ul className="text-sm space-y-1.5 text-green-800 dark:text-green-300 flex-1">
                                 <li>✓ Plain white t-shirt or simple clothing</li>
                                 <li>✓ Well-lit, natural or studio lighting</li>
@@ -84,7 +87,7 @@ const GuideModal = ({ isOpen, onClose }) => {
                             <span className="font-bold text-red-700 dark:text-red-400">Incorrect</span>
                         </div>
                         <div className="flex gap-4">
-                            <img src="/assets/guide_incorrect.png" alt="Incorrect Example" className="w-24 h-32 object-cover rounded-lg border border-red-200 dark:border-red-800/30" />
+                            <img src={guideIncorrectImg} alt="Incorrect Example" className="w-24 h-32 object-cover rounded-lg border border-red-200 dark:border-red-800/30" />
                             <ul className="text-sm space-y-1.5 text-red-800 dark:text-red-300 flex-1">
                                 <li>✗ Heavy Instagram filters or editing</li>
                                 <li>✗ Baggy or patterned clothing</li>
