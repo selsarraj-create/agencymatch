@@ -102,7 +102,20 @@ const GuideModal = ({ isOpen, onClose }) => {
 
 /* ─── Stats Result Modal ───────────────────────────────────────────── */
 const StatsModal = ({ isOpen, onClose, stats, onSave, saving }) => {
-    if (!isOpen || !stats) return null;
+    const [editStats, setEditStats] = useState(null);
+
+    useEffect(() => {
+        if (isOpen && stats) {
+            setEditStats({ ...stats });
+        }
+    }, [isOpen, stats]);
+
+    if (!isOpen || !stats || !editStats) return null;
+
+    const handleChange = (field, value) => {
+        setEditStats(prev => ({ ...prev, [field]: value }));
+    };
+
     return (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
             <div className="bg-card-light dark:bg-card-dark border border-gray-200 dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -118,42 +131,79 @@ const StatsModal = ({ isOpen, onClose, stats, onSave, saving }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
                             <span className="text-[10px] uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">Waist</span>
-                            <div className="text-2xl font-black">{stats.waist_cm}cm</div>
+                            <div className="flex items-center gap-1">
+                                <input
+                                    type="number"
+                                    value={editStats.waist_cm}
+                                    onChange={(e) => handleChange('waist_cm', e.target.value)}
+                                    className="bg-transparent text-2xl font-black w-20 border-b border-dashed border-gray-300 dark:border-white/20 focus:border-brand-start outline-none"
+                                />
+                                <span className="text-sm font-bold opacity-50">cm</span>
+                            </div>
                         </div>
                         <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
                             <span className="text-[10px] uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">Hips</span>
-                            <div className="text-2xl font-black">{stats.hips_cm}cm</div>
+                            <div className="flex items-center gap-1">
+                                <input
+                                    type="number"
+                                    value={editStats.hips_cm}
+                                    onChange={(e) => handleChange('hips_cm', e.target.value)}
+                                    className="bg-transparent text-2xl font-black w-20 border-b border-dashed border-gray-300 dark:border-white/20 focus:border-brand-start outline-none"
+                                />
+                                <span className="text-sm font-bold opacity-50">cm</span>
+                            </div>
                         </div>
                         <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
                             <span className="text-[10px] uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">Bust/Chest</span>
-                            <div className="text-2xl font-black">{stats.bust_cm}cm</div>
+                            <div className="flex items-center gap-1">
+                                <input
+                                    type="number"
+                                    value={editStats.bust_cm}
+                                    onChange={(e) => handleChange('bust_cm', e.target.value)}
+                                    className="bg-transparent text-2xl font-black w-20 border-b border-dashed border-gray-300 dark:border-white/20 focus:border-brand-start outline-none"
+                                />
+                                <span className="text-sm font-bold opacity-50">cm</span>
+                            </div>
                         </div>
                         <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
                             <span className="text-[10px] uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">Shoe Size</span>
-                            <div className="text-2xl font-black">UK {stats.shoe_size_uk}</div>
+                            <div className="flex items-center gap-1">
+                                <span className="text-sm font-bold opacity-50">UK</span>
+                                <input
+                                    type="number"
+                                    step="0.5"
+                                    value={editStats.shoe_size_uk}
+                                    onChange={(e) => handleChange('shoe_size_uk', e.target.value)}
+                                    className="bg-transparent text-2xl font-black w-16 border-b border-dashed border-gray-300 dark:border-white/20 focus:border-brand-start outline-none text-center"
+                                />
+                            </div>
                         </div>
                     </div>
 
                     {/* Color Analysis */}
                     <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl text-xs">
+                            <span className="font-bold uppercase tracking-wider opacity-50">Physical Traits</span>
+                            <span className="text-[9px] text-gray-400">Not editable</span>
+                        </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
                             <span className="text-sm font-bold">Eye Color</span>
                             <div className="flex items-center gap-2">
-                                <span className="text-sm">{stats.eye_color?.category}</span>
-                                <div className="w-4 h-4 rounded-full border border-gray-200" style={{ backgroundColor: stats.eye_color?.hex }}></div>
+                                <span className="text-sm">{editStats.eye_color?.category}</span>
+                                <div className="w-4 h-4 rounded-full border border-gray-200" style={{ backgroundColor: editStats.eye_color?.hex }}></div>
                             </div>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
                             <span className="text-sm font-bold">Hair Color</span>
                             <div className="flex items-center gap-2">
-                                <span className="text-sm">{stats.hair_color?.category}</span>
-                                <div className="w-4 h-4 rounded-full border border-gray-200" style={{ backgroundColor: stats.hair_color?.hex }}></div>
+                                <span className="text-sm">{editStats.hair_color?.category}</span>
+                                <div className="w-4 h-4 rounded-full border border-gray-200" style={{ backgroundColor: editStats.hair_color?.hex }}></div>
                             </div>
                         </div>
                     </div>
 
                     <button
-                        onClick={onSave}
+                        onClick={() => onSave(editStats)}
                         disabled={saving}
                         className="w-full py-4 bg-brand-start hover:bg-brand-mid text-white rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2"
                     >
@@ -506,8 +556,9 @@ const PhotoLab = ({ isEmbedded = false }) => {
         }
     };
 
-    const handleSaveStats = async () => {
-        if (!statsResult) return;
+    const handleSaveStats = async (finalStats) => {
+        const statsToSave = finalStats || statsResult;
+        if (!statsToSave) return;
         setSavingStats(true);
         try {
             // Format height string based on current selection
@@ -519,12 +570,12 @@ const PhotoLab = ({ isEmbedded = false }) => {
             }
 
             const updates = {
-                waist_cm: statsResult.waist_cm,
-                hips_cm: statsResult.hips_cm,
-                bust_cm: statsResult.bust_cm,
-                shoe_size_uk: statsResult.shoe_size_uk,
-                eye_color: statsResult.eye_color?.category,
-                hair_color: statsResult.hair_color?.category,
+                waist_cm: statsToSave.waist_cm,
+                hips_cm: statsToSave.hips_cm,
+                bust_cm: statsToSave.bust_cm,
+                shoe_size_uk: statsToSave.shoe_size_uk,
+                eye_color: statsToSave.eye_color?.category,
+                hair_color: statsToSave.hair_color?.category,
                 height: heightStr
             };
 
