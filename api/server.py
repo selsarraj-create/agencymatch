@@ -378,6 +378,38 @@ async def analyze_endpoint(file: UploadFile = File(...)):
         print(f"Analyze Error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+# --- Studio Statistics Analysis ---
+from api.studio_analysis import analyze_model_stats
+
+class StatsAnalysisRequest(BaseModel):
+    portrait_url: str
+    fullbody_url: str
+    height_cm: str
+
+@app.post("/api/analyze-stats")
+async def analyze_stats_endpoint(req: StatsAnalysisRequest):
+    try:
+        # Download images to memory
+        # In production, use async http client (httpx), but requests is fine for low volume
+        import requests
+        
+        # Helper to download
+        def download_to_bytes(url):
+            r = requests.get(url, timeout=20)
+            r.raise_for_status()
+            return r.content
+            
+        portrait_bytes = download_to_bytes(req.portrait_url)
+        fullbody_bytes = download_to_bytes(req.fullbody_url)
+        
+        # Analyze
+        result = analyze_model_stats(portrait_bytes, fullbody_bytes, req.height_cm)
+        return result
+        
+    except Exception as e:
+        print(f"Stats Analysis Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
 # --- Photo Lab Endpoints ---
 from api.photo_lab import process_digitals, process_digitals_dual, audit_image_quality
 

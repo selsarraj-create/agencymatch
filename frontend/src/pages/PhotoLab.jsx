@@ -100,6 +100,75 @@ const GuideModal = ({ isOpen, onClose }) => {
     );
 };
 
+/* ─── Stats Result Modal ───────────────────────────────────────────── */
+const StatsModal = ({ isOpen, onClose, stats, onSave, saving }) => {
+    if (!isOpen || !stats) return null;
+    return (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-card-light dark:bg-card-dark border border-gray-200 dark:border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+                <div className="p-6 border-b border-gray-100 dark:border-white/5 flex justify-between items-center">
+                    <h3 className="text-xl font-black flex items-center gap-2">
+                        <ScanFace className="text-brand-start" /> Auto-Measurements
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-black dark:hover:text-white transition-colors"><X size={24} /></button>
+                </div>
+
+                <div className="p-6 space-y-6">
+                    {/* Measurements Grid */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+                            <span className="text-[10px] uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">Waist</span>
+                            <div className="text-2xl font-black">{stats.waist_cm}cm</div>
+                        </div>
+                        <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+                            <span className="text-[10px] uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">Hips</span>
+                            <div className="text-2xl font-black">{stats.hips_cm}cm</div>
+                        </div>
+                        <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+                            <span className="text-[10px] uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">Bust/Chest</span>
+                            <div className="text-2xl font-black">{stats.bust_cm}cm</div>
+                        </div>
+                        <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+                            <span className="text-[10px] uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">Shoe Size</span>
+                            <div className="text-2xl font-black">UK {stats.shoe_size_uk}</div>
+                        </div>
+                    </div>
+
+                    {/* Color Analysis */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
+                            <span className="text-sm font-bold">Eye Color</span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm">{stats.eye_color?.category}</span>
+                                <div className="w-4 h-4 rounded-full border border-gray-200" style={{ backgroundColor: stats.eye_color?.hex }}></div>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
+                            <span className="text-sm font-bold">Hair Color</span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm">{stats.hair_color?.category}</span>
+                                <div className="w-4 h-4 rounded-full border border-gray-200" style={{ backgroundColor: stats.hair_color?.hex }}></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={onSave}
+                        disabled={saving}
+                        className="w-full py-4 bg-brand-start hover:bg-brand-mid text-white rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2"
+                    >
+                        {saving ? <Loader2 className="animate-spin" /> : <CheckCircle />}
+                        Save to Profile
+                    </button>
+                    <p className="text-[10px] text-center text-gray-400">
+                        *Estimates based on computer vision. Please verify manually.
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 /* ─── Upload Box Component ─────────────────────────────────────────── */
 const UploadBox = ({ label, preview, silhouette: Silhouette, onFileSelect, onClear, error: fileError, auditing, auditStatus }) => {
     const inputRef = useRef(null);
@@ -171,6 +240,13 @@ const PhotoLab = ({ isEmbedded = false }) => {
     const [loading, setLoading] = useState(true);
     const [step, setStep] = useState('upload'); // upload | processing | result
 
+    // Stats State
+    const [height, setHeight] = useState('');
+    const [statsResult, setStatsResult] = useState(null);
+    const [showStatsModal, setShowStatsModal] = useState(false);
+    const [analyzingStats, setAnalyzingStats] = useState(false);
+    const [savingStats, setSavingStats] = useState(false);
+
     // Dual reference state
     const [portraitRef, setPortraitRef] = useState(null);     // { preview, url }
     const [fullBodyRef, setFullBodyRef] = useState(null);     // { preview, url }
@@ -214,8 +290,11 @@ const PhotoLab = ({ isEmbedded = false }) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { navigate('/login'); return; }
         setUser(user);
-        const { data: profile } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
-        if (profile) setCredits(profile.credits);
+        const { data: profile } = await supabase.from('profiles').select('credits, height').eq('id', user.id).single();
+        if (profile) {
+            setCredits(profile.credits);
+            if (profile.height) setHeight(profile.height.replace('cm', ''));
+        }
         setLoading(false);
 
         const channel = supabase.channel('photolab_realtime')
@@ -320,6 +399,58 @@ const PhotoLab = ({ isEmbedded = false }) => {
         }
     };
 
+    /* ── Stats Handlers ───────────────────────────────────────────── */
+    const handleAnalyzeStats = async () => {
+        if (!height) { alert("Please enter your height first."); return; }
+        if (!bothReady) { alert("Please upload both photos first."); return; }
+
+        setAnalyzingStats(true);
+        try {
+            const response = await axios.post(`${API_URL}/analyze-stats`, {
+                portrait_url: portraitRef.url,
+                fullbody_url: fullBodyRef.url,
+                height_cm: height
+            });
+
+            if (response.data.error) throw new Error(response.data.error);
+
+            setStatsResult(response.data);
+            setShowStatsModal(true);
+        } catch (e) {
+            console.error("Stats Error:", e);
+            alert("Failed to analyze stats. Please ensure photos are clear.");
+        } finally {
+            setAnalyzingStats(false);
+        }
+    };
+
+    const handleSaveStats = async () => {
+        if (!statsResult) return;
+        setSavingStats(true);
+        try {
+            const updates = {
+                waist_cm: statsResult.waist_cm,
+                hips_cm: statsResult.hips_cm,
+                bust_cm: statsResult.bust_cm,
+                shoe_size_uk: statsResult.shoe_size_uk,
+                eye_color: statsResult.eye_color?.category,
+                hair_color: statsResult.hair_color?.category,
+                height: `${height}cm` // Ensure height is saved too
+            };
+
+            const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
+            if (error) throw error;
+
+            setShowStatsModal(false);
+            alert("Measurements saved to your profile!");
+        } catch (e) {
+            console.error("Save Error:", e);
+            alert("Failed to save stats.");
+        } finally {
+            setSavingStats(false);
+        }
+    };
+
     const resetAll = () => {
         setStep('upload');
         setGeneratedImages(null);
@@ -378,6 +509,30 @@ const PhotoLab = ({ isEmbedded = false }) => {
                             1. References
                             {bothReady && <CheckCircle size={16} className="text-green-500" />}
                         </h2>
+
+                        {/* Height Input & Auto-Analyze */}
+                        <div className="mb-6 bg-gray-50 dark:bg-white/5 p-4 rounded-2xl flex items-end gap-3 border border-gray-100 dark:border-white/5">
+                            <div className="flex-1">
+                                <label className="text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1 block">Your Height (cm)</label>
+                                <input
+                                    type="number"
+                                    value={height}
+                                    onChange={(e) => setHeight(e.target.value)}
+                                    placeholder="e.g. 175"
+                                    className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
+                                />
+                            </div>
+                            {bothReady && (
+                                <button
+                                    onClick={handleAnalyzeStats}
+                                    disabled={analyzingStats || !height}
+                                    className="h-[46px] px-4 bg-brand-start/10 hover:bg-brand-start/20 text-brand-start rounded-xl font-bold text-sm transition-colors flex items-center gap-2 disabled:opacity-50"
+                                >
+                                    {analyzingStats ? <Loader2 size={16} className="animate-spin" /> : <ScanFace size={18} />}
+                                    Auto-Measure
+                                </button>
+                            )}
+                        </div>
 
                         {/* Side-by-side upload grid */}
                         <div className="flex gap-[4%]">
@@ -650,6 +805,19 @@ const PhotoLab = ({ isEmbedded = false }) => {
                     {content}
                 </DashboardLayout>
             )}
+
+            {/* Stats Modal */}
+            <AnimatePresence>
+                {showStatsModal && (
+                    <StatsModal
+                        isOpen={showStatsModal}
+                        stats={statsResult}
+                        onClose={() => setShowStatsModal(false)}
+                        onSave={handleSaveStats}
+                        saving={savingStats}
+                    />
+                )}
+            </AnimatePresence>
         </>
     );
 };
