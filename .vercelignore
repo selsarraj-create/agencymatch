@@ -1,0 +1,34 @@
+# Test artifacts
+*.jpg
+*.png
+test_*.py
+check_*.py
+debug_*.py
+
+# Scraping scripts (local only)
+scrape_*.py
+verify_urls.py
+uk_agencies_master.json
+uk_active_agencies.csv
+verified_list.txt
+final_agencies.json
+app_urls.json
+models_dump.html
+models_list.txt
+
+# Local environments
+venv/
+env/
+.env
+.env.*
+
+# Build artifacts
+__pycache__/
+*.pyc
+dist/
+
+# Backend test scripts
+backend/test_*.py
+
+# Scripts (local only)
+scripts/

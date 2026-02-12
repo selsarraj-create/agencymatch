@@ -6,8 +6,5 @@ pydantic
 supabase
 requests
 typing_extensions
-# Force cache bust v10 - remove debug logging
-Pillow
 stripe
-playwright
 google-genai
