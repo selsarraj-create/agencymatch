@@ -240,8 +240,14 @@ const PhotoLab = ({ isEmbedded = false }) => {
     const [loading, setLoading] = useState(true);
     const [step, setStep] = useState('upload'); // upload | processing | result
 
+
+
     // Stats State
-    const [height, setHeight] = useState('');
+    const [heightUnit, setHeightUnit] = useState('cm'); // 'cm' | 'ft'
+    const [heightCm, setHeightCm] = useState('');
+    const [heightFt, setHeightFt] = useState('');
+    const [heightIn, setHeightIn] = useState('');
+
     const [statsResult, setStatsResult] = useState(null);
     const [showStatsModal, setShowStatsModal] = useState(false);
     const [analyzingStats, setAnalyzingStats] = useState(false);
@@ -293,7 +299,22 @@ const PhotoLab = ({ isEmbedded = false }) => {
         const { data: profile } = await supabase.from('profiles').select('credits, height').eq('id', user.id).single();
         if (profile) {
             setCredits(profile.credits);
-            if (profile.height) setHeight(profile.height.replace('cm', ''));
+            if (profile.height) {
+                // Try to parse existing height
+                const h = profile.height.toLowerCase();
+                if (h.includes('cm')) {
+                    setHeightUnit('cm');
+                    setHeightCm(h.replace('cm', '').trim());
+                } else if (h.includes("'")) {
+                    setHeightUnit('ft');
+                    const [f, i] = h.split("'");
+                    setHeightFt(f.trim());
+                    setHeightIn(i.replace('"', '').trim());
+                } else {
+                    // Fallback assume cm if just number
+                    setHeightCm(h.trim());
+                }
+            }
         }
         setLoading(false);
 
@@ -401,7 +422,17 @@ const PhotoLab = ({ isEmbedded = false }) => {
 
     /* ── Stats Handlers ───────────────────────────────────────────── */
     const handleAnalyzeStats = async () => {
-        if (!height) { alert("Please enter your height first."); return; }
+        let heightVal = heightCm;
+
+        if (heightUnit === 'ft') {
+            if (!heightFt) { alert("Please enter feet."); return; }
+            // Convert to cm: 1 ft = 30.48 cm, 1 in = 2.54 cm
+            const ft = parseInt(heightFt) || 0;
+            const inch = parseInt(heightIn) || 0;
+            heightVal = Math.round((ft * 30.48) + (inch * 2.54));
+        }
+
+        if (!heightVal) { alert("Please enter your height."); return; }
         if (!bothReady) { alert("Please upload both photos first."); return; }
 
         setAnalyzingStats(true);
@@ -409,7 +440,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
             const response = await axios.post(`${API_URL}/analyze-stats`, {
                 portrait_url: portraitRef.url,
                 fullbody_url: fullBodyRef.url,
-                height_cm: height
+                height_cm: heightVal
             });
 
             if (response.data.error) throw new Error(response.data.error);
@@ -428,6 +459,14 @@ const PhotoLab = ({ isEmbedded = false }) => {
         if (!statsResult) return;
         setSavingStats(true);
         try {
+            // Format height string based on current selection
+            let heightStr = '';
+            if (heightUnit === 'cm') {
+                heightStr = `${heightCm}cm`;
+            } else {
+                heightStr = `${heightFt}'${heightIn}"`;
+            }
+
             const updates = {
                 waist_cm: statsResult.waist_cm,
                 hips_cm: statsResult.hips_cm,
@@ -435,7 +474,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
                 shoe_size_uk: statsResult.shoe_size_uk,
                 eye_color: statsResult.eye_color?.category,
                 hair_color: statsResult.hair_color?.category,
-                height: `${height}cm` // Ensure height is saved too
+                height: heightStr
             };
 
             const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
@@ -513,19 +552,64 @@ const PhotoLab = ({ isEmbedded = false }) => {
                         {/* Height Input & Auto-Analyze */}
                         <div className="mb-6 bg-gray-50 dark:bg-white/5 p-4 rounded-2xl flex items-end gap-3 border border-gray-100 dark:border-white/5">
                             <div className="flex-1">
-                                <label className="text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1 block">Your Height (cm)</label>
-                                <input
-                                    type="number"
-                                    value={height}
-                                    onChange={(e) => setHeight(e.target.value)}
-                                    placeholder="e.g. 175"
-                                    className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
-                                />
+                                <div className="flex justify-between items-center mb-1">
+                                    <label className="text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark">Your Height</label>
+                                    <div className="flex bg-gray-200 dark:bg-black/40 rounded-lg p-0.5">
+                                        <button
+                                            onClick={() => setHeightUnit('ft')}
+                                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${heightUnit === 'ft' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-gray-500'}`}
+                                        >
+                                            FT
+                                        </button>
+                                        <button
+                                            onClick={() => setHeightUnit('cm')}
+                                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${heightUnit === 'cm' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-gray-500'}`}
+                                        >
+                                            CM
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {heightUnit === 'cm' ? (
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            value={heightCm}
+                                            onChange={(e) => setHeightCm(e.target.value)}
+                                            placeholder="175"
+                                            className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
+                                        />
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 pointer-events-none">cm</span>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <input
+                                                type="number"
+                                                value={heightFt}
+                                                onChange={(e) => setHeightFt(e.target.value)}
+                                                placeholder="5"
+                                                className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
+                                            />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 pointer-events-none">ft</span>
+                                        </div>
+                                        <div className="relative flex-1">
+                                            <input
+                                                type="number"
+                                                value={heightIn}
+                                                onChange={(e) => setHeightIn(e.target.value)}
+                                                placeholder="9"
+                                                className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
+                                            />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 pointer-events-none">in</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             {bothReady && (
                                 <button
                                     onClick={handleAnalyzeStats}
-                                    disabled={analyzingStats || !height}
+                                    disabled={analyzingStats || (heightUnit === 'cm' ? !heightCm : !heightFt)}
                                     className="h-[46px] px-4 bg-brand-start/10 hover:bg-brand-start/20 text-brand-start rounded-xl font-bold text-sm transition-colors flex items-center gap-2 disabled:opacity-50"
                                 >
                                     {analyzingStats ? <Loader2 size={16} className="animate-spin" /> : <ScanFace size={18} />}
