@@ -7,8 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '../components/ThemeToggle';
 import DashboardLayout from '../components/DashboardLayout';
 
-import guideCorrectImg from '../assets/guide_correct.png';
-import guideIncorrectImg from '../assets/guide_incorrect.png';
+import guideCorrectImg from '../assets/guide_correct_v2.png';
+import guideIncorrectImg from '../assets/guide_incorrect_v2.png';
 
 /* ─── Ghost Silhouette SVGs ──────────────────────────────────────────── */
 const PortraitSilhouette = () => (
