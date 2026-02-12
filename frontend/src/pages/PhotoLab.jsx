@@ -66,13 +66,16 @@ const GuideModal = ({ isOpen, onClose }) => {
                             <CheckCircle size={18} className="text-green-500" />
                             <span className="font-bold text-green-700 dark:text-green-400">Correct</span>
                         </div>
-                        <ul className="text-sm space-y-1.5 text-green-800 dark:text-green-300">
-                            <li>✓ Plain white t-shirt or simple clothing</li>
-                            <li>✓ Well-lit, natural or studio lighting</li>
-                            <li>✓ Neutral wall or clean background</li>
-                            <li>✓ No heavy makeup or filters</li>
-                            <li>✓ Face clearly visible, no obstructions</li>
-                        </ul>
+                        <div className="flex gap-4">
+                            <img src="/assets/guide_correct.png" alt="Correct Example" className="w-24 h-32 object-cover rounded-lg border border-green-200 dark:border-green-800/30" />
+                            <ul className="text-sm space-y-1.5 text-green-800 dark:text-green-300 flex-1">
+                                <li>✓ Plain white t-shirt or simple clothing</li>
+                                <li>✓ Well-lit, natural or studio lighting</li>
+                                <li>✓ Neutral wall or clean background</li>
+                                <li>✓ No heavy makeup or filters</li>
+                                <li>✓ Face clearly visible, no obstructions</li>
+                            </ul>
+                        </div>
                     </div>
                     {/* Incorrect */}
                     <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/30 rounded-2xl p-4">
@@ -80,13 +83,16 @@ const GuideModal = ({ isOpen, onClose }) => {
                             <XCircle size={18} className="text-red-500" />
                             <span className="font-bold text-red-700 dark:text-red-400">Incorrect</span>
                         </div>
-                        <ul className="text-sm space-y-1.5 text-red-800 dark:text-red-300">
-                            <li>✗ Heavy Instagram filters or editing</li>
-                            <li>✗ Baggy or patterned clothing</li>
-                            <li>✗ Cluttered or busy backgrounds</li>
-                            <li>✗ Sunglasses covering face/eyes</li>
-                            <li>✗ Group photos or cropped images</li>
-                        </ul>
+                        <div className="flex gap-4">
+                            <img src="/assets/guide_incorrect.png" alt="Incorrect Example" className="w-24 h-32 object-cover rounded-lg border border-red-200 dark:border-red-800/30" />
+                            <ul className="text-sm space-y-1.5 text-red-800 dark:text-red-300 flex-1">
+                                <li>✗ Heavy Instagram filters or editing</li>
+                                <li>✗ Baggy or patterned clothing</li>
+                                <li>✗ Cluttered or busy backgrounds</li>
+                                <li>✗ Sunglasses covering face/eyes</li>
+                                <li>✗ Group photos or cropped images</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </motion.div>
@@ -363,8 +369,8 @@ const PhotoLab = ({ isEmbedded = false }) => {
                             onClick={handleGenerate}
                             disabled={!bothReady || credits < 1 || step === 'processing'}
                             className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] shadow-lg text-sm ${!bothReady || credits < 1
-                                    ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gradient-to-r from-brand-start to-brand-end hover:brightness-110 text-white'
+                                ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-brand-start to-brand-end hover:brightness-110 text-white'
                                 }`}
                         >
                             {step === 'processing' ? (
