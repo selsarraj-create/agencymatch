@@ -183,7 +183,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
     const [auditingPortrait, setAuditingPortrait] = useState(false);
     const [auditingFullBody, setAuditingFullBody] = useState(false);
 
-    const [generatedImage, setGeneratedImage] = useState(null);
+    const [generatedImages, setGeneratedImages] = useState(null);
     const [identityConstraints, setIdentityConstraints] = useState(null);
     const [error, setError] = useState(null);
     const [processingStage, setProcessingStage] = useState('');
@@ -287,7 +287,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
 
     /* ── Generate ─────────────────────────────────────────────────── */
     const handleGenerate = async () => {
-        if (credits < 1) { setError("Insufficient credits."); setShowBuyModal(true); return; }
+        if (credits < 5) { setError("Insufficient credits."); setShowBuyModal(true); return; }
         if (!bothReady) { setError("Upload both photos first."); return; }
 
         setStep('processing');
@@ -304,10 +304,12 @@ const PhotoLab = ({ isEmbedded = false }) => {
             if (response.data.status === 'success') {
                 setIdentityConstraints(response.data.identity_constraints);
                 setProcessingStage('Rendering Full-Length Digital...');
-                const imageSrc = `data:image/jpeg;base64,${response.data.image_bytes}`;
-                setGeneratedImage(imageSrc);
+                setGeneratedImages({
+                    headshot: response.data.headshot_url || response.data.public_url,
+                    fullbody: response.data.fullbody_url
+                });
                 setStep('result');
-                setCredits(prev => Math.max(0, prev - 1));
+                setCredits(prev => Math.max(0, prev - 5));
             } else if (response.data.error) {
                 throw new Error(response.data.error);
             }
@@ -320,7 +322,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
 
     const resetAll = () => {
         setStep('upload');
-        setGeneratedImage(null);
+        setGeneratedImages(null);
         setIdentityConstraints(null);
         setPortraitRef(null);
         setFullBodyRef(null);
@@ -494,8 +496,8 @@ const PhotoLab = ({ isEmbedded = false }) => {
                     {step !== 'result' && (
                         <button
                             onClick={handleGenerate}
-                            disabled={!bothReady || credits < 1 || step === 'processing'}
-                            className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] shadow-lg text-sm ${!bothReady || credits < 1
+                            disabled={!bothReady || credits < 5 || step === 'processing'}
+                            className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] shadow-lg text-sm ${!bothReady || credits < 5
                                 ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
                                 : 'bg-gradient-to-r from-brand-start to-brand-end hover:brightness-110 text-white'
                                 }`}
@@ -508,7 +510,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
                             {step === 'processing'
                                 ? processingStage
                                 : bothReady
-                                    ? 'Generate Digital (1 Credit)'
+                                    ? 'Generate Digitals (5 Credits)'
                                     : 'Upload both photos to continue'}
                         </button>
                     )}
@@ -539,16 +541,32 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                     </p>
                                 </div>
                             </div>
-                        ) : step === 'result' && generatedImage ? (
-                            <div className="flex-1 flex flex-col gap-4 animate-in fade-in duration-700">
-                                <div className="relative rounded-lg overflow-hidden shadow-2xl bg-white p-2 md:p-4 rotate-1 border border-gray-100">
-                                    <img src={generatedImage} alt="Model Digital" className="w-full h-auto rounded-sm filter contrast-110 saturate-[0.85]" />
-                                    <div className="mt-4 flex justify-between items-end">
-                                        <div className="font-handwriting text-black/80 text-xl transform -rotate-2 ml-2">Digital #01</div>
-                                        <div className="flex items-center gap-1 text-[10px] text-green-600 font-bold bg-green-50 px-2 py-1 rounded-full border border-green-100">
-                                            <CheckCircle size={10} /> Saved to Profile
+                        ) : step === 'result' && generatedImages ? (
+                            <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-700">
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Headshot */}
+                                    <div className="relative rounded-lg overflow-hidden shadow-xl bg-white p-2 border border-gray-100 rotate-[-1deg] transition-transform hover:rotate-0 hover:scale-[1.02] duration-300">
+                                        <img src={generatedImages.headshot} alt="Headshot" className="w-full h-auto rounded-sm filter contrast-110 saturate-[0.85]" />
+                                        <div className="mt-2 text-center font-handwriting text-black/80 text-lg">Digital #01</div>
+                                        <div className="absolute top-3 right-3 flex items-center gap-1 text-[8px] text-green-600 font-bold bg-green-50 px-1.5 py-0.5 rounded-full border border-green-100 shadow-sm">
+                                            HEADSHOT
                                         </div>
-                                        <img src="/logo-small.png" className="h-6 opacity-50 grayscale" alt="" />
+                                    </div>
+                                    {/* Full Body */}
+                                    {generatedImages.fullbody && (
+                                        <div className="relative rounded-lg overflow-hidden shadow-xl bg-white p-2 border border-gray-100 rotate-[1deg] transition-transform hover:rotate-0 hover:scale-[1.02] duration-300">
+                                            <img src={generatedImages.fullbody} alt="Full Body" className="w-full h-auto rounded-sm filter contrast-110 saturate-[0.85]" />
+                                            <div className="mt-2 text-center font-handwriting text-black/80 text-lg">Digital #02</div>
+                                            <div className="absolute top-3 right-3 flex items-center gap-1 text-[8px] text-green-600 font-bold bg-green-50 px-1.5 py-0.5 rounded-full border border-green-100 shadow-sm">
+                                                FULL BODY
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex justify-center">
+                                    <div className="flex items-center gap-1 text-[10px] text-green-600 font-bold bg-green-50 px-3 py-1 rounded-full border border-green-100">
+                                        <CheckCircle size={10} /> Saved to Profile
                                     </div>
                                 </div>
 

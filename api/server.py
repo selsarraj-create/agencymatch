@@ -472,8 +472,8 @@ async def generate_digitals_dual_endpoint(req: DualDigitalGenRequest):
         supabase = get_supabase()
         profile_check = supabase.table("profiles").select("credits").eq("id", req.user_id).single().execute()
         current_credits = (profile_check.data or {}).get("credits", 0)
-        if current_credits < 1:
-            return JSONResponse(status_code=402, content={"error": "Insufficient credits"})
+        if current_credits < 5:
+            return JSONResponse(status_code=402, content={"error": "Insufficient credits (5 required)"})
 
         result = process_digitals_dual(req.portrait_url, req.fullbody_url)
 
@@ -485,29 +485,56 @@ async def generate_digitals_dual_endpoint(req: DualDigitalGenRequest):
             import base64
             import time
 
-            image_bytes = base64.b64decode(result["image_bytes"])
+            ts = int(time.time())
+            urls_to_add = []
+            
+            # 1. Save Headshot
+            headshot_data = result.get("headshot", {})
+            if "image_bytes" in headshot_data:
+                headshot_bytes = base64.b64decode(headshot_data["image_bytes"])
+                headshot_filename = f"{req.user_id}/{ts}_headshot.jpg"
+                supabase.storage.from_("generated").upload(
+                    file=headshot_bytes,
+                    path=headshot_filename,
+                    file_options={"content-type": "image/jpeg"}
+                )
+                headshot_url = supabase.storage.from_("generated").get_public_url(headshot_filename)
+                result["headshot_url"] = headshot_url
+                urls_to_add.append(headshot_url)
+                print(f"[DUAL] Saved headshot: {headshot_url}")
+                # Clean up bytes
+                del result["headshot"]["image_bytes"]
 
-            filename = f"{req.user_id}/{int(time.time())}_dual_digital.jpg"
-            supabase.storage.from_("generated").upload(
-                file=image_bytes,
-                path=filename,
-                file_options={"content-type": "image/jpeg"}
-            )
+            # 2. Save Fullbody
+            fullbody_data = result.get("fullbody", {})
+            if "image_bytes" in fullbody_data:
+                fullbody_bytes = base64.b64decode(fullbody_data["image_bytes"])
+                fullbody_filename = f"{req.user_id}/{ts}_fullbody.jpg"
+                supabase.storage.from_("generated").upload(
+                    file=fullbody_bytes,
+                    path=fullbody_filename,
+                    file_options={"content-type": "image/jpeg"}
+                )
+                fullbody_url = supabase.storage.from_("generated").get_public_url(fullbody_filename)
+                result["fullbody_url"] = fullbody_url
+                urls_to_add.append(fullbody_url)
+                print(f"[DUAL] Saved fullbody: {fullbody_url}")
+                # Clean up bytes
+                del result["fullbody"]["image_bytes"]
 
-            public_url = supabase.storage.from_("generated").get_public_url(filename)
-            print(f"[DUAL] Saved to storage: {public_url}")
-
+            # Update Profile
             profile_resp = supabase.table("profiles").select("generated_photos, credits").eq("id", req.user_id).single().execute()
             current_photos = (profile_resp.data or {}).get("generated_photos") or []
-            current_photos.append(public_url)
-            new_credits = max(0, (profile_resp.data or {}).get("credits", 0) - 1)
+            current_photos.extend(urls_to_add)
+            
+            new_credits = max(0, (profile_resp.data or {}).get("credits", 0) - 5)
+            
             supabase.table("profiles").update({
                 "generated_photos": current_photos,
                 "credits": new_credits,
             }).eq("id", req.user_id).execute()
-            print(f"[DUAL] Updated profile: {len(current_photos)} photos, {new_credits} credits remaining")
+            print(f"[DUAL] Updated profile: added {len(urls_to_add)} photos, {new_credits} credits remaining")
 
-            result["public_url"] = public_url
             result["remaining_credits"] = new_credits
 
         except Exception as storage_err:

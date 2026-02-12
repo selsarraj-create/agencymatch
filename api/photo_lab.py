@@ -48,18 +48,22 @@ def audit_image_quality(image_url: str) -> dict:
     prompt = (
         "Analyze this photo for Model Digital suitability.\n\n"
         "CRITERIA:\n"
-        "1. Brightness: Is the face underexposed or too dark?\n"
-        "2. Clarity: Is there significant motion blur?\n"
-        "3. Obstructions: Is the face clearly visible, or are there "
+        "1. Human Face: Does this image contain a clear human face? "
+        "If it is a screenshot, object, animal, meme, or anything "
+        "that is NOT a real human photo, immediately return score 0 "
+        "with issue 'no_face' and can_proceed false.\n"
+        "2. Brightness: Is the face underexposed or too dark?\n"
+        "3. Clarity: Is there significant motion blur?\n"
+        "4. Obstructions: Is the face clearly visible, or are there "
         "large objects/hands/sunglasses blocking it?\n\n"
         "RULES:\n"
         "- Be lenient. If the photo is 'good enough' for the AI to "
         "identify features, set can_proceed to true even if score is low.\n"
         "- Only set can_proceed to false for truly unusable photos "
-        "(face completely hidden, extreme blur, pitch black).\n\n"
+        "(no human face, face completely hidden, extreme blur, pitch black).\n\n"
         "Respond with ONLY a valid JSON object, no markdown fences:\n"
         '{ "score": <1-10>, "issues": [<zero or more of: '
-        '"too_dark", "blurry", "obstructed">], "can_proceed": <true/false> }'
+        '"no_face", "too_dark", "blurry", "obstructed">], "can_proceed": <true/false> }'
     )
 
     try:
@@ -265,36 +269,52 @@ def process_digitals(image_url: str):
 
 def process_digitals_dual(portrait_url: str, fullbody_url: str):
     """
-    Multi-Reference Identity Lock pipeline using Gemini 3 Pro.
+    Parallel Generation Pipeline:
+    1. Headshot: Uses process_digitals(portrait_url)
+    2. Full Body: Uses _generate_fullbody_dual(portrait_url, fullbody_url)
+    Returns composite result with both images.
+    """
+    import concurrent.futures
 
-    Accepts two reference images:
-      - Reference_1 (Portrait): face/identity — absolute constraint
-      - Reference_2 (Full Body): body proportions and scale
+    print(f"[DUAL] Starting parallel generation...")
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Submit both tasks
+        future_headshot = executor.submit(process_digitals, portrait_url)
+        future_fullbody = executor.submit(_generate_fullbody_dual, portrait_url, fullbody_url)
 
-    Step 1: Gemini 3 Pro merges both references into a single
-            full-length model digital with identity lock.
-    Step 2: Texture refinement pass for DSLR-quality output.
+        # Wait for results
+        headshot_result = future_headshot.result()
+        fullbody_result = future_fullbody.result()
+
+    return {
+        "status": "success",
+        "headshot": headshot_result,
+        "fullbody": fullbody_result
+    }
+
+
+def _generate_fullbody_dual(portrait_url: str, fullbody_url: str):
+    """
+    Private helper: Multi-Reference Identity Lock pipeline for Full Body.
     """
     client = get_client()
-    print(f"[DUAL] Processing — Portrait: {portrait_url}, Body: {fullbody_url}")
+    print(f"[DUAL-BODY] Processing — Portrait: {portrait_url}, Body: {fullbody_url}")
 
     # ── Fetch Both Source Images ──────────────────────────────────────────
     try:
         resp_p = requests.get(portrait_url)
         resp_p.raise_for_status()
         portrait_bytes = resp_p.content
-        print(f"[DUAL] Portrait downloaded: {len(portrait_bytes):,} bytes")
     except Exception as e:
-        print(f"[DUAL] Failed to fetch portrait: {e}")
+        print(f"[DUAL-BODY] Failed to fetch portrait: {e}")
         return {"error": "Failed to download portrait image"}
 
     try:
         resp_b = requests.get(fullbody_url)
         resp_b.raise_for_status()
         body_bytes = resp_b.content
-        print(f"[DUAL] Full body downloaded: {len(body_bytes):,} bytes")
     except Exception as e:
-        print(f"[DUAL] Failed to fetch full body: {e}")
+        print(f"[DUAL-BODY] Failed to fetch full body: {e}")
         return {"error": "Failed to download full body image"}
 
     # ══════════════════════════════════════════════════════════════════════
@@ -326,7 +346,7 @@ def process_digitals_dual(portrait_url: str, fullbody_url: str):
     )
 
     try:
-        print(f"[DUAL] Step 1: {GEMINI_MODEL} — Multi-reference identity lock...")
+        print(f"[DUAL-BODY] Step 1: {GEMINI_MODEL} — Multi-reference identity lock...")
         step1_response = client.models.generate_content(
             model=GEMINI_MODEL,
             contents=[
@@ -362,13 +382,13 @@ def process_digitals_dual(portrait_url: str, fullbody_url: str):
 
         if not intermediate_bytes:
             text_out = step1_response.text if step1_response.text else "No content"
-            print(f"[DUAL] Step 1 failed — text: {text_out[:200]}")
+            print(f"[DUAL-BODY] Step 1 failed — text: {text_out[:200]}")
             return {"error": f"Step 1 returned text: {text_out[:100]}"}
 
-        print(f"[DUAL] Step 1 complete — {len(intermediate_bytes):,} bytes")
+        print(f"[DUAL-BODY] Step 1 complete — {len(intermediate_bytes):,} bytes")
 
     except Exception as e:
-        print(f"[DUAL] Step 1 failed: {e}")
+        print(f"[DUAL-BODY] Step 1 failed: {e}")
         return {"error": f"Step 1 (Multi-Ref) failed: {str(e)}"}
 
     # ══════════════════════════════════════════════════════════════════════
@@ -394,7 +414,7 @@ def process_digitals_dual(portrait_url: str, fullbody_url: str):
     )
 
     try:
-        print(f"[DUAL] Step 2: {GEMINI_MODEL} — 4K texture refinement...")
+        print(f"[DUAL-BODY] Step 2: {GEMINI_MODEL} — 4K texture refinement...")
         step2_response = client.models.generate_content(
             model=GEMINI_MODEL,
             contents=[
@@ -418,7 +438,7 @@ def process_digitals_dual(portrait_url: str, fullbody_url: str):
                 if part.inline_data and part.inline_data.mime_type.startswith("image/"):
                     final_bytes = part.inline_data.data
                     final_mime = part.inline_data.mime_type
-                    print(f"[DUAL] Step 2 complete — {len(final_bytes):,} bytes")
+                    print(f"[DUAL-BODY] Step 2 complete — {len(final_bytes):,} bytes")
                     return {
                         "status": "success",
                         "identity_constraints": "Multi-Ref: face lock (Ref_1) + body (Ref_2) → DSLR refinement",
@@ -427,10 +447,10 @@ def process_digitals_dual(portrait_url: str, fullbody_url: str):
                     }
 
         text_out = step2_response.text if step2_response.text else "No content"
-        print(f"[DUAL] Step 2 returned text — fallback: {text_out[:200]}")
+        print(f"[DUAL-BODY] Step 2 returned text — fallback: {text_out[:200]}")
 
     except Exception as e:
-        print(f"[DUAL] Step 2 failed — fallback: {e}")
+        print(f"[DUAL-BODY] Step 2 failed — fallback: {e}")
 
     # Fallback: return Step 1 output
     return {
