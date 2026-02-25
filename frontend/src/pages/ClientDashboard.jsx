@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { LayoutDashboard, ExternalLink, CheckCircle, XCircle, Clock, Loader2, Coins, ArrowRight, CheckCircle2, User, X, Image as ImageIcon } from 'lucide-react';
+import { LayoutDashboard, ExternalLink, CheckCircle, XCircle, Clock, Loader2, Coins, ArrowRight, CheckCircle2, User, X, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import { ThemeToggle } from '../components/ThemeToggle';
 import ProfileEditor from '../components/ProfileEditor';
 import DashboardLayout from '../components/DashboardLayout';
@@ -320,6 +320,34 @@ const ClientDashboard = () => {
                                 ? agencies
                                 : agencies.filter(a => a.modeling_types?.includes(selectedCategory));
 
+                            // Match logic helper
+                            const userHeight = userProfile?.height_cm ? parseInt(userProfile.height_cm) : 0;
+                            const userAge = userProfile?.date_of_birth
+                                ? Math.floor((Date.now() - new Date(userProfile.date_of_birth).getTime()) / 31557600000)
+                                : 0;
+
+                            const getMatch = (agency) => {
+                                const genderOk = !agency.gender_req || agency.gender_req === 'all'
+                                    || (userProfile?.gender && userProfile.gender.toLowerCase() === agency.gender_req.toLowerCase());
+                                const heightOk = !agency.height_min_cm || !userHeight
+                                    || (userHeight >= agency.height_min_cm && userHeight <= (agency.height_max_cm || 999));
+                                const ageOk = !agency.age_min || !userAge
+                                    || (userAge >= agency.age_min && userAge <= (agency.age_max || 99));
+
+                                const isMatch = genderOk && heightOk && ageOk;
+                                const reason = !genderOk ? 'Gender' : !heightOk ? 'Height' : !ageOk ? 'Age' : null;
+                                return { isMatch, reason };
+                            };
+
+                            // Sort: matches first, then vacancies, then alpha
+                            const sortedAgencies = [...filteredAgencies].sort((a, b) => {
+                                const mA = getMatch(a).isMatch ? 1 : 0;
+                                const mB = getMatch(b).isMatch ? 1 : 0;
+                                if (mA !== mB) return mB - mA;
+                                if (a.has_vacancies !== b.has_vacancies) return a.has_vacancies ? -1 : 1;
+                                return a.name.localeCompare(b.name);
+                            });
+
                             return (<>
                                 {/* Agency Directory Section */}
                                 <div className="space-y-4">
@@ -346,8 +374,8 @@ const ClientDashboard = () => {
                                             <button
                                                 onClick={() => setSelectedCategory('All')}
                                                 className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all active:scale-95 ${selectedCategory === 'All'
-                                                        ? 'bg-brand-start text-white shadow-md shadow-brand-start/25'
-                                                        : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10'
+                                                    ? 'bg-brand-start text-white shadow-md shadow-brand-start/25'
+                                                    : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10'
                                                     }`}
                                             >
                                                 All <span className="ml-1 opacity-70">{agencies.length}</span>
@@ -357,8 +385,8 @@ const ClientDashboard = () => {
                                                     key={name}
                                                     onClick={() => setSelectedCategory(name)}
                                                     className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all active:scale-95 whitespace-nowrap ${selectedCategory === name
-                                                            ? 'bg-brand-start text-white shadow-md shadow-brand-start/25'
-                                                            : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10'
+                                                        ? 'bg-brand-start text-white shadow-md shadow-brand-start/25'
+                                                        : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10'
                                                         }`}
                                                 >
                                                     {name} <span className="ml-1 opacity-70">{count}</span>
@@ -374,71 +402,91 @@ const ClientDashboard = () => {
                                                 Loading agencies...
                                             </div>
                                         ) : (
-                                            filteredAgencies.map(agency => (
-                                                <div
-                                                    key={agency.id}
-                                                    onClick={() => toggleAgency(agency.id)}
-                                                    className={`p-6 rounded-3xl border cursor-pointer transition-all group relative overflow-hidden flex flex-col justify-between ${selectedAgencies.has(agency.id)
-                                                        ? 'bg-brand-start/5 border-brand-start ring-1 ring-brand-start shadow-md'
-                                                        : agency.has_vacancies
-                                                            ? 'bg-green-500/5 border-green-500/50 hover:border-green-500 hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1'
-                                                            : 'bg-card-light dark:bg-card-dark border-gray-200 dark:border-white/10 hover:border-brand-start/30 hover:shadow-lg hover:-translate-y-1'
-                                                        }`}
-                                                >
-                                                    {agency.has_vacancies && (
-                                                        <div className="absolute top-0 right-0 bg-green-500 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-bl-xl shadow-sm z-20">
-                                                            Booking Now
+                                            sortedAgencies.map(agency => {
+                                                const match = getMatch(agency);
+                                                return (
+                                                    <div
+                                                        key={agency.id}
+                                                        onClick={() => toggleAgency(agency.id)}
+                                                        className={`p-6 rounded-3xl border cursor-pointer transition-all group relative overflow-hidden flex flex-col justify-between ${selectedAgencies.has(agency.id)
+                                                            ? 'bg-brand-start/5 border-brand-start ring-1 ring-brand-start shadow-md'
+                                                            : agency.has_vacancies
+                                                                ? 'bg-green-500/5 border-green-500/50 hover:border-green-500 hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1'
+                                                                : 'bg-card-light dark:bg-card-dark border-gray-200 dark:border-white/10 hover:border-brand-start/30 hover:shadow-lg hover:-translate-y-1'
+                                                            }`}
+                                                    >
+                                                        {agency.has_vacancies && (
+                                                            <div className="absolute top-0 right-0 bg-green-500 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-bl-xl shadow-sm z-20">
+                                                                Booking Now
+                                                            </div>
+                                                        )}
+                                                        <div className="flex justify-between items-start relative z-10 mb-4">
+                                                            <div className="flex gap-4 items-start">
+                                                                {/* Logo */}
+                                                                <div className="w-12 h-12 rounded-xl bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden shrink-0">
+                                                                    {agency.image_url ? (
+                                                                        <img src={agency.image_url} alt={agency.name} className="w-full h-full object-contain p-1" />
+                                                                    ) : (
+                                                                        <span className="text-xl font-black text-brand-start">{agency.name.charAt(0)}</span>
+                                                                    )}
+                                                                </div>
+                                                                <div>
+                                                                    <h3 className="font-bold text-lg leading-tight mb-1 line-clamp-2">{agency.name}</h3>
+                                                                    <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wide flex items-center gap-1">
+                                                                        {agency.location || 'London, UK'}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
+                                                                {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-white" />}
+                                                            </div>
                                                         </div>
-                                                    )}
-                                                    <div className="flex justify-between items-start relative z-10 mb-4">
-                                                        <div className="flex gap-4 items-start">
-                                                            {/* Logo */}
-                                                            <div className="w-12 h-12 rounded-xl bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden shrink-0">
-                                                                {agency.image_url ? (
-                                                                    <img src={agency.image_url} alt={agency.name} className="w-full h-full object-contain p-1" />
+
+                                                        {/* Match Badge */}
+                                                        {userProfile && (userHeight > 0 || userAge > 0) && (
+                                                            <div className="mb-3">
+                                                                {match.isMatch ? (
+                                                                    <div className="inline-flex items-center gap-1 bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-400 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border border-green-200 dark:border-green-500/25">
+                                                                        <CheckCircle2 size={10} />
+                                                                        You Fit
+                                                                    </div>
                                                                 ) : (
-                                                                    <span className="text-xl font-black text-brand-start">{agency.name.charAt(0)}</span>
+                                                                    <div className="inline-flex items-center gap-1 bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-500 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border border-yellow-200 dark:border-yellow-500/20">
+                                                                        <AlertTriangle size={10} />
+                                                                        {match.reason} Mismatch
+                                                                    </div>
                                                                 )}
                                                             </div>
-                                                            <div>
-                                                                <h3 className="font-bold text-lg leading-tight mb-1 line-clamp-2">{agency.name}</h3>
-                                                                <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wide flex items-center gap-1">
-                                                                    {agency.location || 'London, UK'}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
-                                                            {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-white" />}
-                                                        </div>
-                                                    </div>
+                                                        )}
 
-                                                    {/* Modeling Types Tags */}
-                                                    <div className="flex flex-wrap gap-2 mt-auto">
-                                                        {agency.modeling_types && agency.modeling_types.length > 0 ? (
-                                                            agency.modeling_types.slice(0, 3).map((type, idx) => (
-                                                                <span key={idx} className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
-                                                                    {type}
+                                                        {/* Modeling Types Tags */}
+                                                        <div className="flex flex-wrap gap-2 mt-auto">
+                                                            {agency.modeling_types && agency.modeling_types.length > 0 ? (
+                                                                agency.modeling_types.slice(0, 3).map((type, idx) => (
+                                                                    <span key={idx} className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
+                                                                        {type}
+                                                                    </span>
+                                                                ))
+                                                            ) : (
+                                                                <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
+                                                                    Fashion
                                                                 </span>
-                                                            ))
-                                                        ) : (
-                                                            <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
-                                                                Fashion
-                                                            </span>
-                                                        )}
-                                                        {agency.modeling_types && agency.modeling_types.length > 3 && (
-                                                            <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
-                                                                +{agency.modeling_types.length - 3}
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                                            )}
+                                                            {agency.modeling_types && agency.modeling_types.length > 3 && (
+                                                                <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
+                                                                    +{agency.modeling_types.length - 3}
+                                                                </span>
+                                                            )}
+                                                        </div>
 
-                                                    {/* Description Preview (Optional, usually takes too much space) */}
-                                                    {/* <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-3 line-clamp-2">
+                                                        {/* Description Preview (Optional, usually takes too much space) */}
+                                                        {/* <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-3 line-clamp-2">
                                                     {agency.description}
                                                 </p> */}
-                                                </div>
-                                            ))
-                                        )}
+                                                    </div>
+                                                );
+                                            }))
+                                        }
                                     </div>
                                 </div>
 
