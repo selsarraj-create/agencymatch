@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { LayoutDashboard, ExternalLink, CheckCircle, XCircle, Clock, Loader2, Coins, ArrowRight, CheckCircle2, User } from 'lucide-react';
+import { LayoutDashboard, ExternalLink, CheckCircle, XCircle, Clock, Loader2, Coins, ArrowRight, CheckCircle2, User, X, Image as ImageIcon } from 'lucide-react';
 import { ThemeToggle } from '../components/ThemeToggle';
 import ProfileEditor from '../components/ProfileEditor';
 import DashboardLayout from '../components/DashboardLayout';
@@ -18,6 +18,8 @@ const ClientDashboard = () => {
     const [agencies, setAgencies] = useState([]);
     const [selectedAgencies, setSelectedAgencies] = useState(new Set());
     const [applying, setApplying] = useState(false);
+    const [lightboxUrl, setLightboxUrl] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState('All');
 
     // Tab State
     const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'profile'
@@ -301,149 +303,207 @@ const ClientDashboard = () => {
 
                         {feedView === 'jobs' || feedView === 'applications' ? (
                             <CastingFeed userProfile={userProfile} filters={{ onlyApplied: feedView === 'applications' }} />
-                        ) : (<>
-                            {/* Agency Directory Section */}
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <h2 className="text-xl font-bold">Agency Directory <span className="text-text-secondary-light dark:text-text-secondary-dark font-medium text-sm ml-2">({agencies.length} available)</span></h2>
-                                    {selectedAgencies.size > 0 && (
-                                        <button
-                                            onClick={handleBulkApply}
-                                            disabled={applying}
-                                            className="bg-text-primary-light dark:bg-white text-white dark:text-black px-6 py-2 rounded-full font-bold hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-lg"
-                                        >
-                                            {applying ? <Loader2 className="animate-spin" /> : 'Apply Selected'}
-                                            <span className="text-xs bg-white/20 dark:bg-black/10 px-2 py-1 rounded-full text-current">
-                                                {selectedAgencies.size}
-                                            </span>
-                                        </button>
-                                    )}
-                                </div>
+                        ) : (() => {
+                            // Derive unique categories sorted by frequency
+                            const categoryCounts = {};
+                            agencies.forEach(a => {
+                                if (a.modeling_types && a.modeling_types.length > 0) {
+                                    a.modeling_types.forEach(t => { categoryCounts[t] = (categoryCounts[t] || 0) + 1; });
+                                }
+                            });
+                            const categoryList = Object.entries(categoryCounts)
+                                .sort((a, b) => b[1] - a[1])
+                                .map(([name, count]) => ({ name, count }));
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-1">
-                                    {agencies.length === 0 ? (
-                                        <div className="col-span-full text-center text-text-secondary-light dark:text-text-secondary-dark py-12 bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10">
-                                            <Loader2 className="animate-spin mx-auto mb-2" />
-                                            Loading agencies...
-                                        </div>
-                                    ) : (
-                                        agencies.map(agency => (
-                                            <div
-                                                key={agency.id}
-                                                onClick={() => toggleAgency(agency.id)}
-                                                className={`p-6 rounded-3xl border cursor-pointer transition-all group relative overflow-hidden flex flex-col justify-between ${selectedAgencies.has(agency.id)
-                                                    ? 'bg-brand-start/5 border-brand-start ring-1 ring-brand-start shadow-md'
-                                                    : agency.has_vacancies
-                                                        ? 'bg-green-500/5 border-green-500/50 hover:border-green-500 hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1'
-                                                        : 'bg-card-light dark:bg-card-dark border-gray-200 dark:border-white/10 hover:border-brand-start/30 hover:shadow-lg hover:-translate-y-1'
+                            // Filter agencies
+                            const filteredAgencies = selectedCategory === 'All'
+                                ? agencies
+                                : agencies.filter(a => a.modeling_types?.includes(selectedCategory));
+
+                            return (<>
+                                {/* Agency Directory Section */}
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="text-xl font-bold">Agency Directory <span className="text-text-secondary-light dark:text-text-secondary-dark font-medium text-sm ml-2">({filteredAgencies.length} available)</span></h2>
+                                        {selectedAgencies.size > 0 && (
+                                            <button
+                                                onClick={handleBulkApply}
+                                                disabled={applying}
+                                                className="bg-text-primary-light dark:bg-white text-white dark:text-black px-6 py-2 rounded-full font-bold hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-lg"
+                                            >
+                                                {applying ? <Loader2 className="animate-spin" /> : 'Apply Selected'}
+                                                <span className="text-xs bg-white/20 dark:bg-black/10 px-2 py-1 rounded-full text-current">
+                                                    {selectedAgencies.size}
+                                                </span>
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Category Filter Pills */}
+                                    <div className="overflow-x-auto -mx-1 px-1 pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+                                        <style>{`.category-pills::-webkit-scrollbar { display: none; }`}</style>
+                                        <div className="category-pills flex gap-2 w-max">
+                                            <button
+                                                onClick={() => setSelectedCategory('All')}
+                                                className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all active:scale-95 ${selectedCategory === 'All'
+                                                        ? 'bg-brand-start text-white shadow-md shadow-brand-start/25'
+                                                        : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10'
                                                     }`}
                                             >
-                                                {agency.has_vacancies && (
-                                                    <div className="absolute top-0 right-0 bg-green-500 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-bl-xl shadow-sm z-20">
-                                                        Booking Now
-                                                    </div>
-                                                )}
-                                                <div className="flex justify-between items-start relative z-10 mb-4">
-                                                    <div className="flex gap-4 items-start">
-                                                        {/* Logo */}
-                                                        <div className="w-12 h-12 rounded-xl bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden shrink-0">
-                                                            {agency.image_url ? (
-                                                                <img src={agency.image_url} alt={agency.name} className="w-full h-full object-contain p-1" />
-                                                            ) : (
-                                                                <span className="text-xl font-black text-brand-start">{agency.name.charAt(0)}</span>
-                                                            )}
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="font-bold text-lg leading-tight mb-1 line-clamp-2">{agency.name}</h3>
-                                                            <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wide flex items-center gap-1">
-                                                                {agency.location || 'London, UK'}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
-                                                        {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-white" />}
-                                                    </div>
-                                                </div>
+                                                All <span className="ml-1 opacity-70">{agencies.length}</span>
+                                            </button>
+                                            {categoryList.map(({ name, count }) => (
+                                                <button
+                                                    key={name}
+                                                    onClick={() => setSelectedCategory(name)}
+                                                    className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all active:scale-95 whitespace-nowrap ${selectedCategory === name
+                                                            ? 'bg-brand-start text-white shadow-md shadow-brand-start/25'
+                                                            : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10'
+                                                        }`}
+                                                >
+                                                    {name} <span className="ml-1 opacity-70">{count}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
 
-                                                {/* Modeling Types Tags */}
-                                                <div className="flex flex-wrap gap-2 mt-auto">
-                                                    {agency.modeling_types && agency.modeling_types.length > 0 ? (
-                                                        agency.modeling_types.slice(0, 3).map((type, idx) => (
-                                                            <span key={idx} className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
-                                                                {type}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-1">
+                                        {agencies.length === 0 ? (
+                                            <div className="col-span-full text-center text-text-secondary-light dark:text-text-secondary-dark py-12 bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10">
+                                                <Loader2 className="animate-spin mx-auto mb-2" />
+                                                Loading agencies...
+                                            </div>
+                                        ) : (
+                                            filteredAgencies.map(agency => (
+                                                <div
+                                                    key={agency.id}
+                                                    onClick={() => toggleAgency(agency.id)}
+                                                    className={`p-6 rounded-3xl border cursor-pointer transition-all group relative overflow-hidden flex flex-col justify-between ${selectedAgencies.has(agency.id)
+                                                        ? 'bg-brand-start/5 border-brand-start ring-1 ring-brand-start shadow-md'
+                                                        : agency.has_vacancies
+                                                            ? 'bg-green-500/5 border-green-500/50 hover:border-green-500 hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1'
+                                                            : 'bg-card-light dark:bg-card-dark border-gray-200 dark:border-white/10 hover:border-brand-start/30 hover:shadow-lg hover:-translate-y-1'
+                                                        }`}
+                                                >
+                                                    {agency.has_vacancies && (
+                                                        <div className="absolute top-0 right-0 bg-green-500 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-bl-xl shadow-sm z-20">
+                                                            Booking Now
+                                                        </div>
+                                                    )}
+                                                    <div className="flex justify-between items-start relative z-10 mb-4">
+                                                        <div className="flex gap-4 items-start">
+                                                            {/* Logo */}
+                                                            <div className="w-12 h-12 rounded-xl bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden shrink-0">
+                                                                {agency.image_url ? (
+                                                                    <img src={agency.image_url} alt={agency.name} className="w-full h-full object-contain p-1" />
+                                                                ) : (
+                                                                    <span className="text-xl font-black text-brand-start">{agency.name.charAt(0)}</span>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="font-bold text-lg leading-tight mb-1 line-clamp-2">{agency.name}</h3>
+                                                                <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wide flex items-center gap-1">
+                                                                    {agency.location || 'London, UK'}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
+                                                            {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-white" />}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Modeling Types Tags */}
+                                                    <div className="flex flex-wrap gap-2 mt-auto">
+                                                        {agency.modeling_types && agency.modeling_types.length > 0 ? (
+                                                            agency.modeling_types.slice(0, 3).map((type, idx) => (
+                                                                <span key={idx} className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
+                                                                    {type}
+                                                                </span>
+                                                            ))
+                                                        ) : (
+                                                            <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
+                                                                Fashion
                                                             </span>
-                                                        ))
-                                                    ) : (
-                                                        <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
-                                                            Fashion
-                                                        </span>
-                                                    )}
-                                                    {agency.modeling_types && agency.modeling_types.length > 3 && (
-                                                        <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
-                                                            +{agency.modeling_types.length - 3}
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                        )}
+                                                        {agency.modeling_types && agency.modeling_types.length > 3 && (
+                                                            <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark px-2 py-1 rounded-md">
+                                                                +{agency.modeling_types.length - 3}
+                                                            </span>
+                                                        )}
+                                                    </div>
 
-                                                {/* Description Preview (Optional, usually takes too much space) */}
-                                                {/* <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-3 line-clamp-2">
+                                                    {/* Description Preview (Optional, usually takes too much space) */}
+                                                    {/* <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-3 line-clamp-2">
                                                     {agency.description}
                                                 </p> */}
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Recent submissions */}
-                            <div className="space-y-4">
-                                <h2 className="text-xl font-bold">Recent Applications</h2>
-                                <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left text-sm">
-                                            <thead className="bg-gray-50 dark:bg-white/5 text-xs uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">
-                                                <tr>
-                                                    <th className="p-5">Agency</th>
-                                                    <th className="p-5">Status</th>
-                                                    <th className="p-5">Date</th>
-                                                    <th className="p-5 text-right">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                                                {submissions.length === 0 ? (
-                                                    <tr><td colSpan="4" className="p-8 text-center text-text-secondary-light dark:text-text-secondary-dark font-medium">No applications yet. Start selecting agencies above!</td></tr>
-                                                ) : (
-                                                    submissions.map((item) => (
-                                                        <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                                                            <td className="p-5 font-bold">{item.agency_url}</td>
-                                                            <td className="p-5">
-                                                                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${item.status === 'success' ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-500 border-green-200 dark:border-green-500/20' :
-                                                                    item.status === 'failed' ? 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 border-red-200 dark:border-red-500/20' :
-                                                                        'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-200 dark:border-yellow-500/20'
-                                                                    }`}>
-                                                                    <StatusIcon status={item.status} />
-                                                                    <span className="capitalize">{item.status}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="p-5 text-text-secondary-light dark:text-text-secondary-dark font-medium">
-                                                                {new Date(item.created_at).toLocaleDateString()}
-                                                            </td>
-                                                            <td className="p-5 text-right">
-                                                                {item.proof_screenshot_url && (
-                                                                    <a href={item.proof_screenshot_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-brand-start font-bold hover:underline">
-                                                                        Proof <ExternalLink size={14} />
-                                                                    </a>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
                                 </div>
-                            </div>
-                        </>)}
+
+                                {/* Recent submissions */}
+                                <div className="space-y-4">
+                                    <h2 className="text-xl font-bold">Recent Applications</h2>
+                                    <div className="bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left text-sm">
+                                                <thead className="bg-gray-50 dark:bg-white/5 text-xs uppercase font-bold text-text-secondary-light dark:text-text-secondary-dark">
+                                                    <tr>
+                                                        <th className="p-5">Agency</th>
+                                                        <th className="p-5">Status</th>
+                                                        <th className="p-5">Date</th>
+                                                        <th className="p-5 text-right">Proof</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                                                    {submissions.length === 0 ? (
+                                                        <tr><td colSpan="4" className="p-8 text-center text-text-secondary-light dark:text-text-secondary-dark font-medium">No applications yet. Start selecting agencies above!</td></tr>
+                                                    ) : (
+                                                        submissions.map((item) => (
+                                                            <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                                                                <td className="p-5 font-bold">{item.agency_url}</td>
+                                                                <td className="p-5">
+                                                                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${item.status === 'success' ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-500 border-green-200 dark:border-green-500/20' :
+                                                                        item.status === 'failed' ? 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 border-red-200 dark:border-red-500/20' :
+                                                                            'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-200 dark:border-yellow-500/20'
+                                                                        }`}>
+                                                                        <StatusIcon status={item.status} />
+                                                                        <span className="capitalize">{item.status}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="p-5 text-text-secondary-light dark:text-text-secondary-dark font-medium">
+                                                                    {new Date(item.created_at).toLocaleDateString()}
+                                                                </td>
+                                                                <td className="p-5 text-right">
+                                                                    {item.proof_screenshot_url ? (
+                                                                        <button
+                                                                            onClick={() => setLightboxUrl(item.proof_screenshot_url)}
+                                                                            className="group inline-flex items-center gap-3 hover:opacity-90 transition-opacity"
+                                                                        >
+                                                                            <img
+                                                                                src={item.proof_screenshot_url}
+                                                                                alt="Proof"
+                                                                                className="w-12 h-12 rounded-xl object-cover border-2 border-gray-200 dark:border-white/10 group-hover:border-brand-start transition-colors shadow-sm"
+                                                                            />
+                                                                            <span className="text-brand-start font-bold text-xs hidden sm:inline">View</span>
+                                                                        </button>
+                                                                    ) : (
+                                                                        <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark font-medium flex items-center gap-1 justify-end">
+                                                                            <Clock size={12} /> Pending
+                                                                        </span>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>);
+                        })()}
                     </>
                 )}
             </DashboardLayout>
@@ -462,6 +522,49 @@ const ClientDashboard = () => {
                     >
                         {applying ? <Loader2 className="animate-spin" /> : 'Apply Now'}
                     </button>
+                </div>
+            )}
+
+            {/* ── Proof Screenshot Lightbox ── */}
+            {lightboxUrl && (
+                <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                    onClick={() => setLightboxUrl(null)}
+                >
+                    <div
+                        className="relative w-[95vw] max-w-4xl max-h-[90vh] bg-card-light dark:bg-card-dark rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/10">
+                            <div className="flex items-center gap-2">
+                                <ImageIcon size={18} className="text-brand-start" />
+                                <span className="font-bold text-sm">Proof Screenshot</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <a
+                                    href={lightboxUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-start hover:underline"
+                                >
+                                    Open in tab <ExternalLink size={12} />
+                                </a>
+                                <button
+                                    onClick={() => setLightboxUrl(null)}
+                                    className="p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="overflow-auto p-4 flex-1">
+                            <img
+                                src={lightboxUrl}
+                                alt="Application proof screenshot"
+                                className="w-full rounded-2xl border border-gray-100 dark:border-white/5 shadow-inner"
+                            />
+                        </div>
+                    </div>
                 </div>
             )}
         </>
