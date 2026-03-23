@@ -10,7 +10,8 @@ import asyncio
 from typing import Dict, Any, Optional
 from playwright.async_api import async_playwright
 
-from api.ai_form_agent import snapshot_form, gemini_map_fields, execute_actions
+# Lazy import: api.ai_form_agent is imported inside apply_to_agency()
+# to avoid ModuleNotFoundError when api/ isn't on the Python path in Docker
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,9 @@ async def apply_to_agency(
         
         # Give JS frameworks time to render
         await page.wait_for_timeout(2000)
+        
+        # Lazy import — api/ module not available in all environments
+        from api.ai_form_agent import snapshot_form, gemini_map_fields, execute_actions
         
         # ── Phase 1: Snapshot ──
         logger.info("📸 Phase 1: Snapshotting form...")
