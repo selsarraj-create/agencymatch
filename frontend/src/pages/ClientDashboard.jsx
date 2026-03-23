@@ -79,7 +79,7 @@ const ClientDashboard = () => {
 
             try {
                 const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
-                const agencyResp = await axios.get(`${API_URL}/agencies`);
+                const agencyResp = await axios.get(`${API_URL}/agencies`, { params: { user_id: user.id } });
                 if (agencyResp.data) {
                     // Sort: Vacancies first, then alphabetical
                     const sorted = agencyResp.data.sort((a, b) => {
@@ -329,8 +329,13 @@ const ClientDashboard = () => {
                             const getMatch = (agency) => {
                                 const genderOk = !agency.gender_req || agency.gender_req === 'all'
                                     || (userProfile?.gender && userProfile.gender.toLowerCase() === agency.gender_req.toLowerCase());
-                                const heightOk = !agency.height_min_cm || !userHeight
-                                    || (userHeight >= agency.height_min_cm && userHeight <= (agency.height_max_cm || 999));
+
+                                // Gender-specific height check
+                                const g = (userProfile?.gender || '').toLowerCase();
+                                const heightMin = (g === 'm' || g === 'male') ? agency.height_min_cm_m
+                                    : agency.height_min_cm_f; // default to female threshold
+                                const heightOk = !heightMin || !userHeight || userHeight >= heightMin;
+
                                 const ageOk = !agency.age_min || !userAge
                                     || (userAge >= agency.age_min && userAge <= (agency.age_max || 99));
 

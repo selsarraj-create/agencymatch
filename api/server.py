@@ -1013,11 +1013,77 @@ async def generate_portfolio(request: Request):
 # ==========================================
 
 @app.get("/api/agencies")
-async def get_agencies():
+async def get_agencies(user_id: Optional[str] = None):
     try:
         supabase = get_supabase()
         response = supabase.table('agencies').select('*').eq('status', 'active').order('name').execute()
-        return response.data
+        agencies = response.data or []
+
+        # If user_id provided, compute match scores
+        if user_id:
+            try:
+                profile_resp = supabase.table('profiles').select('height_cm, date_of_birth, gender').eq('id', user_id).single().execute()
+                profile = profile_resp.data if profile_resp.data else {}
+            except Exception:
+                profile = {}
+
+            user_height = profile.get('height_cm')
+            user_dob = profile.get('date_of_birth')
+            user_gender = (profile.get('gender') or '').lower()
+
+            # Calculate age from DOB
+            user_age = None
+            if user_dob:
+                try:
+                    from datetime import datetime, date
+                    dob = datetime.strptime(str(user_dob)[:10], '%Y-%m-%d').date()
+                    today = date.today()
+                    user_age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+                except Exception:
+                    pass
+
+            for agency in agencies:
+                reasons = []
+                has_data = user_height is not None or user_age is not None
+
+                if not has_data:
+                    agency['match_score'] = 'unknown'
+                    agency['match_reason'] = 'Complete your profile for matching'
+                    continue
+
+                # Height check (gender-specific)
+                if user_height:
+                    h_min = None
+                    if user_gender in ('f', 'female', 'woman'):
+                        h_min = agency.get('height_min_cm_f')
+                    elif user_gender in ('m', 'male', 'man'):
+                        h_min = agency.get('height_min_cm_m')
+                    else:
+                        # Unknown gender — use the lower threshold (female)
+                        h_min = agency.get('height_min_cm_f')
+
+                    if h_min and int(user_height) < int(h_min):
+                        reasons.append(f"Height below {h_min}cm minimum")
+
+                # Age check
+                a_min = agency.get('age_min')
+                if a_min and user_age is not None:
+                    if user_age < int(a_min):
+                        reasons.append(f"Under minimum age ({a_min})")
+
+                a_max = agency.get('age_max')
+                if a_max and user_age is not None:
+                    if user_age > int(a_max):
+                        reasons.append(f"Over maximum age ({a_max})")
+
+                if reasons:
+                    agency['match_score'] = 'low'
+                    agency['match_reason'] = '. '.join(reasons)
+                else:
+                    agency['match_score'] = 'great'
+                    agency['match_reason'] = None
+
+        return agencies
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
@@ -1026,7 +1092,7 @@ class BulkApplyRequest(BaseModel):
     agency_ids: list[str]
 
 @app.post("/api/apply-bulk")
-async def apply_bulk(req: BulkApplyRequest):
+async def apply_bulk(req: BulkApplyRequest, background_tasks: BackgroundTasks):
     try:
         supabase = get_supabase()
         
@@ -1036,12 +1102,14 @@ async def apply_bulk(req: BulkApplyRequest):
             
         cost = count * 1 # 1 Credit per agency
         
-        # 1. Check Balance
-        profile_resp = supabase.table('profiles').select('credits').eq('id', req.user_id).single().execute()
+        # 1. Fetch Full User Profile (not just credits)
+        profile_resp = supabase.table('profiles').select('*').eq('id', req.user_id).single().execute()
         if not profile_resp.data:
              return JSONResponse(status_code=404, content={"error": "User profile not found"})
-             
-        current_credits = profile_resp.data['credits']
+        
+        profile = profile_resp.data
+        current_credits = profile.get('credits', 0)
+        
         if current_credits < cost:
              return JSONResponse(status_code=402, content={"error": f"Insufficient credits. Need {cost}, have {current_credits}."})
         
@@ -1057,29 +1125,191 @@ async def apply_bulk(req: BulkApplyRequest):
             'description': f'Applied to {count} agencies'
         }).execute()
         
-        # 4. Create Submissions (Mock Browserless)
-        # In a real scenario, this would queue a job for the worker. 
-        # Here we just insert the record as 'pending' -> 'success'
-        submissions = []
+        # 4. Fetch Agency URLs
+        agency_resp = supabase.table('agencies').select('id, name, application_url').in_('id', req.agency_ids).execute()
+        agency_map = {a['id']: a for a in agency_resp.data} if agency_resp.data else {}
+        
+        # 5. Create Submissions + Queue Background Tasks
         for agency_id in req.agency_ids:
-            submissions.append({
-                'user_id': req.user_id,
-                'status': 'success', # Instant success for demo
-                'agency_url': f"Agency ID: {agency_id}", # Placeholder connection
-                'proof_screenshot_url': "https://placehold.co/600x400/png?text=Application+Sent"
-            })
+            agency = agency_map.get(agency_id, {})
+            agency_url = agency.get('application_url')
+            agency_name = agency.get('name', 'Unknown')
             
-        supabase.table('agency_submissions').insert(submissions).execute()
+            # Insert 'processing' record
+            sub_data = {
+                'user_id': req.user_id,
+                'status': 'processing',
+                'agency_url': agency_url or f"Missing URL for {agency_name}",
+                'proof_screenshot_url': None
+            }
+            sub_resp = supabase.table('agency_submissions').insert(sub_data).execute()
+            
+            if sub_resp.data:
+                sub_id = sub_resp.data[0]['id']
+                
+                if agency_url:
+                    # Queue real AI-powered application
+                    background_tasks.add_task(
+                        _apply_worker,
+                        submission_id=sub_id,
+                        agency_url=agency_url,
+                        agency_name=agency_name,
+                        user_data=profile,
+                        user_id=req.user_id
+                    )
+                else:
+                    # No URL — mark as failed + refund
+                    supabase.table('agency_submissions').update({
+                        'status': 'failed',
+                        'proof_screenshot_url': None
+                    }).eq('id', sub_id).execute()
+                    
+                    # Refund 1 credit
+                    _refund_credit(supabase, req.user_id, sub_id, "Missing application URL")
         
         return {
             "status": "success", 
-            "message": f"Successfully applied to {count} agencies!",
+            "message": f"Started applying to {count} agencies!",
             "new_balance": new_balance
         }
 
     except Exception as e:
         print(f"Apply Error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+class DryRunRequest(BaseModel):
+    user_id: str
+    agency_id: str
+
+@app.post("/api/apply-dry-run")
+async def apply_dry_run(req: DryRunRequest):
+    """Test-fill a single agency form without submitting. Returns the action plan + screenshot."""
+    try:
+        supabase = get_supabase()
+        
+        # Fetch user profile
+        profile_resp = supabase.table('profiles').select('*').eq('id', req.user_id).single().execute()
+        if not profile_resp.data:
+            return JSONResponse(status_code=404, content={"error": "User not found"})
+        
+        # Fetch agency
+        agency_resp = supabase.table('agencies').select('name, application_url').eq('id', req.agency_id).single().execute()
+        if not agency_resp.data or not agency_resp.data.get('application_url'):
+            return JSONResponse(status_code=404, content={"error": "Agency or application URL not found"})
+        
+        agency_url = agency_resp.data['application_url']
+        
+        # Run the apply service in dry_run mode
+        from api.ai_form_agent import snapshot_form, gemini_map_fields, execute_actions
+        from api.apply_engine import apply_to_agency
+        result = await apply_to_agency(agency_url, profile_resp.data, dry_run=True)
+        
+        # Upload screenshot if available
+        screenshot_url = None
+        if result.get("screenshot"):
+            ts = int(time.time())
+            filename = f"dry_run_{req.user_id}_{ts}.png"
+            
+            try:
+                supabase.storage.from_("photos").upload(
+                    path=filename,
+                    file=result["screenshot"],
+                    file_options={"content-type": "image/png"}
+                )
+                screenshot_url = supabase.storage.from_("photos").get_public_url(filename)
+            except:
+                pass
+        
+        return {
+            "status": result["status"],
+            "agency_name": agency_resp.data['name'],
+            "actions_completed": result.get("actions_completed", 0),
+            "actions_total": result.get("actions_total", 0),
+            "errors": result.get("errors", []),
+            "screenshot_url": screenshot_url
+        }
+        
+    except Exception as e:
+        print(f"Dry Run Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+# ── Background Worker ──
+
+async def _apply_worker(submission_id: int, agency_url: str, agency_name: str, user_data: dict, user_id: str):
+    """Background task that runs the AI form agent for a single agency."""
+    print(f"🚀 WORKER: Starting application to {agency_name} ({agency_url})")
+    
+    supabase = get_supabase()
+    
+    try:
+        from api.apply_engine import apply_to_agency
+        result = await apply_to_agency(agency_url, user_data, dry_run=False)
+        
+        # Upload proof screenshot
+        screenshot_url = None
+        if result.get("screenshot"):
+            ts = int(time.time())
+            filename = f"proof_{submission_id}_{ts}.png"
+            
+            try:
+                supabase.storage.from_("photos").upload(
+                    path=filename,
+                    file=result["screenshot"],
+                    file_options={"content-type": "image/png"}
+                )
+                screenshot_url = supabase.storage.from_("photos").get_public_url(filename)
+            except Exception as e:
+                print(f"Screenshot upload failed: {e}")
+        
+        # Update submission status
+        final_status = result["status"]  # "applied", "failed", or "captcha_blocked"
+        
+        supabase.table('agency_submissions').update({
+            'status': 'success' if final_status == 'applied' else 'failed',
+            'proof_screenshot_url': screenshot_url
+        }).eq('id', submission_id).execute()
+        
+        # If failed or captcha_blocked, refund credit
+        if final_status in ('failed', 'captcha_blocked'):
+            reason = result["errors"][0] if result["errors"] else final_status
+            _refund_credit(supabase, user_id, submission_id, reason)
+        
+        print(f"{'✅' if final_status == 'applied' else '❌'} WORKER: {agency_name} → {final_status}")
+        
+    except Exception as e:
+        print(f"❌ WORKER CRASH for {agency_name}: {e}")
+        
+        # Update submission
+        supabase.table('agency_submissions').update({
+            'status': 'failed'
+        }).eq('id', submission_id).execute()
+        
+        # Refund credit
+        _refund_credit(supabase, user_id, submission_id, str(e))
+
+
+def _refund_credit(supabase, user_id: str, submission_id: int, reason: str):
+    """Refund 1 credit to the user for a failed submission."""
+    try:
+        # Get current credits
+        prof = supabase.table('profiles').select('credits').eq('id', user_id).single().execute()
+        if prof.data:
+            new_credits = prof.data['credits'] + 1
+            supabase.table('profiles').update({'credits': new_credits}).eq('id', user_id).execute()
+            
+            # Log refund transaction
+            supabase.table('transactions').insert({
+                'user_id': user_id,
+                'amount': 1,
+                'type': 'refund',
+                'description': f'Auto-refund: {reason[:100]}'
+            }).execute()
+            
+            print(f"💰 Refunded 1 credit to {user_id} (reason: {reason[:80]})")
+    except Exception as e:
+        print(f"⚠️ Refund failed for {user_id}: {e}")
 
 @app.delete("/api/delete-account")
 async def delete_account(request: Request):

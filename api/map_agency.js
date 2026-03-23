@@ -28,6 +28,10 @@ const TAGS_TO_STRIP = [
     "audio", "canvas", "picture", "source", "head",
 ];
 
+function sleep(ms) {
+    return new Promise((r) => setTimeout(r, ms));
+}
+
 // Fields the mapper should look for
 const TARGET_FIELDS = [
     "firstName",
@@ -88,8 +92,38 @@ async function fetchFormHTML(url) {
         console.log(`🌐 Navigating to ${url}...`);
         await page.goto(url, { waitUntil: "networkidle0", timeout: 60_000 });
 
-        // Extract raw body HTML
-        const rawHTML = await page.evaluate(() => document.body.innerHTML);
+        // Scroll to bottom to trigger lazy-loaded forms
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+        await sleep(2000);
+
+        // Wait for JS frameworks to hydrate form elements
+        await page.waitForSelector(
+            'form, input, textarea, select, [type="submit"], [type="email"]',
+            { timeout: 8000 }
+        ).catch(() => console.log("⚠️  No form elements detected after 8s wait"));
+
+        // Extract main body HTML
+        let rawHTML = await page.evaluate(() => document.body.innerHTML);
+
+        // Extract iframe content (Typeform, JotForm, embedded forms)
+        try {
+            const frames = page.frames().filter(f => f !== page.mainFrame());
+            for (const frame of frames) {
+                try {
+                    const frameHTML = await frame.evaluate(() => {
+                        const body = document.body;
+                        if (!body) return '';
+                        // Only grab iframe content that has form elements
+                        const hasForm = body.querySelector('form, input, textarea, select');
+                        return hasForm ? body.innerHTML : '';
+                    }).catch(() => '');
+                    if (frameHTML && frameHTML.length > 100) {
+                        console.log(`📎 Extracted iframe content: ${(frameHTML.length / 1024).toFixed(1)} KB`);
+                        rawHTML += '\n<!-- IFRAME CONTENT -->\n' + frameHTML;
+                    }
+                } catch (_) { /* skip inaccessible frames */ }
+            }
+        } catch (_) { /* no frames */ }
 
         console.log(`📄 Raw HTML: ${(rawHTML.length / 1024).toFixed(1)} KB`);
 

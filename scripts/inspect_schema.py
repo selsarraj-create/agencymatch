@@ -33,11 +33,7 @@ def inspect_table(table_name):
 
 
 def list_tables():
-    print("🔍 Listing all public tables...")
-    potential_tables = ["transactions", "transaction_history"]
-    
-    for t in potential_tables:
-        inspect_table(t)
+    inspect_table("profiles")
 
 list_tables()
 
