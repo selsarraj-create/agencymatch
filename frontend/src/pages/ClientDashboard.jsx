@@ -2,11 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { LayoutDashboard, ExternalLink, CheckCircle, XCircle, Clock, Loader2, Coins, ArrowRight, CheckCircle2, User, X, Image as ImageIcon, AlertTriangle } from 'lucide-react';
+import { LayoutDashboard, ExternalLink, CheckCircle, XCircle, Clock, Loader2, Coins, ArrowRight, CheckCircle2, User, X, Image as ImageIcon, AlertTriangle, Info } from 'lucide-react';
 import { ThemeToggle } from '../components/ThemeToggle';
 import ProfileEditor from '../components/ProfileEditor';
 import DashboardLayout from '../components/DashboardLayout';
 import CastingFeed from '../components/CastingFeed';
+import AgencyDrawer from '../components/AgencyDrawer';
 
 const ClientDashboard = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -20,6 +21,7 @@ const ClientDashboard = () => {
     const [applying, setApplying] = useState(false);
     const [lightboxUrl, setLightboxUrl] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [drawerAgency, setDrawerAgency] = useState(null);
 
     // Tab State
     const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'profile'
@@ -524,8 +526,17 @@ const ClientDashboard = () => {
                                                                     </p>
                                                                 </div>
                                                             </div>
-                                                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
-                                                                {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-white" />}
+                                                            <div className="flex items-center gap-2 shrink-0">
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); setDrawerAgency(agency); }}
+                                                                    className="w-6 h-6 rounded-full border-2 border-gray-300 dark:border-white/20 flex items-center justify-center hover:border-brand-start hover:bg-brand-start/10 transition-all shrink-0"
+                                                                    title="View agency details"
+                                                                >
+                                                                    <Info size={12} className="text-gray-400 dark:text-gray-500" />
+                                                                </button>
+                                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${selectedAgencies.has(agency.id) ? 'bg-brand-start border-brand-start scale-110' : 'border-gray-300 dark:border-white/20 group-hover:border-brand-start'}`}>
+                                                                    {selectedAgencies.has(agency.id) && <CheckCircle size={14} className="text-white" />}
+                                                                </div>
                                                             </div>
                                                         </div>
 
@@ -715,6 +726,13 @@ const ClientDashboard = () => {
                         </div>
                     </div>
                 </div>
+            )}
+            {drawerAgency && (
+                <AgencyDrawer
+                    agency={drawerAgency}
+                    userProfile={userProfile}
+                    onClose={() => setDrawerAgency(null)}
+                />
             )}
         </>
     );
