@@ -29,7 +29,13 @@ const ProfileEditor = ({ userId, onUpdate }) => {
         hips_cm: '',
         shoe_size_uk: '',
         eye_color: '',
-        hair_color: ''
+        hair_color: '',
+        instagram_handle: '',
+        tiktok_handle: '',
+        city: '',
+        nationality: '',
+        ethnicity: '',
+        dress_size: ''
     });
 
     useEffect(() => {
@@ -59,6 +65,12 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                         shoe_size_uk: profile.shoe_size_uk || '',
                         eye_color: profile.eye_color || '',
                         hair_color: profile.hair_color || '',
+                        instagram_handle: profile.instagram_handle || '',
+                        tiktok_handle: profile.tiktok_handle || '',
+                        city: profile.city || '',
+                        nationality: profile.nationality || '',
+                        ethnicity: profile.ethnicity || '',
+                        dress_size: profile.dress_size || '',
                         generated_photos: profile.generated_photos || []
                     });
                 }
@@ -119,7 +131,13 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                     hips_cm: formData.hips_cm || null,
                     shoe_size_uk: formData.shoe_size_uk || null,
                     eye_color: formData.eye_color,
-                    hair_color: formData.hair_color
+                    hair_color: formData.hair_color,
+                    instagram_handle: formData.instagram_handle || null,
+                    tiktok_handle: formData.tiktok_handle || null,
+                    city: formData.city || null,
+                    nationality: formData.nationality || null,
+                    ethnicity: formData.ethnicity || null,
+                    dress_size: formData.dress_size || null
                 })
                 .eq('id', userId);
 
@@ -392,6 +410,95 @@ const ProfileEditor = ({ userId, onUpdate }) => {
                                 <option value="White">White</option>
                                 <option value="Other">Other</option>
                             </select>
+                        </div>
+                        {/* Dress Size */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Dress Size</label>
+                            <input
+                                type="text"
+                                name="dress_size"
+                                value={formData.dress_size}
+                                onChange={handleChange}
+                                placeholder="8"
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="border-t border-gray-100 dark:border-white/5 my-6"></div>
+
+                {/* Additional Info Section */}
+                <div>
+                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-text-primary-light dark:text-white">
+                        <span className="bg-brand-start/10 text-brand-start p-1 rounded-lg"><User size={16} /></span>
+                        Additional Info (Optional)
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Instagram */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Instagram Handle</label>
+                            <input
+                                type="text"
+                                name="instagram_handle"
+                                value={formData.instagram_handle}
+                                onChange={handleChange}
+                                placeholder="@yourusername"
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                            />
+                        </div>
+
+                        {/* TikTok */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">TikTok Handle</label>
+                            <input
+                                type="text"
+                                name="tiktok_handle"
+                                value={formData.tiktok_handle}
+                                onChange={handleChange}
+                                placeholder="@yourtiktok"
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                            />
+                        </div>
+
+                        {/* City */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">City / Location</label>
+                            <input
+                                type="text"
+                                name="city"
+                                value={formData.city}
+                                onChange={handleChange}
+                                placeholder="London"
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                            />
+                        </div>
+
+                        {/* Nationality */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Nationality</label>
+                            <input
+                                type="text"
+                                name="nationality"
+                                value={formData.nationality}
+                                onChange={handleChange}
+                                placeholder="British"
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                            />
+                        </div>
+
+                        {/* Ethnicity */}
+                        <div>
+                            <label className="block text-[10px] font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1">Ethnicity</label>
+                            <input
+                                type="text"
+                                name="ethnicity"
+                                value={formData.ethnicity}
+                                onChange={handleChange}
+                                placeholder="Optional"
+                                className="block w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/50 py-2 px-3 text-sm text-text-primary-light dark:text-white focus:border-brand-start focus:ring-1 focus:ring-brand-start transition-colors"
+                            />
                         </div>
                     </div>
                 </div>

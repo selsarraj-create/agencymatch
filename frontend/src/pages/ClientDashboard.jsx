@@ -128,6 +128,53 @@ const ClientDashboard = () => {
             setShowBuyModal(true);
             return;
         }
+
+        // Check for missing profile fields on selected agencies
+        const FIELD_TO_PROFILE = {
+            firstName: 'first_name', lastName: 'last_name', email: 'email',
+            phone: 'phone_number', dateOfBirth: 'date_of_birth', gender: 'gender',
+            height: 'height_cm', bust: 'bust_cm', waist: 'waist_cm', hips: 'hips_cm',
+            shoeSize: 'shoe_size_uk', eyeColor: 'eye_color', hairColor: 'hair_color',
+            instagramHandle: 'instagram_handle', aboutMe: 'bio',
+            city: 'city', nationality: 'nationality', ethnicity: 'ethnicity',
+            tiktokHandle: 'tiktok_handle', dressSize: 'dress_size',
+        };
+        const FIELD_LABELS = {
+            first_name: 'First Name', last_name: 'Last Name', email: 'Email',
+            phone_number: 'Phone', date_of_birth: 'Date of Birth', gender: 'Gender',
+            height_cm: 'Height', bust_cm: 'Bust', waist_cm: 'Waist', hips_cm: 'Hips',
+            shoe_size_uk: 'Shoe Size', eye_color: 'Eye Color', hair_color: 'Hair Color',
+            instagram_handle: 'Instagram', bio: 'Bio/About',
+            city: 'City/Location', nationality: 'Nationality', ethnicity: 'Ethnicity',
+            tiktok_handle: 'TikTok', dress_size: 'Dress Size',
+        };
+        const SKIP_FIELDS = ['submitButton', 'termsCheckbox', 'photoUpload', 'howDidYouHear', 'age'];
+
+        const allMissing = [];
+        for (const agencyId of selectedAgencies) {
+            const agency = agencies.find(a => a.id === agencyId);
+            if (!agency) continue;
+            const selectors = agency.selector_map?.selectors || agency.selector_map;
+            if (!selectors) continue;
+            const missing = [];
+            for (const [field, selector] of Object.entries(selectors)) {
+                if (!selector || SKIP_FIELDS.includes(field)) continue;
+                const profileKey = FIELD_TO_PROFILE[field];
+                if (profileKey && !userProfile?.[profileKey]) {
+                    missing.push(FIELD_LABELS[profileKey] || field);
+                }
+            }
+            if (missing.length > 0) {
+                allMissing.push({ name: agency.name, fields: missing });
+            }
+        }
+
+        if (allMissing.length > 0) {
+            const msg = allMissing.map(a => `${a.name}: ${a.fields.join(', ')}`).join('\n');
+            alert(`⚠️ Missing profile fields — please complete your profile first:\n\n${msg}`);
+            return;
+        }
+
         if (!window.confirm(`Apply to ${selectedAgencies.size} agencies for ${cost} credits?`)) return;
 
         setApplying(true);
@@ -344,6 +391,41 @@ const ClientDashboard = () => {
                                 return { isMatch, reason };
                             };
 
+                            // Missing profile fields helper
+                            const FIELD_TO_PROFILE_MAP = {
+                                firstName: 'first_name', lastName: 'last_name', email: 'email',
+                                phone: 'phone_number', dateOfBirth: 'date_of_birth', gender: 'gender',
+                                height: 'height_cm', bust: 'bust_cm', waist: 'waist_cm', hips: 'hips_cm',
+                                shoeSize: 'shoe_size_uk', eyeColor: 'eye_color', hairColor: 'hair_color',
+                                instagramHandle: 'instagram_handle', aboutMe: 'bio',
+                                city: 'city', nationality: 'nationality', ethnicity: 'ethnicity',
+                                tiktokHandle: 'tiktok_handle', dressSize: 'dress_size',
+                            };
+                            const SKIP = ['submitButton', 'termsCheckbox', 'photoUpload', 'howDidYouHear', 'age'];
+                            const LABELS = {
+                                first_name: 'Name', last_name: 'Surname', email: 'Email',
+                                phone_number: 'Phone', date_of_birth: 'DOB', gender: 'Gender',
+                                height_cm: 'Height', bust_cm: 'Bust', waist_cm: 'Waist', hips_cm: 'Hips',
+                                shoe_size_uk: 'Shoe Size', eye_color: 'Eye Colour', hair_color: 'Hair Colour',
+                                instagram_handle: 'Instagram', bio: 'Bio',
+                                city: 'City', nationality: 'Nationality', ethnicity: 'Ethnicity',
+                                tiktok_handle: 'TikTok', dress_size: 'Dress Size',
+                            };
+
+                            const getMissingFields = (agency) => {
+                                const selectors = agency.selector_map?.selectors || agency.selector_map;
+                                if (!selectors) return [];
+                                const missing = [];
+                                for (const [field, sel] of Object.entries(selectors)) {
+                                    if (!sel || SKIP.includes(field)) continue;
+                                    const pk = FIELD_TO_PROFILE_MAP[field];
+                                    if (pk && !userProfile?.[pk]) {
+                                        missing.push(LABELS[pk] || field);
+                                    }
+                                }
+                                return missing;
+                            };
+
                             // Sort: matches first, then vacancies, then alpha
                             const sortedAgencies = [...filteredAgencies].sort((a, b) => {
                                 const mA = getMatch(a).isMatch ? 1 : 0;
@@ -463,6 +545,20 @@ const ClientDashboard = () => {
                                                                 )}
                                                             </div>
                                                         )}
+
+                                                        {/* Missing Fields Badge */}
+                                                        {(() => {
+                                                            const missing = getMissingFields(agency);
+                                                            if (missing.length === 0) return null;
+                                                            return (
+                                                                <div className="mb-3">
+                                                                    <div className="inline-flex items-center gap-1 bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border border-orange-200 dark:border-orange-500/20" title={`Missing: ${missing.join(', ')}`}>
+                                                                        <AlertTriangle size={10} />
+                                                                        {missing.length} field{missing.length > 1 ? 's' : ''} needed
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })()}
 
                                                         {/* Modeling Types Tags */}
                                                         <div className="flex flex-wrap gap-2 mt-auto">
