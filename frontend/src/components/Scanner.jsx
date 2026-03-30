@@ -101,7 +101,7 @@ const Scanner = () => {
             {/* Header - Restored Wording & Theme Aware */}
             <div className="mb-4 text-center">
                 <h1 className="text-3xl sm:text-5xl font-black tracking-tighter mb-2 leading-tight text-text-primary-light dark:text-white">
-                    10 Second <span className="text-brand-start">Model Scout</span>
+                    10 Second <span className="text-brand-start">Agency Scout</span>
                 </h1>
                 <p className="text-lg font-bold text-text-primary-light dark:text-white mb-1">
                     Could You Be A Model?
