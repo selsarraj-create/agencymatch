@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Apple, CheckCircle2, Facebook, Smartphone } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 const GoogleIcon = () => (
     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -61,17 +61,7 @@ const SocialAuthButtons = () => {
 
     return (
         <div className="flex flex-col gap-3 w-full max-w-sm mx-auto">
-            {/* Apple - Primary */}
-            <ButtonBase
-                onClick={() => handleSocialLogin('apple')}
-                icon={<Apple size={22} className="fill-current" />}
-                label="Continue with Apple"
-                bgColor="bg-text-primary-light dark:bg-white"
-                textColor="text-white dark:text-black"
-                borderColor="border-transparent"
-            />
-
-            {/* Google - Clean */}
+            {/* Google */}
             <ButtonBase
                 onClick={() => handleSocialLogin('google')}
                 icon={<GoogleIcon />}
@@ -79,32 +69,6 @@ const SocialAuthButtons = () => {
                 bgColor="bg-card-light dark:bg-card-dark"
                 textColor="text-text-primary-light dark:text-white"
                 borderColor="border-gray-200 dark:border-white/10"
-            />
-
-            <div className="relative my-2">
-                <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-200 dark:border-white/10"></span></div>
-                <div className="relative flex justify-center text-xs uppercase font-bold tracking-widest"><span className="bg-white dark:bg-black px-2 text-text-secondary-light dark:text-text-secondary-dark font-sans">More Options</span></div>
-            </div>
-
-            {/* TikTok - Brand Highlight */}
-            <ButtonBase
-                onClick={() => handleSocialLogin('tiktok')}
-                icon={<TikTokIcon />}
-                label="Continue with TikTok"
-                badge={true}
-                bgColor="bg-black dark:bg-[#111]"
-                textColor="text-white"
-                borderColor="border-white/10"
-            />
-
-            {/* Facebook */}
-            <ButtonBase
-                onClick={() => handleSocialLogin('facebook')}
-                icon={<Facebook size={22} className="fill-current" />}
-                label="Continue with Facebook"
-                bgColor="bg-[#1877F2]/5 dark:bg-[#1877F2]/10"
-                textColor="text-[#1877F2]"
-                borderColor="border-[#1877F2]/20"
             />
         </div>
     );
