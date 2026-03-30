@@ -893,6 +893,33 @@ async def admin_add_credits(payload: CreditAdjustment):
         print(f"Admin Update Error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+@app.delete("/api/admin/users/{user_id}")
+async def admin_delete_user(user_id: str, request: Request):
+    try:
+        admin_id = request.headers.get('X-User-Id')
+        if not admin_id:
+            return JSONResponse(status_code=401, content={"error": "Unauthorized"})
+
+        supabase = get_supabase()
+
+        # Verify admin
+        admin_check = supabase.rpc('is_user_admin', {'check_id': admin_id}).execute()
+        if not admin_check.data:
+            return JSONResponse(status_code=403, content={"error": "Forbidden"})
+
+        # Delete related data first (in case no CASCADE)
+        supabase.table('agency_submissions').delete().eq('user_id', user_id).execute()
+        supabase.table('transactions').delete().eq('user_id', user_id).execute()
+
+        # Delete from auth (cascades to profiles)
+        supabase.auth.admin.delete_user(user_id)
+
+        return {"status": "success", "message": f"User {user_id} deleted"}
+
+    except Exception as e:
+        print(f"Admin Delete User Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
 @app.post("/api/webhooks/stripe")
 async def stripe_webhook(request: Request):
     payload = await request.body()

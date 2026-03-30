@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Shield, Users, Search, PlusCircle, Coins, Loader2, X, Lock } from 'lucide-react';
+import { Shield, Users, Search, PlusCircle, Coins, Loader2, X, Lock, Trash2 } from 'lucide-react';
 import { ThemeToggle } from '../components/ThemeToggle';
 
 import AdminAgencyManager from '../components/AdminAgencyManager'; // Import the new component
@@ -68,6 +68,22 @@ const AdminDashboard = () => {
             alert("Failed to add credits.");
         } finally {
             setProcessing(false);
+        }
+    };
+
+    const handleDeleteUser = async (user) => {
+        const displayName = user.name !== 'N/A' ? user.name : user.email;
+        if (!window.confirm(`Delete user "${displayName}"?\n\nThis will permanently remove their account, profile, submissions, and transactions.`)) return;
+        if (!window.confirm(`FINAL WARNING: This action cannot be undone. Are you absolutely sure?`)) return;
+
+        try {
+            const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000';
+            await axios.delete(`${API_URL}/admin/users/${user.id}`, { headers: { 'X-User-Id': adminUser.id } });
+            setUsers(prev => prev.filter(u => u.id !== user.id));
+            alert(`User ${displayName} has been deleted.`);
+        } catch (error) {
+            console.error('Delete user failed:', error);
+            alert('Failed to delete user: ' + (error.response?.data?.error || error.message));
         }
     };
 
@@ -228,13 +244,22 @@ const AdminDashboard = () => {
                                                 </div>
                                             </td>
                                             <td className="p-4 text-right">
-                                                <button
-                                                    onClick={() => { setSelectedUser(user); setShowCreditModal(true); }}
-                                                    className="text-text-primary-light dark:text-white hover:text-brand-start p-2 bg-gray-100 dark:bg-white/5 rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100 active:scale-95"
-                                                    title="Add Credits"
-                                                >
-                                                    <PlusCircle size={18} />
-                                                </button>
+                                                <div className="flex items-center justify-end gap-1">
+                                                    <button
+                                                        onClick={() => { setSelectedUser(user); setShowCreditModal(true); }}
+                                                        className="text-text-primary-light dark:text-white hover:text-brand-start p-2 bg-gray-100 dark:bg-white/5 rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100 active:scale-95"
+                                                        title="Add Credits"
+                                                    >
+                                                        <PlusCircle size={18} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteUser(user)}
+                                                        className="text-red-500 hover:text-red-600 p-2 bg-gray-100 dark:bg-white/5 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100 active:scale-95"
+                                                        title="Delete User"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
