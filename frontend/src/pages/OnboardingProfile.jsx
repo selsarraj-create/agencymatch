@@ -76,7 +76,7 @@ const OnboardingProfile = () => {
                 .eq('id', userId);
 
             if (error) throw error;
-            navigate('/dashboard');
+            navigate('/photo-lab');
         } catch (err) {
             console.error(err);
             alert("Failed to save profile. Please try again.");
