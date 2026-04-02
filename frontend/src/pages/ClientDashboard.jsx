@@ -428,11 +428,11 @@ const ClientDashboard = () => {
                                 return missing;
                             };
 
-                            // Sort: matches first, then vacancies, then alpha
-                            const sortedAgencies = [...filteredAgencies].sort((a, b) => {
-                                const mA = getMatch(a).isMatch ? 1 : 0;
-                                const mB = getMatch(b).isMatch ? 1 : 0;
-                                if (mA !== mB) return mB - mA;
+                            // Only show agencies where user matches
+                            const matchedAgencies = filteredAgencies.filter(a => getMatch(a).isMatch);
+
+                            // Sort: vacancies first, then alpha
+                            const sortedAgencies = [...matchedAgencies].sort((a, b) => {
                                 if (a.has_vacancies !== b.has_vacancies) return a.has_vacancies ? -1 : 1;
                                 return a.name.localeCompare(b.name);
                             });
@@ -441,7 +441,7 @@ const ClientDashboard = () => {
                                 {/* Agency Directory Section */}
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center">
-                                        <h2 className="text-xl font-bold">Agency Directory <span className="text-text-secondary-light dark:text-text-secondary-dark font-medium text-sm ml-2">({filteredAgencies.length} available)</span></h2>
+                                        <h2 className="text-xl font-bold">Your Agency Matches <span className="text-text-secondary-light dark:text-text-secondary-dark font-medium text-sm ml-2">({matchedAgencies.length} of {agencies.length})</span></h2>
                                         {selectedAgencies.size > 0 && (
                                             <button
                                                 onClick={handleBulkApply}
