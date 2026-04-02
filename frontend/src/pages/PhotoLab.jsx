@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Zap, Image as ImageIcon, Loader2, Upload, Sparkles, ScanFace, CheckCircle, Coins, XCircle, User, HelpCircle, X, AlertTriangle } from 'lucide-react';
+import { Camera, Zap, Image as ImageIcon, Loader2, Upload, Sparkles, ScanFace, CheckCircle, Coins, XCircle, User, HelpCircle, X, AlertTriangle, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '../components/ThemeToggle';
@@ -948,6 +948,13 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                         <p className="text-text-primary-light dark:text-white leading-relaxed font-mono opacity-80">{identityConstraints}</p>
                                     </div>
                                 )}
+
+                                <button
+                                    onClick={() => navigate('/dashboard')}
+                                    className="w-full py-3.5 bg-brand-start hover:bg-brand-mid text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-brand-start/25 flex items-center justify-center gap-2"
+                                >
+                                    View Agency Matches <ArrowRight size={18} />
+                                </button>
 
                                 <button
                                     onClick={resetAll}
