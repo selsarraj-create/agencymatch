@@ -147,7 +147,7 @@ const ProfileEditor = ({ userId, onUpdate }) => {
             if (onUpdate) onUpdate(); // Notify parent to refresh if needed
         } catch (error) {
             console.error("Error updating profile:", error);
-            alert("Failed to update profile.");
+            alert("Failed to update profile: " + (error.message || JSON.stringify(error)));
         } finally {
             setSaving(false);
         }
