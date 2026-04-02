@@ -36,21 +36,6 @@ const OnboardingProfile = () => {
                 if (profile.is_onboarding_complete) {
                     navigate('/dashboard');
                 }
-                setFirstName(profile.first_name || '');
-                setLastName(profile.last_name || '');
-                // Fallback for migration not run yet
-                if (!profile.first_name && profile.legal_name) {
-                    const parts = profile.legal_name.split(' ');
-                    setFirstName(parts[0]);
-                    setLastName(parts.slice(1).join(' '));
-                }
-            } else {
-                // Parse metadata
-                if (user.user_metadata?.full_name) {
-                    const parts = user.user_metadata.full_name.split(' ');
-                    setFirstName(parts[0]);
-                    setLastName(parts.slice(1).join(' '));
-                }
             }
             setLoading(false);
         };
