@@ -431,11 +431,14 @@ const ClientDashboard = () => {
                             // Only show agencies where user matches
                             const matchedAgencies = filteredAgencies.filter(a => getMatch(a).isMatch);
 
-                            // Sort: vacancies first, then alpha
-                            const sortedAgencies = [...matchedAgencies].sort((a, b) => {
-                                if (a.has_vacancies !== b.has_vacancies) return a.has_vacancies ? -1 : 1;
-                                return a.name.localeCompare(b.name);
-                            });
+                            // Sort: agencies with all required fields filled first, then randomize top 30
+                            const withMissing = matchedAgencies.map(a => ({ agency: a, missing: getMissingFields(a).length }));
+                            // Separate complete vs incomplete
+                            const complete = withMissing.filter(x => x.missing === 0).map(x => x.agency);
+                            const incomplete = withMissing.filter(x => x.missing > 0).sort((a, b) => a.missing - b.missing).map(x => x.agency);
+                            // Shuffle helper (Fisher-Yates)
+                            const shuffle = (arr) => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+                            const sortedAgencies = [...shuffle(complete), ...shuffle(incomplete)].slice(0, 30);
 
                             return (<>
                                 {/* Agency Directory Section */}

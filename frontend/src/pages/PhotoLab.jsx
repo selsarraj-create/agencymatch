@@ -6,6 +6,7 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '../components/ThemeToggle';
 import DashboardLayout from '../components/DashboardLayout';
+import GuidedCamera from '../components/GuidedCamera';
 
 /* ─── Ghost Silhouette SVGs ──────────────────────────────────────────── */
 const PortraitSilhouette = () => (
@@ -322,6 +323,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
     const [error, setError] = useState(null);
     const [processingStage, setProcessingStage] = useState('');
     const [showGuide, setShowGuide] = useState(false);
+    const [showCamera, setShowCamera] = useState(false);
 
     // Credits modal
     const [showBuyModal, setShowBuyModal] = useState(false);
@@ -753,16 +755,56 @@ const PhotoLab = ({ isEmbedded = false }) => {
 
                         {/* Side-by-side upload grid */}
                         <div className="flex gap-[4%]">
-                            <UploadBox
-                                label="Portrait"
-                                preview={portraitRef?.preview}
-                                silhouette={PortraitSilhouette}
-                                onFileSelect={(file) => validateAndUpload(file, setPortraitRef, setPortraitError, setPortraitAudit, setAuditingPortrait)}
-                                onClear={() => { setPortraitRef(null); setPortraitAudit(null); }}
-                                error={portraitError}
-                                auditing={auditingPortrait}
-                                auditStatus={portraitAudit?.can_proceed}
-                            />
+                            {/* Portrait — Camera Capture */}
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold uppercase tracking-wider text-text-secondary-light dark:text-text-secondary-dark mb-2 text-center">Portrait</p>
+                                {portraitRef?.preview ? (
+                                    <div className="relative rounded-2xl overflow-hidden aspect-[3/4] border-2 border-green-300 dark:border-green-700 group bg-gray-100 dark:bg-white/5">
+                                        <img src={portraitRef.preview} alt="Portrait" className="w-full h-full object-cover" />
+                                        <button
+                                            onClick={() => { setPortraitRef(null); setPortraitAudit(null); }}
+                                            className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full backdrop-blur-md transition-colors"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                        {auditingPortrait ? (
+                                            <div className="absolute bottom-2 left-2 flex items-center gap-1 text-[10px] text-blue-100 font-bold bg-blue-600/80 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                                                <Loader2 size={10} className="animate-spin" /> Analyzing...
+                                            </div>
+                                        ) : portraitAudit?.can_proceed === false ? (
+                                            <div className="absolute bottom-2 left-2 flex items-center gap-1 text-[10px] text-red-100 font-bold bg-red-600/80 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                                                <XCircle size={10} /> Action Needed
+                                            </div>
+                                        ) : portraitAudit ? (
+                                            <div className="absolute bottom-2 left-2 flex items-center gap-1 text-[10px] text-green-100 font-bold bg-green-600/80 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                                                <CheckCircle size={10} /> Ready
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                ) : (
+                                    <div
+                                        onClick={() => setShowCamera(true)}
+                                        className="relative aspect-[3/4] rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/20 flex flex-col items-center justify-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 hover:border-brand-start/40 transition-all cursor-pointer group"
+                                    >
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                            <PortraitSilhouette />
+                                        </div>
+                                        <div className="relative z-10 flex flex-col items-center gap-2">
+                                            <div className="w-10 h-10 rounded-full bg-brand-start/10 text-brand-start flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                <Camera size={18} />
+                                            </div>
+                                            <p className="text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark">Take Selfie</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {portraitError && (
+                                    <div className="mt-2 flex items-center gap-1 text-[11px] text-red-500 font-medium">
+                                        <AlertTriangle size={12} /> {portraitError}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Full Body — File Upload */}
                             <UploadBox
                                 label="Full Body"
                                 preview={fullBodyRef?.preview}
@@ -774,6 +816,17 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                 auditStatus={fullBodyAudit?.can_proceed}
                             />
                         </div>
+
+                        {/* Guided Camera Modal */}
+                        {showCamera && (
+                            <GuidedCamera
+                                onComplete={(file) => {
+                                    setShowCamera(false);
+                                    validateAndUpload(file, setPortraitRef, setPortraitError, setPortraitAudit, setAuditingPortrait);
+                                }}
+                                onCancel={() => setShowCamera(false)}
+                            />
+                        )}
 
                         {/* Quality Feedback Cards */}
                         {[{ audit: portraitAudit, auditing: auditingPortrait, label: 'Portrait', setter: setPortraitRef, auditSetter: setPortraitAudit },
