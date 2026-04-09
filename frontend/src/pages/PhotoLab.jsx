@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '../components/ThemeToggle';
 import DashboardLayout from '../components/DashboardLayout';
 import GuidedCamera from '../components/GuidedCamera';
+import OnboardingStepper from '../components/OnboardingStepper';
 
 /* ─── Ghost Silhouette SVGs ──────────────────────────────────────────── */
 const PortraitSilhouette = () => (
@@ -324,6 +325,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
     const [processingStage, setProcessingStage] = useState('');
     const [showGuide, setShowGuide] = useState(false);
     const [showCamera, setShowCamera] = useState(false);
+    const [isOnboarding, setIsOnboarding] = useState(false);
 
     // Credits modal
     const [showBuyModal, setShowBuyModal] = useState(false);
@@ -350,8 +352,9 @@ const PhotoLab = ({ isEmbedded = false }) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { navigate('/login'); return; }
         setUser(user);
-        const { data: profile } = await supabase.from('profiles').select('credits, height').eq('id', user.id).single();
+        const { data: profile } = await supabase.from('profiles').select('credits, height, is_onboarding_complete').eq('id', user.id).single();
         if (profile) {
+            setIsOnboarding(!profile.is_onboarding_complete);
             setCredits(profile.credits);
             if (profile.height) {
                 // Try to parse existing height
@@ -631,6 +634,7 @@ const PhotoLab = ({ isEmbedded = false }) => {
     /* ── Content ──────────────────────────────────────────────────── */
     const content = (
         <div className="space-y-6 px-4 md:px-0">
+            {isOnboarding && <div className="pt-4 pb-2"><OnboardingStepper currentStep="photos" /></div>}
 
             {/* Header + Guide Link */}
             <div className="text-center">
@@ -1003,10 +1007,17 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                 )}
 
                                 <button
-                                    onClick={() => navigate('/dashboard')}
+                                    onClick={async () => {
+                                        if (isOnboarding) {
+                                            await supabase.from('profiles').update({ onboarding_stage: 'stats' }).eq('id', user.id);
+                                            navigate('/onboarding/stats');
+                                        } else {
+                                            navigate('/dashboard');
+                                        }
+                                    }}
                                     className="w-full py-3.5 bg-brand-start hover:bg-brand-mid text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-brand-start/25 flex items-center justify-center gap-2"
                                 >
-                                    View Agency Matches <ArrowRight size={18} />
+                                    {isOnboarding ? 'Continue to Final Step' : 'View Agency Matches'} <ArrowRight size={18} />
                                 </button>
 
                                 <button
@@ -1077,7 +1088,13 @@ const PhotoLab = ({ isEmbedded = false }) => {
                 </div>
             )}
 
-            {isEmbedded ? content : (
+            {isEmbedded ? content : isOnboarding ? (
+                <div className="min-h-screen bg-surface-light dark:bg-surface-dark pb-12 pt-8">
+                    <div className="max-w-4xl mx-auto">
+                        {content}
+                    </div>
+                </div>
+            ) : (
                 <DashboardLayout header={<PhotoLabHeader />}>
                     {content}
                 </DashboardLayout>

@@ -12,6 +12,7 @@ import { Loader2 } from 'lucide-react';
 import { ThemeProvider } from './components/ThemeProvider';
 import MobileBottomNav from './components/MobileBottomNav';
 import StudioHub from './pages/StudioHub';
+import OnboardingStats from './pages/OnboardingStats';
 
 import './index.css';
 
@@ -105,19 +106,25 @@ const AppContent = () => {
         </RequireAnalysis>
       } />
 
-      {/* 2. Dashboard */}
+      {/* 2. Photo Lab */}
+      <Route path="/photo-lab" element={
+        <RequireAnalysis session={session}>
+          <PhotoLab />
+        </RequireAnalysis>
+      } />
+
+      {/* 3. Onboarding Stats */}
+      <Route path="/onboarding/stats" element={
+        <RequireAnalysis session={session}>
+          <OnboardingStats />
+        </RequireAnalysis>
+      } />
+
+      {/* Dashboard (Fully Guarded) */}
       <Route path="/dashboard" element={
         <RequireAnalysis session={session}>
           <RequireOnboarding session={session}>
             <ClientDashboard />
-          </RequireOnboarding>
-        </RequireAnalysis>
-      } />
-
-      <Route path="/photo-lab" element={
-        <RequireAnalysis session={session}>
-          <RequireOnboarding session={session}>
-            <PhotoLab />
           </RequireOnboarding>
         </RequireAnalysis>
       } />
@@ -198,10 +205,12 @@ const RequireOnboarding = ({ children, session }) => {
     if (!session) return;
 
     const checkOnboarding = async () => {
-      const { data: profile } = await supabase.from('profiles').select('is_onboarding_complete').eq('id', session.user.id).single();
+      const { data: profile } = await supabase.from('profiles').select('is_onboarding_complete, onboarding_stage').eq('id', session.user.id).single();
 
       if (!profile?.is_onboarding_complete) {
-        navigate('/onboarding/profile');
+        if (profile?.onboarding_stage === 'photos') navigate('/photo-lab');
+        else if (profile?.onboarding_stage === 'stats') navigate('/onboarding/stats');
+        else navigate('/onboarding/profile');
       }
       setChecking(false);
     };

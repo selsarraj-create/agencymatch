@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { User, Calendar, Smartphone, ArrowRight, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
+import OnboardingStepper from '../components/OnboardingStepper';
 
 const OnboardingProfile = () => {
     const navigate = useNavigate();
@@ -56,7 +57,7 @@ const OnboardingProfile = () => {
                     date_of_birth: dob,
                     gender: gender,
                     phone_number: phone,
-                    is_onboarding_complete: true
+                    onboarding_stage: 'photos'
                 })
                 .eq('id', userId);
 
@@ -73,8 +74,9 @@ const OnboardingProfile = () => {
     if (loading) return <div className="min-h-screen bg-surface-light dark:bg-surface-dark flex items-center justify-center text-text-primary-light dark:text-white">Loading...</div>;
 
     return (
-        <div className="min-h-screen bg-surface-light dark:bg-surface-dark text-text-primary-light dark:text-white flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-12 transition-colors duration-300">
-            <div className="max-w-md w-full mx-auto space-y-8">
+        <div className="min-h-screen bg-surface-light dark:bg-surface-dark text-text-primary-light dark:text-white flex flex-col pt-8 px-4 sm:px-6 lg:px-8 pb-12 transition-colors duration-300">
+            <OnboardingStepper currentStep="profile" />
+            <div className="max-w-md w-full mx-auto space-y-8 flex-1 flex flex-col justify-center">
                 <div className="text-center">
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}

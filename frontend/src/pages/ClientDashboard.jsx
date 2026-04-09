@@ -22,6 +22,7 @@ const ClientDashboard = () => {
     const [lightboxUrl, setLightboxUrl] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [drawerAgency, setDrawerAgency] = useState(null);
+    const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
     // Tab State
     const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'profile'
@@ -74,6 +75,9 @@ const ClientDashboard = () => {
             if (profile.data) {
                 setCredits(profile.data.credits);
                 setUserProfile(profile.data);
+                if (profile.data.has_seen_welcome_modal === false) {
+                    setShowWelcomeModal(true);
+                }
             }
 
             const { data } = await supabase.from('agency_submissions').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
@@ -736,6 +740,40 @@ const ClientDashboard = () => {
                     userProfile={userProfile}
                     onClose={() => setDrawerAgency(null)}
                 />
+            )}
+
+            {/* Welcome Reveal Modal */}
+            {showWelcomeModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+                    <div className="relative max-w-lg w-full bg-white dark:bg-[#111] rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 border border-gray-100 dark:border-white/10">
+                        {/* Decorative background flare */}
+                        <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-start/30 rounded-full blur-[60px]" />
+                        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/20 rounded-full blur-[60px]" />
+
+                        <div className="p-8 pb-10 text-center relative z-10">
+                            <div className="mx-auto w-20 h-20 bg-brand-start/10 rounded-full flex items-center justify-center mb-6">
+                                <span className="text-4xl text-brand-start">🎉</span>
+                            </div>
+                            
+                            <h2 className="text-2xl font-black mb-3">You matched with <span className="text-brand-start">{agencies.filter(a => a.isMatch).length || agencies.length}</span> Premium Agencies!</h2>
+                            <p className="text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-8">
+                                Your profile looks great. To help you get started, we've loaded your account with <span className="font-bold text-gray-900 dark:text-white">5 FREE CREDITS</span> to apply to your top matches right now.
+                            </p>
+
+                            <button
+                                onClick={async () => {
+                                    setShowWelcomeModal(false);
+                                    try {
+                                        await supabase.from('profiles').update({ has_seen_welcome_modal: true }).eq('id', currentUserId);
+                                    } catch (e) {}
+                                }}
+                                className="w-full py-4 bg-brand-start hover:bg-brand-mid text-white rounded-2xl font-bold text-lg transition-transform transform hover:scale-[1.02] active:scale-95 shadow-lg flex justify-center items-center gap-2"
+                            >
+                                Start Applying <ArrowRight size={20} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
     );
