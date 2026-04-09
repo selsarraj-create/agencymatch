@@ -40,6 +40,11 @@ const OnboardingStats = () => {
                 .single();
 
             if (profile) {
+                if (profile.is_onboarding_complete) {
+                    navigate('/dashboard');
+                    return;
+                }
+
                 setFormData({
                     height_cm: profile.height_cm || '',
                     bust_cm: profile.bust_cm || '',

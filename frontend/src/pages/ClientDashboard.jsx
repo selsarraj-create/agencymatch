@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { LayoutDashboard, ExternalLink, CheckCircle, XCircle, Clock, Loader2, Coins, ArrowRight, CheckCircle2, User, X, Image as ImageIcon, AlertTriangle, Info } from 'lucide-react';
 import { ThemeToggle } from '../components/ThemeToggle';
@@ -30,6 +30,7 @@ const ClientDashboard = () => {
     const [currentUserId, setCurrentUserId] = useState(null);
 
     const navigate = useNavigate();
+    const location = useLocation();
 
     const PACKAGES = [
         { credits: 10, price: '£5.00', amount: 500, id: 10, popular: false },
@@ -65,7 +66,7 @@ const ClientDashboard = () => {
             setCurrentUserId(user.id);
 
             // Check URL param for tab
-            const params = new URLSearchParams(window.location.search);
+            const params = new URLSearchParams(location.search);
             const tabParam = params.get('tab');
             if (tabParam === 'profile') setActiveTab('profile');
             else setActiveTab('dashboard'); // Default reset if no param
@@ -112,7 +113,7 @@ const ClientDashboard = () => {
         };
         fetchData();
         // Listen for Location changes to update tab if user clicks Nav while already on page
-    }, [navigate, window.location.search]);
+    }, [navigate, location.search]);
 
     const handleSubmissionUpdate = (payload) => {
         if (payload.eventType === 'INSERT') setSubmissions(prev => [payload.new, ...prev]);

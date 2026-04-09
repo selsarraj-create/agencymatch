@@ -129,6 +129,18 @@ async def background_worker(user_id: str, agency_id: str, submission_id: int, us
                 'proof_screenshot_url': result.get('screenshot')
             }).eq('id', submission_id).execute()
             
+            # Auto-Refund 1 credit if failed
+            if status == 'failed':
+                logger.info(f"Refunding 1 credit to {user_id} due to failed application for {agency_id}")
+                try:
+                    res = database.supabase.table('profiles').select('credits').eq('id', user_id).single().execute()
+                    if res.data:
+                        database.supabase.table('profiles').update({
+                            'credits': res.data['credits'] + 1
+                        }).eq('id', user_id).execute()
+                except Exception as refund_e:
+                    logger.error(f"Failed to refund credit: {refund_e}")
+                    
         logger.info(f"Worker finished for {agency_id}: {status}")
 
     except Exception as e:
@@ -138,6 +150,16 @@ async def background_worker(user_id: str, agency_id: str, submission_id: int, us
              database.supabase.table('agency_submissions').update({
                 'status': 'failed'
             }).eq('id', submission_id).execute()
+            
+             # Auto-Refund 1 credit on exception
+             try:
+                 res = database.supabase.table('profiles').select('credits').eq('id', user_id).single().execute()
+                 if res.data:
+                     database.supabase.table('profiles').update({
+                         'credits': res.data['credits'] + 1
+                     }).eq('id', user_id).execute()
+             except Exception as refund_e:
+                 logger.error(f"Failed to refund credit: {refund_e}")
 
 @app.post("/api/apply-bulk")
 def apply_bulk(req: BulkApplyRequest, background_tasks: BackgroundTasks):
