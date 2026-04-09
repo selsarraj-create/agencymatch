@@ -84,8 +84,7 @@ const OnboardingStats = () => {
                     ethnicity: formData.ethnicity || null,
                     dress_size: formData.dress_size || null,
                     onboarding_stage: 'complete',
-                    is_onboarding_complete: true,
-                    credits: 5 // Grant 5 free credits for completing onboarding
+                    is_onboarding_complete: true
                 })
                 .eq('id', userId);
 
