@@ -568,10 +568,14 @@ const PhotoLab = ({ isEmbedded = false }) => {
         try {
             // Format height string based on current selection
             let heightStr = '';
+            let parsedHeightCm = null;
             if (heightUnit === 'cm') {
                 heightStr = `${heightCm}cm`;
+                parsedHeightCm = parseFloat(heightCm) || null;
             } else {
                 heightStr = `${heightFt}'${heightIn}"`;
+                const totalInches = (parseFloat(heightFt) || 0) * 12 + (parseFloat(heightIn) || 0);
+                if (totalInches > 0) parsedHeightCm = Math.round(totalInches * 2.54);
             }
 
             const updates = {
@@ -581,7 +585,8 @@ const PhotoLab = ({ isEmbedded = false }) => {
                 shoe_size_uk: statsToSave.shoe_size_uk,
                 eye_color: statsToSave.eye_color?.category,
                 hair_color: statsToSave.hair_color?.category,
-                height: heightStr
+                height: heightStr,
+                height_cm: parsedHeightCm
             };
 
             const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
