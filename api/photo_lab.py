@@ -271,20 +271,41 @@ def process_digitals_dual(portrait_url: str, fullbody_url: str):
     """
     Parallel Generation Pipeline:
     1. Headshot: Uses process_digitals(portrait_url)
-    2. Full Body: Uses _generate_fullbody_dual(portrait_url, fullbody_url)
+    2. Full Body: DISABLED — passes through the raw uploaded image.
     Returns composite result with both images.
     """
-    import concurrent.futures
+    # import concurrent.futures
 
-    print(f"[DUAL] Starting parallel generation...")
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        # Submit both tasks
-        future_headshot = executor.submit(process_digitals, portrait_url)
-        future_fullbody = executor.submit(_generate_fullbody_dual, portrait_url, fullbody_url)
+    print(f"[DUAL] Starting generation (headshot AI + fullbody passthrough)...")
 
-        # Wait for results
-        headshot_result = future_headshot.result()
-        fullbody_result = future_fullbody.result()
+    # ── Headshot: still AI-generated ──
+    headshot_result = process_digitals(portrait_url)
+
+    # ── Full Body: passthrough (AI generation disabled) ──
+    # To re-enable AI full body generation, uncomment the block below
+    # and remove the passthrough block.
+    #
+    # with concurrent.futures.ThreadPoolExecutor() as executor:
+    #     future_headshot = executor.submit(process_digitals, portrait_url)
+    #     future_fullbody = executor.submit(_generate_fullbody_dual, portrait_url, fullbody_url)
+    #     headshot_result = future_headshot.result()
+    #     fullbody_result = future_fullbody.result()
+
+    # Passthrough: just download and return the raw uploaded full body image
+    try:
+        resp = requests.get(fullbody_url)
+        resp.raise_for_status()
+        raw_body_bytes = resp.content
+        print(f"[DUAL] Full body passthrough — {len(raw_body_bytes):,} bytes")
+        fullbody_result = {
+            "status": "success",
+            "identity_constraints": "Passthrough (AI generation disabled)",
+            "image_bytes": base64.b64encode(raw_body_bytes).decode("utf-8"),
+            "mime_type": "image/jpeg",
+        }
+    except Exception as e:
+        print(f"[DUAL] Full body passthrough failed: {e}")
+        fullbody_result = {"error": f"Failed to download full body image: {e}"}
 
     return {
         "status": "success",
