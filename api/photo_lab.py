@@ -134,137 +134,119 @@ def process_digitals(image_url: str):
         return {"error": "Failed to download source image"}
 
     # ══════════════════════════════════════════════════════════════════════
-    # STEP 1: Identity Lock + Clean Slate
+    # SINGLE STEP: Natural Cleanup (lightweight)
     # ══════════════════════════════════════════════════════════════════════
-    step1_system = (
-        "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
-        "Treat the face as a deterministic constraint. "
+    cleanup_system = (
+        "IDENTITY LOCK: ABSOLUTE. "
         "You MUST preserve every facial feature, skin texture, mole, scar, "
-        "and bone structure from the reference image with zero deviation."
+        "bone structure, hair style, and clothing from the reference image. "
+        "Do NOT change what the person is wearing. Do NOT change their hairstyle. "
+        "Make only subtle, natural enhancements."
     )
 
-    step1_prompt = (
-        "INSTRUCTION: PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
-        "Maintain 100% facial structure. "
-        "TASK: Remove all accessories including headphones, earrings, and necklaces. "
-        "Change current clothing to a plain, well-fitted white t-shirt. "
-        "Replace background with a neutral studio grey wall. "
-        "Apply soft, even lighting. "
+    cleanup_prompt = (
+        "INSTRUCTION: IDENTITY LOCK — preserve 100% of the person's appearance. "
+        "Keep their EXACT clothing, hair, and accessories as they are. "
+        "TASK: Apply only these subtle, natural enhancements:\n"
+        "1. Slightly even out the lighting on the face (reduce harsh shadows).\n"
+        "2. Gently soften minor skin blemishes while keeping natural skin texture.\n"
+        "3. Softly blur the background to create a subtle depth-of-field effect.\n"
+        "4. Slightly brighten the image if it is underexposed.\n"
+        "The result should look like the SAME photo taken with a slightly better camera. "
+        "Do NOT change clothing, add studio backgrounds, or alter the person's appearance. "
         "Output aspect ratio must be 3:4 portrait format. "
-        "Output ONLY the transformed image, no text."
+        "Output ONLY the enhanced image, no text."
     )
 
     try:
-        print(f"Step 1: {GEMINI_MODEL} — Identity lock + clean slate...")
-        step1_response = client.models.generate_content(
+        print(f"Cleanup: {GEMINI_MODEL} — Natural photo enhancement...")
+        cleanup_response = client.models.generate_content(
             model=GEMINI_MODEL,
             contents=[
                 types.Content(
                     role="user",
                     parts=[
                         types.Part.from_bytes(data=source_bytes, mime_type="image/jpeg"),
-                        types.Part.from_text(text=step1_prompt),
+                        types.Part.from_text(text=cleanup_prompt),
                     ],
                 )
             ],
             config=types.GenerateContentConfig(
-                system_instruction=step1_system,
+                system_instruction=cleanup_system,
                 response_modalities=["IMAGE"],
-                thinking_config=types.ThinkingConfig(thinkingBudget=8192),
+                thinking_config=types.ThinkingConfig(thinkingBudget=4096),
             ),
         )
 
-        intermediate_bytes = None
-        intermediate_mime = "image/jpeg"
-        if step1_response.candidates and step1_response.candidates[0].content.parts:
-            for part in step1_response.candidates[0].content.parts:
-                if part.inline_data and part.inline_data.mime_type.startswith("image/"):
-                    intermediate_bytes = part.inline_data.data
-                    intermediate_mime = part.inline_data.mime_type
-                    break
-
-        if not intermediate_bytes:
-            text_out = step1_response.text if step1_response.text else "No content"
-            print(f"Step 1 failed — model returned text: {text_out[:200]}")
-            return {"error": f"Step 1 returned text: {text_out[:100]}"}
-
-        print(f"Step 1 complete — {len(intermediate_bytes):,} bytes")
-
-    except Exception as e:
-        print(f"Step 1 failed: {e}")
-        return {"error": f"Step 1 failed: {str(e)}"}
-
-    # ══════════════════════════════════════════════════════════════════════
-    # STEP 2: DSLR Studio-Quality Refinement
-    # ══════════════════════════════════════════════════════════════════════
-    step2_system = (
-        "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
-        "Treat the face as a deterministic constraint. "
-        "Do NOT change the person's identity, facial structure, or expression."
-    )
-
-    step2_prompt = (
-        "REFINEMENT PASS. This image has already been identity-locked. "
-        "DO NOT change the face, expression, or identity. "
-        "TASK: Enhance this image to professional DSLR studio headshot quality. "
-        "Apply softbox clamshell lighting with natural catchlights in the eyes. "
-        "Enhance realistic skin texture — visible pores, natural imperfections. "
-        "Sharpen focus on the face with subtle shallow depth of field. "
-        "Ensure the final result is indistinguishable from a professional DSLR headshot. "
-        "The background must remain neutral studio grey. "
-        "The clothing must remain a plain white t-shirt. "
-        "Output aspect ratio must be 3:4 portrait format. "
-        "Output ONLY the refined image, no text."
-    )
-
-    try:
-        print(f"Step 2: {GEMINI_MODEL} — DSLR studio refinement...")
-        step2_response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=[
-                types.Content(
-                    role="user",
-                    parts=[
-                        types.Part.from_bytes(data=intermediate_bytes, mime_type=intermediate_mime),
-                        types.Part.from_text(text=step2_prompt),
-                    ],
-                )
-            ],
-            config=types.GenerateContentConfig(
-                system_instruction=step2_system,
-                response_modalities=["IMAGE"],
-                thinking_config=types.ThinkingConfig(thinkingBudget=8192),
-            ),
-        )
-
-        if step2_response.candidates and step2_response.candidates[0].content.parts:
-            for part in step2_response.candidates[0].content.parts:
+        if cleanup_response.candidates and cleanup_response.candidates[0].content.parts:
+            for part in cleanup_response.candidates[0].content.parts:
                 if part.inline_data and part.inline_data.mime_type.startswith("image/"):
                     final_bytes = part.inline_data.data
                     final_mime = part.inline_data.mime_type
-                    print(f"Step 2 complete — {len(final_bytes):,} bytes final image")
+                    print(f"Cleanup complete — {len(final_bytes):,} bytes")
                     return {
                         "status": "success",
-                        "identity_constraints": "Tiered: Gemini 3 Pro identity lock → DSLR refinement",
+                        "identity_constraints": "Gemini 3 Pro natural cleanup (single pass)",
                         "image_bytes": base64.b64encode(final_bytes).decode("utf-8"),
                         "mime_type": final_mime,
                     }
 
-        # Step 2 returned text — fall back to Step 1 output
-        text_out = step2_response.text if step2_response.text else "No content"
-        print(f"Step 2 returned text — falling back to Step 1 output: {text_out[:200]}")
+        text_out = cleanup_response.text if cleanup_response.text else "No content"
+        print(f"Cleanup returned text instead of image: {text_out[:200]}")
 
     except Exception as e:
-        print(f"Step 2 failed — falling back to Step 1 output: {e}")
+        print(f"Cleanup failed: {e}")
 
-    # Fallback: return Step 1 intermediate image
+    # Fallback: return the original photo as-is
     return {
         "status": "success",
-        "identity_constraints": "Gemini 3 Pro identity lock (Step 2 fallback)",
-        "image_bytes": base64.b64encode(intermediate_bytes).decode("utf-8"),
-        "mime_type": intermediate_mime,
+        "identity_constraints": "Passthrough (cleanup failed)",
+        "image_bytes": base64.b64encode(source_bytes).decode("utf-8"),
+        "mime_type": "image/jpeg",
         "fallback": True,
     }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # OLD HEAVY PIPELINE (commented out — re-enable if needed)
+    # ──────────────────────────────────────────────────────────────────────
+    #
+    # # STEP 1: Identity Lock + Clean Slate
+    # step1_system = (
+    #     "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
+    #     "Treat the face as a deterministic constraint. "
+    #     "You MUST preserve every facial feature, skin texture, mole, scar, "
+    #     "and bone structure from the reference image with zero deviation."
+    # )
+    # step1_prompt = (
+    #     "INSTRUCTION: PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
+    #     "Maintain 100% facial structure. "
+    #     "TASK: Remove all accessories including headphones, earrings, and necklaces. "
+    #     "Change current clothing to a plain, well-fitted white t-shirt. "
+    #     "Replace background with a neutral studio grey wall. "
+    #     "Apply soft, even lighting. "
+    #     "Output aspect ratio must be 3:4 portrait format. "
+    #     "Output ONLY the transformed image, no text."
+    # )
+    #
+    # # STEP 2: DSLR Studio-Quality Refinement
+    # step2_system = (
+    #     "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
+    #     "Treat the face as a deterministic constraint. "
+    #     "Do NOT change the person's identity, facial structure, or expression."
+    # )
+    # step2_prompt = (
+    #     "REFINEMENT PASS. This image has already been identity-locked. "
+    #     "DO NOT change the face, expression, or identity. "
+    #     "TASK: Enhance this image to professional DSLR studio headshot quality. "
+    #     "Apply softbox clamshell lighting with natural catchlights in the eyes. "
+    #     "Enhance realistic skin texture — visible pores, natural imperfections. "
+    #     "Sharpen focus on the face with subtle shallow depth of field. "
+    #     "Ensure the final result is indistinguishable from a professional DSLR headshot. "
+    #     "The background must remain neutral studio grey. "
+    #     "The clothing must remain a plain white t-shirt. "
+    #     "Output aspect ratio must be 3:4 portrait format. "
+    #     "Output ONLY the refined image, no text."
+    # )
 
 
 def process_digitals_dual(portrait_url: str, fullbody_url: str):
