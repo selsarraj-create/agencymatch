@@ -13,7 +13,9 @@ const OnboardingStepper = ({ currentStep }) => {
     const currentIndex = STEPS.findIndex(s => s.id === currentStep);
     
     return (
-        <div className="w-full max-w-3xl mx-auto mb-8 px-4">
+        <>
+        <div className="fixed top-0 left-0 right-0 z-50 bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-lg border-b border-gray-200/50 dark:border-white/5 py-4">
+            <div className="w-full max-w-3xl mx-auto px-4">
             <div className="flex items-center justify-between relative">
                 {/* Background line */}
                 <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-gray-200 dark:bg-white/10 -z-10" />
@@ -32,7 +34,7 @@ const OnboardingStepper = ({ currentStep }) => {
                     const isUpcoming = currentIndex < idx;
 
                     return (
-                        <div key={step.id} className="flex flex-col items-center gap-2 bg-surface-light dark:bg-surface-dark px-2">
+                        <div key={step.id} className="flex flex-col items-center gap-2 px-2">
                             <motion.div 
                                 initial={false}
                                 animate={{
@@ -58,7 +60,11 @@ const OnboardingStepper = ({ currentStep }) => {
                     );
                 })}
             </div>
+            </div>
         </div>
+        {/* Spacer to push page content below the fixed header */}
+        <div className="h-20 sm:h-24" />
+        </>
     );
 };
 
