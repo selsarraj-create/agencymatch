@@ -36,17 +36,17 @@ const OnboardingStepper = ({ currentStep }) => {
                                 <motion.div 
                                     initial={false}
                                     animate={{
-                                        scale: isCurrent ? 1.05 : 1,
-                                        backgroundColor: isCompleted ? '#22c55e' : isCurrent ? '#000' : '#f3f4f6',
+                                        scale: isCurrent ? 1.1 : 1,
+                                        backgroundColor: isCompleted ? '#22c55e' : isCurrent ? '#000' : '#e5e7eb',
                                         color: (isCompleted || isCurrent) ? '#fff' : '#9ca3af',
                                         borderColor: isCurrent ? '#22c55e' : 'transparent'
                                     }}
-                                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shrink-0
-                                        ${isCurrent ? 'dark:bg-white dark:text-black border-2 border-brand-start' : 'dark:bg-white/10 dark:text-gray-400'}
-                                        ${isCompleted ? 'dark:bg-brand-start dark:text-black' : ''}
+                                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-black text-sm sm:text-base shrink-0 shadow-md
+                                        ${isCurrent ? 'dark:bg-white dark:text-black border-2 border-brand-start ring-4 ring-brand-start/20' : 'dark:bg-white/10 dark:text-gray-400'}
+                                        ${isCompleted ? 'dark:bg-brand-start dark:text-black shadow-green-500/30' : ''}
                                     `}
                                 >
-                                    {isCompleted ? <Check size={12} /> : step.numeral}
+                                    {isCompleted ? <Check size={16} strokeWidth={3} /> : step.numeral}
                                 </motion.div>
                                 
                                 <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider
@@ -61,7 +61,7 @@ const OnboardingStepper = ({ currentStep }) => {
             </div>
         </div>
         {/* Spacer — compact on mobile */}
-        <div className="h-12 sm:h-16" />
+        <div className="h-14 sm:h-16" />
         </>
     );
 };
