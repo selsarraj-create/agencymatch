@@ -139,23 +139,23 @@ def process_digitals(image_url: str):
     cleanup_system = (
         "IDENTITY LOCK: ABSOLUTE. "
         "You MUST preserve every facial feature, skin texture, mole, scar, "
-        "bone structure, hair style, and clothing from the reference image. "
-        "Do NOT change what the person is wearing. Do NOT change their hairstyle. "
-        "Make only subtle, natural enhancements."
+        "bone structure, and hair style from the reference image with zero deviation. "
+        "The face must be identical to the input photo. "
+        "You may change clothing and background ONLY as instructed."
     )
 
     cleanup_prompt = (
-        "INSTRUCTION: IDENTITY LOCK — preserve 100% of the person's appearance. "
-        "Keep their EXACT clothing, hair, and accessories as they are. "
-        "TASK: Apply only these subtle, natural enhancements:\n"
-        "1. Slightly even out the lighting on the face (reduce harsh shadows).\n"
-        "2. Gently soften minor skin blemishes while keeping natural skin texture.\n"
-        "3. Softly blur the background to create a subtle depth-of-field effect.\n"
-        "4. Slightly brighten the image if it is underexposed.\n"
-        "The result should look like the SAME photo taken with a slightly better camera. "
-        "Do NOT change clothing, add studio backgrounds, or alter the person's appearance. "
+        "INSTRUCTION: IDENTITY LOCK — preserve 100% of the person's face and hair. "
+        "The face MUST remain identical to the input photo. "
+        "TASK: Apply these changes:\n"
+        "1. Change clothing to a plain, well-fitted white t-shirt.\n"
+        "2. Replace the background with a clean white wall.\n"
+        "3. Even out the lighting on the face — soft, natural, flattering.\n"
+        "4. Gently soften minor skin blemishes while keeping natural skin texture and pores.\n"
+        "5. Keep the person's natural hair exactly as it is.\n"
+        "The result should look like the same person photographed in a clean studio setting. "
         "Output aspect ratio must be 3:4 portrait format. "
-        "Output ONLY the enhanced image, no text."
+        "Output ONLY the transformed image, no text."
     )
 
     try:
