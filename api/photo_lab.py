@@ -137,29 +137,31 @@ def process_digitals(image_url: str):
     # SINGLE STEP: Natural Cleanup (lightweight)
     # ══════════════════════════════════════════════════════════════════════
     cleanup_system = (
-        "IDENTITY LOCK: ABSOLUTE. "
-        "You MUST preserve every facial feature, skin texture, mole, scar, "
-        "bone structure, and hair style from the reference image with zero deviation. "
-        "The face must be identical to the input photo. "
-        "You may change clothing and background ONLY as instructed."
+        "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
+        "The face in the input image is a HARD CONSTRAINT — treat every pixel of the face "
+        "as immutable. You MUST NOT alter, regenerate, smooth, reshape, or reinterpret "
+        "any facial feature. Preserve the exact jawline, nose shape, lip shape, eye shape, "
+        "skin tone, skin texture, wrinkles, facial hair, moles, scars, and bone structure. "
+        "The output face must be pixel-for-pixel identical to the input face. "
+        "You may ONLY change clothing and background as instructed below."
     )
 
     cleanup_prompt = (
-        "INSTRUCTION: IDENTITY LOCK — preserve 100% of the person's face and hair. "
-        "The face MUST remain identical to the input photo. "
-        "TASK: Apply these changes:\n"
-        "1. Change clothing to a plain, well-fitted white t-shirt.\n"
+        "CRITICAL: The face is LOCKED. Do NOT change, smooth, reshape, or alter the face in ANY way. "
+        "Copy the face EXACTLY as it appears in the input — same jawline, same skin tone, same wrinkles, same everything. "
+        "TASK — change ONLY these two things:\n"
+        "1. Replace the clothing with a plain white t-shirt.\n"
         "2. Replace the background with a clean white wall.\n"
-        "3. Even out the lighting on the face — soft, natural, flattering.\n"
-        "4. Gently soften minor skin blemishes while keeping natural skin texture and pores.\n"
-        "5. Keep the person's natural hair exactly as it is.\n"
-        "The result should look like the same person photographed in a clean studio setting. "
+        "RULES:\n"
+        "- The face must be IDENTICAL to the input. Do not beautify or alter it.\n"
+        "- Keep the exact same hair style, facial hair, and skin tone.\n"
+        "- Use soft, even lighting but do NOT change skin color or facial structure.\n"
         "Output aspect ratio must be 3:4 portrait format. "
-        "Output ONLY the transformed image, no text."
+        "Output ONLY the image, no text."
     )
 
     try:
-        print(f"Cleanup: {GEMINI_MODEL} — Natural photo enhancement...")
+        print(f"Cleanup: {GEMINI_MODEL} — Identity-locked studio transform...")
         cleanup_response = client.models.generate_content(
             model=GEMINI_MODEL,
             contents=[
@@ -174,7 +176,7 @@ def process_digitals(image_url: str):
             config=types.GenerateContentConfig(
                 system_instruction=cleanup_system,
                 response_modalities=["IMAGE"],
-                thinking_config=types.ThinkingConfig(thinkingBudget=4096),
+                thinking_config=types.ThinkingConfig(thinkingBudget=1024),
             ),
         )
 
