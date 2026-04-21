@@ -77,11 +77,14 @@ const PhotoTest = () => {
 
                 {/* Upload area */}
                 {!preview && (
-                    <label className="block w-full max-w-sm mx-auto aspect-[3/4] rounded-2xl border-2 border-dashed border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 transition-all cursor-pointer flex flex-col items-center justify-center gap-3">
-                        <input type="file" accept="image/jpeg,image/png" onChange={handleFileSelect} className="hidden" />
+                    <div 
+                        onClick={() => document.getElementById('phototest-input').click()}
+                        className="w-full max-w-sm mx-auto aspect-[3/4] rounded-2xl border-2 border-dashed border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 transition-all cursor-pointer flex flex-col items-center justify-center gap-3"
+                    >
+                        <input id="phototest-input" type="file" accept="image/jpeg,image/png" onChange={handleFileSelect} className="hidden" />
                         <Upload size={32} className="text-gray-400" />
                         <span className="text-sm text-gray-400 font-medium">Tap to upload a test photo</span>
-                    </label>
+                    </div>
                 )}
 
                 {/* Before / After comparison */}
