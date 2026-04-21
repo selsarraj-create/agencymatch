@@ -426,6 +426,24 @@ async def audit_image_endpoint(req: AuditImageRequest):
         # Fail open
         return {"score": 5, "issues": [], "can_proceed": True}
 
+
+# ── Test-only endpoint (no credits, no profile, no storage save) ──
+class TestHeadshotRequest(BaseModel):
+    photo_url: str
+
+@app.post("/api/test-headshot")
+async def test_headshot_endpoint(req: TestHeadshotRequest):
+    """Dev-only: runs the headshot pipeline on a photo URL and returns the result as base64."""
+    try:
+        result = process_digitals(req.photo_url)
+        if "error" in result:
+            return JSONResponse(status_code=500, content=result)
+        return result
+    except Exception as e:
+        print(f"Test Headshot Error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
 class DigitalGenRequest(BaseModel):
     photo_url: str
     user_id: str

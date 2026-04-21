@@ -13,6 +13,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 import MobileBottomNav from './components/MobileBottomNav';
 import StudioHub from './pages/StudioHub';
 import OnboardingStats from './pages/OnboardingStats';
+import PhotoTest from './pages/PhotoTest';
 
 import './index.css';
 
@@ -138,6 +139,7 @@ const AppContent = () => {
       } />
 
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/phototest" element={<PhotoTest />} />
     </Routes>
   );
 };
