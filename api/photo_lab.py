@@ -158,6 +158,8 @@ def process_digitals(image_url: str):
         "- Keep the EXACT same focal length, camera distance, and framing as the input photo. "
         "Do NOT zoom in, zoom out, or change how close the face appears. "
         "The subject should occupy the same proportion of the frame as in the original.\n"
+        "- Match the SOFTNESS of the original photo. Do NOT over-sharpen or add artificial crispness. "
+        "The output should have the same natural, soft quality as a phone camera photo — not hyper-sharp or HDR.\n"
         "- Use soft, even lighting but do NOT change skin color or facial structure.\n"
         "Output aspect ratio must be 3:4 portrait format. "
         "Output ONLY the image, no text."
