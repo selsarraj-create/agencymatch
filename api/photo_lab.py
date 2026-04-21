@@ -143,15 +143,16 @@ def process_digitals(image_url: str):
         "any facial feature. Preserve the exact jawline, nose shape, lip shape, eye shape, "
         "and skin tone. "
         "The output face must be pixel-for-pixel identical to the input face. "
-        "You may ONLY change clothing and background as instructed below."
+        "You must also preserve the original clothing and background exactly as they appear."
     )
 
     cleanup_prompt = (
         "CRITICAL: The face is LOCKED. Do NOT change, shape, contour, or alter the face in ANY way. "
         "Copy the face EXACTLY as it appears in the input — same jawline, same skin tone, same everything. "
-        "TASK — change ONLY these two things:\n"
-        "1. Replace the clothing with a plain white t-shirt.\n"
-        "2. Replace the background with a clean white wall.\n"
+        "TASK:\n"
+        "1. Keep the EXACT same clothing — do not change styles, colors, or fabrics.\n"
+        "2. Keep the EXACT same background.\n"
+        "3. Only improve the lighting to be soft, flat, and even, reducing any harsh shadows.\n"
         "RULES:\n"
         "- The face must be IDENTICAL to the input.\n"
         "- Keep the exact same hair style, facial hair, and skin tone.\n"
