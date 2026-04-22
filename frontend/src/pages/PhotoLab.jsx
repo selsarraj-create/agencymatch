@@ -791,18 +791,42 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                         ) : null}
                                     </div>
                                 ) : (
-                                    <div
-                                        onClick={() => setShowCamera(true)}
-                                        className="relative aspect-[3/4] rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/20 flex flex-col items-center justify-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 hover:border-brand-start/40 transition-all cursor-pointer group"
-                                    >
-                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div className="relative aspect-[3/4] rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/20 flex flex-col items-center justify-center gap-4 group">
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
                                             <PortraitSilhouette />
                                         </div>
-                                        <div className="relative z-10 flex flex-col items-center gap-2">
-                                            <div className="w-10 h-10 rounded-full bg-brand-start/10 text-brand-start flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                <Camera size={18} />
+                                        <div className="relative z-10 flex gap-4">
+                                            {/* Take Selfie */}
+                                            <div
+                                                onClick={() => setShowCamera(true)}
+                                                className="flex flex-col items-center gap-2 cursor-pointer group/btn"
+                                            >
+                                                <div className="w-12 h-12 rounded-full bg-brand-start/10 text-brand-start flex items-center justify-center group-hover/btn:scale-110 transition-transform border-2 border-brand-start/20">
+                                                    <Camera size={20} />
+                                                </div>
+                                                <p className="text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark">Take Selfie</p>
                                             </div>
-                                            <p className="text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark">Take Selfie</p>
+                                            {/* Upload */}
+                                            <div
+                                                onClick={() => document.getElementById('portrait-upload-input').click()}
+                                                className="flex flex-col items-center gap-2 cursor-pointer group/btn"
+                                            >
+                                                <div className="w-12 h-12 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover/btn:scale-110 transition-transform border-2 border-blue-500/20">
+                                                    <Upload size={20} />
+                                                </div>
+                                                <p className="text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark">Tap to upload</p>
+                                            </div>
+                                            <input
+                                                id="portrait-upload-input"
+                                                type="file"
+                                                accept="image/jpeg,image/png,image/webp,image/heic"
+                                                className="hidden"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (file) validateAndUpload(file, setPortraitRef, setPortraitError, setPortraitAudit, setAuditingPortrait);
+                                                    e.target.value = '';
+                                                }}
+                                            />
                                         </div>
                                     </div>
                                 )}
