@@ -544,12 +544,44 @@ const PhotoLab = ({ isEmbedded = false }) => {
             clearInterval(interval);
             setAnalysisProgress(100);
 
-            // Short delay to show 100%
-            setTimeout(() => {
-                setStatsResult(response.data);
-                setShowStatsModal(true);
-                setAnalyzingStats(false);
-                setAnalysisProgress(0);
+            // Save stats to profile and navigate to stats page
+            setTimeout(async () => {
+                try {
+                    // Format height string
+                    let heightStr = '';
+                    let parsedHeightCm = null;
+                    if (heightUnit === 'cm') {
+                        heightStr = `${heightCm}cm`;
+                        parsedHeightCm = parseFloat(heightCm) || null;
+                    } else {
+                        heightStr = `${heightFt}'${heightIn}\"`;
+                        const totalInches = (parseFloat(heightFt) || 0) * 12 + (parseFloat(heightIn) || 0);
+                        if (totalInches > 0) parsedHeightCm = Math.round(totalInches * 2.54);
+                    }
+
+                    const statsData = response.data;
+                    await supabase.from('profiles').update({
+                        waist_cm: statsData.waist_cm,
+                        hips_cm: statsData.hips_cm,
+                        bust_cm: statsData.bust_cm,
+                        shoe_size_uk: statsData.shoe_size_uk,
+                        eye_color: statsData.eye_color?.category,
+                        hair_color: statsData.hair_color?.category,
+                        height: heightStr,
+                        height_cm: parsedHeightCm,
+                        onboarding_stage: 'stats'
+                    }).eq('id', user.id);
+
+                    setAnalyzingStats(false);
+                    setAnalysisProgress(0);
+                    navigate('/onboarding/stats');
+                } catch (saveErr) {
+                    console.error('Failed to save stats:', saveErr);
+                    setAnalyzingStats(false);
+                    setAnalysisProgress(0);
+                    // Still navigate — user can edit on stats page
+                    navigate('/onboarding/stats');
+                }
             }, 500);
 
         } catch (e) {
@@ -662,105 +694,6 @@ const PhotoLab = ({ isEmbedded = false }) => {
                             {bothReady && <CheckCircle size={16} className="text-green-500" />}
                         </h2>
 
-                        {/* Height Input & Auto-Analyze */}
-                        <div className="mb-6 bg-gray-50 dark:bg-white/5 p-4 rounded-2xl flex items-end gap-3 border border-gray-100 dark:border-white/5">
-                            <div className="flex-1">
-                                <div className="flex justify-between items-center mb-1">
-                                    <label className="text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark">Your Height</label>
-                                    <div className="flex bg-gray-200 dark:bg-black/40 rounded-lg p-0.5">
-                                        <button
-                                            onClick={() => toggleHeightUnit('ft')}
-                                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${heightUnit === 'ft' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-gray-500'}`}
-                                        >
-                                            FT
-                                        </button>
-                                        <button
-                                            onClick={() => toggleHeightUnit('cm')}
-                                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${heightUnit === 'cm' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-gray-500'}`}
-                                        >
-                                            CM
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {heightUnit === 'cm' ? (
-                                    <div className="relative">
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value={heightCm}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                if (val >= 0) setHeightCm(val);
-                                            }}
-                                            placeholder="175"
-                                            className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
-                                        />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 pointer-events-none">cm</span>
-                                    </div>
-                                ) : (
-                                    <div className="flex gap-2">
-                                        <div className="relative flex-1">
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                value={heightFt}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    if (val >= 0) setHeightFt(val);
-                                                }}
-                                                placeholder="5"
-                                                className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
-                                            />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 pointer-events-none">ft</span>
-                                        </div>
-                                        <div className="relative flex-1">
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                value={heightIn}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    if (val >= 0) setHeightIn(val);
-                                                }}
-                                                placeholder="9"
-                                                className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
-                                            />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 pointer-events-none">in</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            {bothReady && (
-                                <button
-                                    onClick={handleAnalyzeStats}
-                                    disabled={analyzingStats || (heightUnit === 'cm' ? !heightCm : !heightFt)}
-                                    className="relative h-[46px] px-6 bg-brand-start/10 hover:bg-brand-start/20 text-brand-start rounded-xl font-bold text-sm transition-all flex items-center gap-2 disabled:opacity-50 overflow-hidden"
-                                >
-                                    {/* Progress Fill */}
-                                    {analyzingStats && (
-                                        <div
-                                            className="absolute left-0 top-0 bottom-0 bg-brand-start/20 transition-all duration-300 ease-out"
-                                            style={{ width: `${analysisProgress}%` }}
-                                        />
-                                    )}
-
-                                    <div className="relative z-10 flex items-center gap-2">
-                                        {analyzingStats ? (
-                                            <>
-                                                <Loader2 size={16} className="animate-spin" />
-                                                Analyzing {analysisProgress}%
-                                            </>
-                                        ) : (
-                                            <>
-                                                <ScanFace size={18} />
-                                                Auto-Measure
-                                            </>
-                                        )}
-                                    </div>
-                                </button>
-                            )}
-                        </div>
 
                         {/* Side-by-side upload grid */}
                         <div className="flex gap-[4%]">
@@ -1035,19 +968,109 @@ const PhotoLab = ({ isEmbedded = false }) => {
                                     </div>
                                 )}
 
-                                <button
-                                    onClick={async () => {
-                                        if (isOnboarding) {
-                                            await supabase.from('profiles').update({ onboarding_stage: 'stats' }).eq('id', user.id);
-                                            navigate('/onboarding/stats');
-                                        } else {
-                                            navigate('/dashboard');
-                                        }
-                                    }}
-                                    className="w-full py-3.5 bg-brand-start hover:bg-brand-mid text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-brand-start/25 flex items-center justify-center gap-2"
-                                >
-                                    {isOnboarding ? 'Continue to Final Step' : 'View Agency Matches'} <ArrowRight size={18} />
-                                </button>
+                                {/* Height Input + Calculate — appears after generation */}
+                                {isOnboarding ? (
+                                    <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-xs font-bold uppercase text-text-secondary-light dark:text-text-secondary-dark">Enter Your Height</label>
+                                            <div className="flex bg-gray-200 dark:bg-black/40 rounded-lg p-0.5">
+                                                <button
+                                                    onClick={() => toggleHeightUnit('ft')}
+                                                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${heightUnit === 'ft' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-gray-500'}`}
+                                                >
+                                                    FT
+                                                </button>
+                                                <button
+                                                    onClick={() => toggleHeightUnit('cm')}
+                                                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${heightUnit === 'cm' ? 'bg-white dark:bg-gray-700 shadow-sm text-black dark:text-white' : 'text-gray-500'}`}
+                                                >
+                                                    CM
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {heightUnit === 'cm' ? (
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    value={heightCm}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        if (val >= 0) setHeightCm(val);
+                                                    }}
+                                                    placeholder="175"
+                                                    className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
+                                                />
+                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 pointer-events-none">cm</span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex gap-2">
+                                                <div className="relative flex-1">
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        value={heightFt}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            if (val >= 0) setHeightFt(val);
+                                                        }}
+                                                        placeholder="5"
+                                                        className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
+                                                    />
+                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 pointer-events-none">ft</span>
+                                                </div>
+                                                <div className="relative flex-1">
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        value={heightIn}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            if (val >= 0) setHeightIn(val);
+                                                        }}
+                                                        placeholder="9"
+                                                        className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 font-bold text-lg focus:ring-2 focus:ring-brand-start outline-none transition-all placeholder:font-normal"
+                                                    />
+                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 pointer-events-none">in</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <button
+                                            onClick={handleAnalyzeStats}
+                                            disabled={analyzingStats || (heightUnit === 'cm' ? !heightCm : !heightFt)}
+                                            className="relative w-full py-3.5 bg-brand-start hover:bg-brand-mid text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-brand-start/25 flex items-center justify-center gap-2 disabled:opacity-50 overflow-hidden"
+                                        >
+                                            {analyzingStats && (
+                                                <div
+                                                    className="absolute left-0 top-0 bottom-0 bg-white/20 transition-all duration-300 ease-out"
+                                                    style={{ width: `${analysisProgress}%` }}
+                                                />
+                                            )}
+                                            <div className="relative z-10 flex items-center gap-2">
+                                                {analyzingStats ? (
+                                                    <>
+                                                        <Loader2 size={16} className="animate-spin" />
+                                                        Analyzing Measurements {analysisProgress}%
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <ScanFace size={18} />
+                                                        Calculate Measurements
+                                                    </>
+                                                )}
+                                            </div>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => navigate('/dashboard')}
+                                        className="w-full py-3.5 bg-brand-start hover:bg-brand-mid text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-brand-start/25 flex items-center justify-center gap-2"
+                                    >
+                                        View Agency Matches <ArrowRight size={18} />
+                                    </button>
+                                )}
 
                                 <button
                                     onClick={resetAll}
