@@ -142,7 +142,8 @@ def process_digitals(image_url: str):
         "as immutable. You MUST NOT alter, regenerate, smooth, reshape, or reinterpret "
         "any facial feature. Preserve the exact jawline, nose shape, lip shape, eye shape, "
         "and skin tone. "
-        "The output face must be pixel-for-pixel identical to the input face."
+        "The output face must be pixel-for-pixel identical to the input face. "
+        "The person in the output MUST look the SAME AGE as the input — do NOT age them."
     )
 
     cleanup_prompt = (
@@ -153,9 +154,13 @@ def process_digitals(image_url: str):
         "TASK:\n"
         "1. Clean neutral off-white background, no distractions.\n"
         "2. Wearing a plain fitted white t-shirt.\n"
-        "3. High-resolution, sharp focus, even studio lighting, subtle shadows for depth, photorealistic, 8k quality.\n"
+        "3. Soft, diffused, flattering studio lighting — the kind that MINIMISES lines and wrinkles. "
+        "No harsh directional light. No shadows that accentuate skin texture.\n"
         "RULES:\n"
         "- The face must be IDENTICAL to the input — same jawline, same skin tone, same everything.\n"
+        "- AGE PRESERVATION: The person must look the EXACT same age as in the input photo. "
+        "Do NOT add wrinkles, lines, or skin texture that is not present in the original. "
+        "Do NOT over-render pores or skin details. Keep the skin as smooth and soft as the input.\n"
         "- Keep the exact same hair style, facial hair, and skin tone.\n"
         "- FRAMING IS LOCKED: The output MUST be cropped and framed IDENTICALLY to the input. "
         "If the input is a close-up selfie where the head fills most of the frame, "
