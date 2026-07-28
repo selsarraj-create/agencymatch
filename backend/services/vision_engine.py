@@ -42,14 +42,20 @@ def generate_professional_headshot(image_bytes: bytes, mime_type: str = "image/j
     )
 
     user_prompt = (
-        "INSTRUCTION: PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
-        "Maintain 100% facial structure. "
-        "TASK: Remove all accessories including headphones, earrings, and necklaces. "
-        "Change current clothing to a plain, well-fitted white t-shirt. "
-        "Replace background with a neutral studio grey wall. "
-        "Apply soft, natural-style studio lighting. "
-        "Output aspect ratio must be 3:4 portrait format. "
-        "Output ONLY the transformed image, no text."
+        "A high-resolution composite modeling portfolio grid featuring a consistent and accurate likeness of the single subject provided in the input image. "
+        "The grid must have four seamless panels arranged in a 2x2 layout, all set against a clean, seamless neutral light-grey studio backdrop with soft, even studio lighting.\n\n"
+        "PANEL LAYOUT:\n"
+        "- Top-Left Panel: A frontal head-and-shoulders portrait looking directly at the camera with a neutral expression.\n"
+        "- Top-Right Panel: A direct profile portrait (subject facing left or right).\n"
+        "- Bottom-Left Panel: A 3/4 view portrait (subject facing the opposite direction of the profile shot).\n"
+        "- Bottom-Right Panel: A tight close-up detail shot focusing on key facial features, skin texture, and hair.\n\n"
+        "STYLING & IDENTITY RULES:\n"
+        "- In all four panels, the subject must be styled in a clean, high-quality solid white crew-neck t-shirt.\n"
+        "- The subject's expression should remain consistent across all views.\n"
+        "- Hair should be neatly styled to keep the face clear.\n"
+        "- Ensure the specific facial details, skin imperfections, and unique features of the reference subject are preserved authentically, without over-smoothing.\n"
+        "- Maintain 100% facial structure, age, skin tone, and hair consistency across all panels.\n\n"
+        "Output ONLY the image, no text."
     )
 
     try:
