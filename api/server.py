@@ -517,8 +517,9 @@ async def generate_digitals_endpoint(req: DigitalGenRequest):
 
 
 class DualDigitalGenRequest(BaseModel):
-    portrait_url: str
-    fullbody_url: str
+    portrait_url: Optional[str] = None
+    fullbody_url: Optional[str] = None
+    reference_urls: Optional[List[str]] = None
     user_id: str
 
 @app.post("/api/generate-digitals-dual")
@@ -531,7 +532,7 @@ async def generate_digitals_dual_endpoint(req: DualDigitalGenRequest):
         if current_credits < 5:
             return JSONResponse(status_code=402, content={"error": "Insufficient credits (5 required)"})
 
-        result = process_digitals_dual(req.portrait_url, req.fullbody_url)
+        result = process_digitals_dual(req.portrait_url, req.fullbody_url, reference_urls=req.reference_urls)
 
         if "error" in result:
              return JSONResponse(status_code=500, content=result)

@@ -109,38 +109,52 @@ def get_client():
     return genai.Client(api_key=api_key, http_options={"api_version": "v1beta"})
 
 
-def process_digitals(image_url: str, secondary_url: str = None):
-    """
-    Two-tiered professional headshot pipeline using Gemini 3 Pro.
+from typing import Union, List, Optional
 
-    Step 1: Takes the raw selfie / reference photos, locks facial identity
-    with maximum reasoning budget (thinkingBudget=8192), removes accessories
-    and head wraps, applies white t-shirt styling and neutral studio backdrop.
+def process_digitals(image_url: Union[str, List[str]] = None, secondary_url: str = None, reference_urls: List[str] = None):
+    """
+    Two-tiered professional headshot pipeline using Gemini 3 Pro with multi-image reference feeding.
+
+    Accepts 1, 2, 3, or more reference URLs (frontal, profile, 3/4 view).
+    All provided reference images are fed directly to Gemini 3 Pro (thinkingBudget=8192)
+    to build an accurate 3D identity anchor.
     """
     client = get_client()
-    print(f"Processing Digital for: {image_url}")
 
-    # ── Fetch Primary & Secondary Source Images ───────────────────────────
+    # Collect all non-empty reference URLs
+    urls = []
+    if reference_urls and isinstance(reference_urls, list):
+        urls.extend([u for u in reference_urls if u])
+    if isinstance(image_url, list):
+        urls.extend([u for u in image_url if u and u not in urls])
+    elif isinstance(image_url, str) and image_url and image_url not in urls:
+        urls.append(image_url)
+
+    if secondary_url and secondary_url not in urls:
+        urls.append(secondary_url)
+
+    if not urls:
+        return {"error": "No reference image URLs provided"}
+
+    print(f"[PHOTO LAB] Processing Digitals using {len(urls)} reference image(s)...")
+
+    # ── Fetch All Source Images ───────────────────────────────────────────
     source_parts = []
-    try:
-        resp = requests.get(image_url)
-        resp.raise_for_status()
-        source_bytes = resp.content
-        source_parts.append(types.Part.from_bytes(data=source_bytes, mime_type="image/jpeg"))
-        print(f"Downloaded primary source image: {len(source_bytes):,} bytes")
-    except Exception as e:
-        print(f"Failed to fetch primary image from URL: {e}")
-        return {"error": "Failed to download source image"}
-
-    if secondary_url:
+    first_bytes = None
+    for idx, u in enumerate(urls):
         try:
-            resp_sec = requests.get(secondary_url)
-            resp_sec.raise_for_status()
-            sec_bytes = resp_sec.content
-            source_parts.append(types.Part.from_bytes(data=sec_bytes, mime_type="image/jpeg"))
-            print(f"Downloaded secondary reference image: {len(sec_bytes):,} bytes")
+            resp = requests.get(u, timeout=15)
+            resp.raise_for_status()
+            img_bytes = resp.content
+            if first_bytes is None:
+                first_bytes = img_bytes
+            source_parts.append(types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"))
+            print(f"Downloaded reference image #{idx + 1}: {len(img_bytes):,} bytes")
         except Exception as e:
-            print(f"Non-fatal: Failed to fetch secondary image from URL: {e}")
+            print(f"Failed to fetch reference image #{idx + 1} from {u}: {e}")
+
+    if not source_parts:
+        return {"error": "Failed to download any reference images"}
 
     # ══════════════════════════════════════════════════════════════════════
     # SINGLE STEP: Natural Cleanup (Identity-Locked Studio Transform)
@@ -178,7 +192,7 @@ def process_digitals(image_url: str, secondary_url: str = None):
     )
 
     try:
-        print(f"Cleanup: {GEMINI_MODEL} — Identity-locked studio transform (ThinkingBudget=8192)...")
+        print(f"Cleanup: {GEMINI_MODEL} — Identity-locked studio transform with {len(source_parts)} reference image(s) (ThinkingBudget=8192)...")
         content_parts = source_parts + [types.Part.from_text(text=cleanup_prompt)]
 
         cleanup_response = client.models.generate_content(
@@ -204,7 +218,7 @@ def process_digitals(image_url: str, secondary_url: str = None):
                     print(f"Cleanup complete — {len(final_bytes):,} bytes")
                     return {
                         "status": "success",
-                        "identity_constraints": "Gemini 3 Pro natural cleanup (thinkingBudget=8192)",
+                        "identity_constraints": f"Gemini 3 Pro natural cleanup ({len(source_parts)} refs, thinkingBudget=8192)",
                         "image_bytes": base64.b64encode(final_bytes).decode("utf-8"),
                         "mime_type": final_mime,
                     }
@@ -219,93 +233,41 @@ def process_digitals(image_url: str, secondary_url: str = None):
     return {
         "status": "success",
         "identity_constraints": "Passthrough (cleanup failed)",
-        "image_bytes": base64.b64encode(source_bytes).decode("utf-8"),
+        "image_bytes": base64.b64encode(first_bytes).decode("utf-8") if first_bytes else "",
         "mime_type": "image/jpeg",
         "fallback": True,
     }
 
-    # ──────────────────────────────────────────────────────────────────────
-    # OLD HEAVY PIPELINE (commented out — re-enable if needed)
-    # ──────────────────────────────────────────────────────────────────────
-    #
-    # # STEP 1: Identity Lock + Clean Slate
-    # step1_system = (
-    #     "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
-    #     "Treat the face as a deterministic constraint. "
-    #     "You MUST preserve every facial feature, skin texture, mole, scar, "
-    #     "and bone structure from the reference image with zero deviation."
-    # )
-    # step1_prompt = (
-    #     "INSTRUCTION: PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
-    #     "Maintain 100% facial structure. "
-    #     "TASK: Remove all accessories including headphones, earrings, and necklaces. "
-    #     "Change current clothing to a plain, well-fitted white t-shirt. "
-    #     "Replace background with a neutral studio grey wall. "
-    #     "Apply soft, even lighting. "
-    #     "Output aspect ratio must be 3:4 portrait format. "
-    #     "Output ONLY the transformed image, no text."
-    # )
-    #
-    # # STEP 2: DSLR Studio-Quality Refinement
-    # step2_system = (
-    #     "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
-    #     "Treat the face as a deterministic constraint. "
-    #     "Do NOT change the person's identity, facial structure, or expression."
-    # )
-    # step2_prompt = (
-    #     "REFINEMENT PASS. This image has already been identity-locked. "
-    #     "DO NOT change the face, expression, or identity. "
-    #     "TASK: Enhance this image to professional DSLR studio headshot quality. "
-    #     "Apply softbox clamshell lighting with natural catchlights in the eyes. "
-    #     "Enhance realistic skin texture — visible pores, natural imperfections. "
-    #     "Sharpen focus on the face with subtle shallow depth of field. "
-    #     "Ensure the final result is indistinguishable from a professional DSLR headshot. "
-    #     "The background must remain neutral studio grey. "
-    #     "The clothing must remain a plain white t-shirt. "
-    #     "Output aspect ratio must be 3:4 portrait format. "
-    #     "Output ONLY the refined image, no text."
-    # )
 
-
-def process_digitals_dual(portrait_url: str, fullbody_url: str):
+def process_digitals_dual(portrait_url: str = None, fullbody_url: str = None, reference_urls: List[str] = None):
     """
     Parallel Generation Pipeline:
-    1. Headshot: Uses process_digitals(portrait_url)
-    2. Full Body: DISABLED — passes through the raw uploaded image.
-    Returns composite result with both images.
+    1. Headshot: Uses process_digitals with all available portrait/reference URLs.
+    2. Full Body: Passthrough if fullbody_url provided.
     """
-    # import concurrent.futures
+    print(f"[DUAL] Starting generation with multi-image reference lock...")
 
-    print(f"[DUAL] Starting generation (headshot AI + fullbody passthrough)...")
+    # Collect all reference URLs
+    all_refs = []
+    if reference_urls and isinstance(reference_urls, list):
+        all_refs.extend([u for u in reference_urls if u])
+    if portrait_url and portrait_url not in all_refs:
+        all_refs.append(portrait_url)
 
-    # ── Headshot: AI-generated with multi-image identity lock ──
-    headshot_result = process_digitals(portrait_url, secondary_url=fullbody_url)
+    headshot_result = process_digitals(reference_urls=all_refs, secondary_url=fullbody_url)
 
-    # ── Full Body: passthrough (AI generation disabled) ──
-    # To re-enable AI full body generation, uncomment the block below
-    # and remove the passthrough block.
-    #
-    # with concurrent.futures.ThreadPoolExecutor() as executor:
-    #     future_headshot = executor.submit(process_digitals, portrait_url)
-    #     future_fullbody = executor.submit(_generate_fullbody_dual, portrait_url, fullbody_url)
-    #     headshot_result = future_headshot.result()
-    #     fullbody_result = future_fullbody.result()
-
-    # Passthrough: just download and return the raw uploaded full body image
-    try:
-        resp = requests.get(fullbody_url)
-        resp.raise_for_status()
-        raw_body_bytes = resp.content
-        print(f"[DUAL] Full body passthrough — {len(raw_body_bytes):,} bytes")
-        fullbody_result = {
-            "status": "success",
-            "identity_constraints": "Passthrough (AI generation disabled)",
-            "image_bytes": base64.b64encode(raw_body_bytes).decode("utf-8"),
-            "mime_type": "image/jpeg",
-        }
-    except Exception as e:
-        print(f"[DUAL] Full body passthrough failed: {e}")
-        fullbody_result = {"error": f"Failed to download full body image: {e}"}
+    # Full Body Passthrough
+    fullbody_result = {"status": "success", "identity_constraints": "Passthrough"}
+    if fullbody_url:
+        try:
+            resp = requests.get(fullbody_url, timeout=15)
+            resp.raise_for_status()
+            raw_body_bytes = resp.content
+            fullbody_result["image_bytes"] = base64.b64encode(raw_body_bytes).decode("utf-8")
+            fullbody_result["mime_type"] = "image/jpeg"
+        except Exception as e:
+            print(f"[DUAL] Full body passthrough failed: {e}")
+            fullbody_result = {"error": f"Failed to download full body image: {e}"}
 
     return {
         "status": "success",
