@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Upload, Loader2, ArrowRight, RotateCcw, Plus, X, Edit3, Settings2, AlertTriangle } from 'lucide-react';
+import { Upload, Loader2, ArrowRight, RotateCcw, Plus, X, Edit3, Settings2, AlertTriangle, Cpu, Zap } from 'lucide-react';
 
 const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000/api';
 
@@ -87,9 +87,10 @@ const PhotoTest = () => {
     const [error, setError] = useState(null);
     const [timing, setTiming] = useState(null);
 
-    // Prompt engineering state — pre-filled with defaults immediately on load
+    // Prompt engineering & thinking budget state
     const [systemInstruction, setSystemInstruction] = useState(DEFAULT_SYSTEM_INSTRUCTION);
     const [userPrompt, setUserPrompt] = useState(DEFAULT_USER_PROMPT);
+    const [thinkingBudget, setThinkingBudget] = useState(2048);
     const [showPromptEditor, setShowPromptEditor] = useState(true);
 
     useEffect(() => {
@@ -146,6 +147,7 @@ const PhotoTest = () => {
     const handleResetPrompts = () => {
         setSystemInstruction(DEFAULT_SYSTEM_INSTRUCTION);
         setUserPrompt(DEFAULT_USER_PROMPT);
+        setThinkingBudget(2048);
     };
 
     const handleGenerate = async () => {
@@ -161,14 +163,15 @@ const PhotoTest = () => {
             // 1. Compress all reference files on canvas to optimized 1024px JPEGs (~200KB)
             const compressedDataUrls = await Promise.all(files.map(f => compressImageFile(f)));
 
-            setStatusMessage('Generating 2x2 Grid with Gemini 3 Pro (8192 Thinking Budget)...');
+            setStatusMessage(`Generating 2x2 Grid (Thinking Budget: ${thinkingBudget} Tokens)...`);
 
-            // 2. Call test endpoint with optimized data URLs & custom editable prompts
+            // 2. Call test endpoint with optimized data URLs, custom prompts, and thinking budget
             const response = await axios.post(`${API_URL}/test-headshot`, {
                 reference_urls: compressedDataUrls,
                 photo_url: compressedDataUrls[0],
                 custom_system_instruction: systemInstruction,
-                custom_user_prompt: userPrompt
+                custom_user_prompt: userPrompt,
+                thinking_budget: Number(thinkingBudget)
             }, { timeout: 180000 });
 
             if (response.data && response.data.image_bytes) {
@@ -198,6 +201,15 @@ const PhotoTest = () => {
         setTiming(null);
     };
 
+    // Label for current thinking budget tier
+    const getBudgetTierLabel = (b) => {
+        if (b === 0) return '0 Tokens (Instant Generation / No Reasoning)';
+        if (b <= 1024) return `${b} Tokens (Ultra Fast — ~4s)`;
+        if (b <= 2048) return `${b} Tokens (Balanced Default — ~7s)`;
+        if (b <= 4096) return `${b} Tokens (High Reasoning — ~12s)`;
+        return `${b} Tokens (Max 3D Identity Lock — ~25s)`;
+    };
+
     return (
         <div className="min-h-screen bg-gray-950 text-white p-6">
             <div className="max-w-5xl mx-auto space-y-6">
@@ -205,10 +217,10 @@ const PhotoTest = () => {
                     <div>
                         <h1 className="text-2xl font-black mb-1 flex items-center gap-2">
                             <Settings2 className="text-green-400" size={24} />
-                            Photo Lab — Staff Prompt Test Bench
+                            Photo Lab — Staff Prompt & Reasoning Test Bench
                         </h1>
                         <p className="text-sm text-gray-400">
-                            Upload 1 to 3 reference photos & iterate live on Gemini 3 Pro prompts. No credits, no login needed.
+                            Upload 1 to 3 reference photos & iterate live on Gemini 3 Pro prompts & thinking budget. No credits, no login needed.
                         </p>
                     </div>
                     <button
@@ -220,19 +232,65 @@ const PhotoTest = () => {
                     </button>
                 </div>
 
-                {/* Editable Prompt Engineering Panel */}
+                {/* Editable Prompt Engineering & Thinking Budget Panel */}
                 {showPromptEditor && (
-                    <div className="bg-gray-900 border border-white/10 rounded-2xl p-5 space-y-4 shadow-xl">
-                        <div className="flex justify-between items-center">
+                    <div className="bg-gray-900 border border-white/10 rounded-2xl p-5 space-y-5 shadow-xl">
+                        <div className="flex justify-between items-center border-b border-white/10 pb-3">
                             <h2 className="text-sm font-bold text-green-400 uppercase tracking-wider flex items-center gap-2">
-                                <Edit3 size={16} /> Live Prompt Workbench (Staff Iteration)
+                                <Edit3 size={16} /> Live Prompt & Reasoning Workbench
                             </h2>
                             <button
                                 onClick={handleResetPrompts}
                                 className="text-xs text-gray-400 hover:text-white underline font-medium"
                             >
-                                Reset to Default Prompts
+                                Reset Defaults
                             </button>
+                        </div>
+
+                        {/* Thinking Time Slider Control */}
+                        <div className="bg-black/40 border border-white/10 rounded-xl p-4 space-y-3">
+                            <div className="flex justify-between items-center">
+                                <label className="text-xs font-bold text-gray-200 flex items-center gap-2">
+                                    <Cpu size={16} className="text-green-400" />
+                                    <span>AI Thinking Time / Reasoning Budget</span>
+                                </label>
+                                <span className="text-xs font-mono font-bold text-green-400 bg-green-500/10 px-2.5 py-1 rounded-md border border-green-500/20">
+                                    {getBudgetTierLabel(thinkingBudget)}
+                                </span>
+                            </div>
+
+                            <input
+                                type="range"
+                                min={0}
+                                max={8192}
+                                step={512}
+                                value={thinkingBudget}
+                                onChange={(e) => setThinkingBudget(Number(e.target.value))}
+                                className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-green-500"
+                            />
+
+                            {/* Preset Buttons */}
+                            <div className="flex gap-2 justify-between pt-1">
+                                {[
+                                    { label: '0 (Off)', val: 0 },
+                                    { label: '1024 (Fast)', val: 1024 },
+                                    { label: '2048 (Default)', val: 2048 },
+                                    { label: '4096 (Deep)', val: 4096 },
+                                    { label: '8192 (Max)', val: 8192 },
+                                ].map((preset) => (
+                                    <button
+                                        key={preset.val}
+                                        onClick={() => setThinkingBudget(preset.val)}
+                                        className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors border ${
+                                            thinkingBudget === preset.val
+                                                ? 'bg-green-600 border-green-400 text-white shadow-sm'
+                                                : 'bg-white/5 border-white/10 hover:bg-white/10 text-gray-400 hover:text-white'
+                                        }`}
+                                    >
+                                        {preset.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -322,18 +380,18 @@ const PhotoTest = () => {
                                         <div className="flex flex-col items-center gap-3 p-4 text-center">
                                             <Loader2 size={32} className="animate-spin text-green-500" />
                                             <span className="text-sm font-semibold text-gray-300">{statusMessage || 'Generating 2x2 Grid...'}</span>
-                                            <span className="text-xs text-gray-500">Locking facial geometry & skin tone across {files.length} photo(s)...</span>
+                                            <span className="text-xs text-gray-500">Locking facial geometry across {files.length} photo(s)...</span>
                                         </div>
                                     ) : resultImage ? (
                                         <img src={resultImage} alt="Result Grid" className="w-full h-full object-cover" />
                                     ) : (
-                                        <span className="text-xs text-gray-500">Tap "Generate" to render with custom prompts</span>
+                                        <span className="text-xs text-gray-500">Tap "Generate" to render with custom settings</span>
                                     )}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Error Banner (Guaranteed String Output) */}
+                        {/* Error Banner */}
                         {Boolean(error) && (
                             <div className="bg-red-900/30 border border-red-700/50 text-red-300 text-sm rounded-xl p-3 text-center flex items-center justify-center gap-2">
                                 <AlertTriangle size={16} /> {String(error)}

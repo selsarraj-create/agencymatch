@@ -149,14 +149,15 @@ def process_digitals(
     secondary_url: str = None,
     reference_urls: List[str] = None,
     custom_system: str = None,
-    custom_prompt: str = None
+    custom_prompt: str = None,
+    thinking_budget: Optional[int] = 2048
 ):
     """
     Two-tiered professional headshot pipeline using Gemini 3 Pro with multi-image reference feeding.
 
     Accepts 1, 2, 3, or more reference URLs (frontal, profile, 3/4 view).
-    All provided reference images are fed directly to Gemini 3 Pro (thinkingBudget=8192)
-    to build an accurate 3D identity anchor. Supports custom system instructions and prompts for testing.
+    All provided reference images are fed directly to Gemini 3 Pro
+    to build an accurate 3D identity anchor. Supports custom system instructions, prompts, and thinking budget.
     """
     client = get_client()
 
@@ -209,9 +210,19 @@ def process_digitals(
     cleanup_system = custom_system.strip() if custom_system and custom_system.strip() else DEFAULT_SYSTEM_INSTRUCTION
     cleanup_prompt = custom_prompt.strip() if custom_prompt and custom_prompt.strip() else DEFAULT_USER_PROMPT
 
+    budget = int(thinking_budget) if thinking_budget is not None else 2048
+    thinking_cfg = types.ThinkingConfig(thinkingBudget=budget) if budget > 0 else None
+
     try:
-        print(f"Cleanup: {GEMINI_MODEL} — Identity-locked studio transform with {len(source_parts)} reference image(s) (ThinkingBudget=2048)...")
+        print(f"Cleanup: {GEMINI_MODEL} — Identity-locked studio transform with {len(source_parts)} reference image(s) (ThinkingBudget={budget})...")
         content_parts = source_parts + [types.Part.from_text(text=cleanup_prompt)]
+
+        gen_config = types.GenerateContentConfig(
+            system_instruction=cleanup_system,
+            response_modalities=["IMAGE"],
+        )
+        if thinking_cfg:
+            gen_config.thinking_config = thinking_cfg
 
         cleanup_response = client.models.generate_content(
             model=GEMINI_MODEL,
@@ -221,11 +232,7 @@ def process_digitals(
                     parts=content_parts,
                 )
             ],
-            config=types.GenerateContentConfig(
-                system_instruction=cleanup_system,
-                response_modalities=["IMAGE"],
-                thinking_config=types.ThinkingConfig(thinkingBudget=2048),
-            ),
+            config=gen_config,
         )
 
         if cleanup_response.candidates and cleanup_response.candidates[0].content.parts:

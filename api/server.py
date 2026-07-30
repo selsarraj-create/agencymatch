@@ -447,6 +447,7 @@ class TestHeadshotRequest(BaseModel):
     reference_urls: Optional[List[str]] = None
     custom_system_instruction: Optional[str] = None
     custom_user_prompt: Optional[str] = None
+    thinking_budget: Optional[int] = 2048
 
 @app.post("/api/test-headshot")
 async def test_headshot_endpoint(req: TestHeadshotRequest):
@@ -456,7 +457,8 @@ async def test_headshot_endpoint(req: TestHeadshotRequest):
         result = process_digitals(
             reference_urls=urls,
             custom_system=req.custom_system_instruction,
-            custom_prompt=req.custom_user_prompt
+            custom_prompt=req.custom_user_prompt,
+            thinking_budget=req.thinking_budget
         )
         return result
     except Exception as e:
