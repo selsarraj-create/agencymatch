@@ -109,46 +109,59 @@ def get_client():
     return genai.Client(api_key=api_key, http_options={"api_version": "v1beta"})
 
 
-def process_digitals(image_url: str):
+def process_digitals(image_url: str, secondary_url: str = None):
     """
     Two-tiered professional headshot pipeline using Gemini 3 Pro.
 
-    Step 1: Takes the raw selfie, locks facial identity with PIXEL PRIORITY
-    MODE, removes accessories, changes clothing to white t-shirt, applies
-    neutral grey backdrop.
-
-    Step 2: Takes Step 1 output and refines it to DSLR studio quality with
-    realistic skin texture, softbox clamshell lighting, and 4K detail.
+    Step 1: Takes the raw selfie / reference photos, locks facial identity
+    with maximum reasoning budget (thinkingBudget=8192), removes accessories
+    and head wraps, applies white t-shirt styling and neutral studio backdrop.
     """
     client = get_client()
     print(f"Processing Digital for: {image_url}")
 
-    # ── Fetch Source Image ────────────────────────────────────────────────
+    # ── Fetch Primary & Secondary Source Images ───────────────────────────
+    source_parts = []
     try:
         resp = requests.get(image_url)
         resp.raise_for_status()
         source_bytes = resp.content
-        print(f"Downloaded source image: {len(source_bytes):,} bytes")
+        source_parts.append(types.Part.from_bytes(data=source_bytes, mime_type="image/jpeg"))
+        print(f"Downloaded primary source image: {len(source_bytes):,} bytes")
     except Exception as e:
-        print(f"Failed to fetch image from URL: {e}")
+        print(f"Failed to fetch primary image from URL: {e}")
         return {"error": "Failed to download source image"}
 
+    if secondary_url:
+        try:
+            resp_sec = requests.get(secondary_url)
+            resp_sec.raise_for_status()
+            sec_bytes = resp_sec.content
+            source_parts.append(types.Part.from_bytes(data=sec_bytes, mime_type="image/jpeg"))
+            print(f"Downloaded secondary reference image: {len(sec_bytes):,} bytes")
+        except Exception as e:
+            print(f"Non-fatal: Failed to fetch secondary image from URL: {e}")
+
     # ══════════════════════════════════════════════════════════════════════
-    # SINGLE STEP: Natural Cleanup (lightweight)
+    # SINGLE STEP: Natural Cleanup (Identity-Locked Studio Transform)
     # ══════════════════════════════════════════════════════════════════════
     cleanup_system = (
         "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
-        "The face in the input image is a HARD CONSTRAINT — treat every pixel of the face "
-        "as immutable. You MUST NOT alter, reshape, or reinterpret any facial feature. "
-        "Preserve the exact jawline, nose shape, lip shape, eye shape, and skin tone. "
-        "AGE PRESERVATION IS MANDATORY: Do NOT age the subject. Do NOT introduce, accentuate, "
-        "or over-render wrinkles, lines, under-eye bags, or rough skin texture. Keep the subject "
-        "looking youthful, fresh, smooth, and the EXACT same age as in the input image. "
-        "ACCESSORY REMOVAL: Remove all accessories including AirPods, earbuds, headphones, glasses, and jewelry."
+        "The face, facial structure, and skin tone in the input image(s) are HARD CONSTRAINTS. "
+        "You MUST NOT alter, reshape, pale, standardize, or reinterpret any facial feature. "
+        "EXACT FACIAL FEATURE LOCK: Preserve the exact jawline, chin shape, nose shape & nostrils, "
+        "lip shape & fullness, eye shape & eyelid folds, eyebrow arch, and facial proportions. "
+        "EXACT SKIN TONE LOCK: Preserve the exact skin tone, undertones, and complexion from the reference image. "
+        "Do NOT lighten, pale, darken, or shift skin color. "
+        "AGE PRESERVATION: Do NOT age the subject. Do NOT introduce or over-render wrinkles, lines, "
+        "or under-eye bags. Keep the subject looking youthful, fresh, and exact same age as in the input image. "
+        "ACCESSORY & HEADWEAR REMOVAL: Remove all accessories including AirPods, earbuds, headphones, glasses, and jewelry. "
+        "If the subject is wearing a head wrap, towel, turban, hair covering, or hat, remove it and replace it with clean, "
+        "simple dark hair neatly styled or slicked back. DO NOT alter the forehead height or skull proportions."
     )
 
     cleanup_prompt = (
-        "A high-resolution composite modeling portfolio grid featuring a consistent, youthful, and accurate likeness of the single subject provided in the input image. "
+        "A high-resolution composite modeling portfolio grid featuring an exact, 100% recognizable, and accurate likeness of the single subject provided in the input reference image(s). "
         "The grid must have four seamless panels arranged in a 2x2 layout, all set against a clean, seamless neutral light-grey studio backdrop with soft, diffused, flattering studio lighting.\n\n"
         "PANEL LAYOUT:\n"
         "- Top-Left Panel: A frontal head-and-shoulders portrait looking directly at the camera with a neutral expression.\n"
@@ -156,31 +169,30 @@ def process_digitals(image_url: str):
         "- Bottom-Left Panel: A 3/4 view portrait (subject facing the opposite direction of the profile shot).\n"
         "- Bottom-Right Panel: A tight close-up portrait shot focusing on the subject's face, eyes, and hair.\n\n"
         "CRITICAL RULES & STYLING:\n"
-        "- ACCESSORY REMOVAL: Remove ALL accessories including AirPods, earbuds, headphones, glasses, earrings, and necklaces in ALL panels. Ears must be completely clear.\n"
-        "- AGE PRESERVATION & FLATTERING LIGHTING: The subject MUST look youthful, smooth, and match the EXACT same age as the input photo. Do NOT add wrinkles, deep lines, under-eye bags, or harsh skin texture. Use soft, diffused lighting that minimizes lines and keeps skin soft and smooth.\n"
+        "- ZERO IDENTITY DRIFT: The output subject MUST look unmistakably identical to the input reference image. Match the exact eyes, nose, lip fullness, jawline, and skin tone. Do NOT generate a generic model face.\n"
+        "- EXACT SKIN TONE: Preserve the exact skin tone, warmth, and undertones from the reference photo.\n"
+        "- HEADWEAR / ACCESSORY REMOVAL: Remove any head towel, wrap, hat, AirPods, earrings, or glasses. Replace headwear with neat, simply styled dark hair without changing the face or forehead shape.\n"
         "- STYLING: In all four panels, the subject must be styled in a clean, fitted solid white crew-neck t-shirt.\n"
-        "- CONSISTENCY: Maintain 100% facial structure, jawline, hair style, and skin tone identically across all four panels.\n"
-        "- Hair should be neatly styled to keep the face clear.\n\n"
+        "- CONSISTENCY: Maintain 100% facial structure, jawline, hair style, and skin tone identically across all four panels.\n\n"
         "Output aspect ratio must be 1:1 square format. Output ONLY the image, no text."
     )
 
     try:
-        print(f"Cleanup: {GEMINI_MODEL} — Identity-locked studio transform...")
+        print(f"Cleanup: {GEMINI_MODEL} — Identity-locked studio transform (ThinkingBudget=8192)...")
+        content_parts = source_parts + [types.Part.from_text(text=cleanup_prompt)]
+
         cleanup_response = client.models.generate_content(
             model=GEMINI_MODEL,
             contents=[
                 types.Content(
                     role="user",
-                    parts=[
-                        types.Part.from_bytes(data=source_bytes, mime_type="image/jpeg"),
-                        types.Part.from_text(text=cleanup_prompt),
-                    ],
+                    parts=content_parts,
                 )
             ],
             config=types.GenerateContentConfig(
                 system_instruction=cleanup_system,
                 response_modalities=["IMAGE"],
-                thinking_config=types.ThinkingConfig(thinkingBudget=1024),
+                thinking_config=types.ThinkingConfig(thinkingBudget=8192),
             ),
         )
 
@@ -192,7 +204,7 @@ def process_digitals(image_url: str):
                     print(f"Cleanup complete — {len(final_bytes):,} bytes")
                     return {
                         "status": "success",
-                        "identity_constraints": "Gemini 3 Pro natural cleanup (single pass)",
+                        "identity_constraints": "Gemini 3 Pro natural cleanup (thinkingBudget=8192)",
                         "image_bytes": base64.b64encode(final_bytes).decode("utf-8"),
                         "mime_type": final_mime,
                     }
@@ -266,8 +278,8 @@ def process_digitals_dual(portrait_url: str, fullbody_url: str):
 
     print(f"[DUAL] Starting generation (headshot AI + fullbody passthrough)...")
 
-    # ── Headshot: still AI-generated ──
-    headshot_result = process_digitals(portrait_url)
+    # ── Headshot: AI-generated with multi-image identity lock ──
+    headshot_result = process_digitals(portrait_url, secondary_url=fullbody_url)
 
     # ── Full Body: passthrough (AI generation disabled) ──
     # To re-enable AI full body generation, uncomment the block below

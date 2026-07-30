@@ -34,14 +34,21 @@ def generate_professional_headshot(image_bytes: bytes, mime_type: str = "image/j
 
     system_instruction = (
         "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
-        "Treat the face as a deterministic constraint. "
-        "You MUST preserve every facial feature, skin tone, and bone structure from the reference image with zero deviation. "
-        "AGE PRESERVATION IS MANDATORY: Do NOT age the subject. Do NOT introduce or over-render wrinkles, lines, under-eye bags, or harsh skin texture. Keep the subject looking youthful and fresh. "
-        "ACCESSORY REMOVAL: Remove all accessories including AirPods, earbuds, headphones, glasses, and jewelry completely."
+        "The face, facial structure, and skin tone in the input image are HARD CONSTRAINTS. "
+        "You MUST NOT alter, reshape, pale, standardize, or reinterpret any facial feature. "
+        "EXACT FACIAL FEATURE LOCK: Preserve the exact jawline, chin shape, nose shape & nostrils, "
+        "lip shape & fullness, eye shape & eyelid folds, eyebrow arch, and facial proportions. "
+        "EXACT SKIN TONE LOCK: Preserve the exact skin tone, undertones, and complexion from the reference image. "
+        "Do NOT lighten, pale, darken, or shift skin color. "
+        "AGE PRESERVATION: Do NOT age the subject. Do NOT introduce or over-render wrinkles, lines, "
+        "or under-eye bags. Keep the subject looking youthful, fresh, and exact same age as in the input image. "
+        "ACCESSORY & HEADWEAR REMOVAL: Remove all accessories including AirPods, earbuds, headphones, glasses, and jewelry. "
+        "If the subject is wearing a head wrap, towel, turban, hair covering, or hat, remove it and replace it with clean, "
+        "simple dark hair neatly styled or slicked back. DO NOT alter the forehead height or skull proportions."
     )
 
     user_prompt = (
-        "A high-resolution composite modeling portfolio grid featuring a consistent, youthful, and accurate likeness of the single subject provided in the input image. "
+        "A high-resolution composite modeling portfolio grid featuring an exact, 100% recognizable, and accurate likeness of the single subject provided in the input reference image. "
         "The grid must have four seamless panels arranged in a 2x2 layout, all set against a clean, seamless neutral light-grey studio backdrop with soft, diffused, flattering studio lighting.\n\n"
         "PANEL LAYOUT:\n"
         "- Top-Left Panel: A frontal head-and-shoulders portrait looking directly at the camera with a neutral expression.\n"
@@ -49,11 +56,11 @@ def generate_professional_headshot(image_bytes: bytes, mime_type: str = "image/j
         "- Bottom-Left Panel: A 3/4 view portrait (subject facing the opposite direction of the profile shot).\n"
         "- Bottom-Right Panel: A tight close-up portrait shot focusing on the subject's face, eyes, and hair.\n\n"
         "CRITICAL RULES & STYLING:\n"
-        "- ACCESSORY REMOVAL: Remove ALL accessories including AirPods, earbuds, headphones, glasses, earrings, and necklaces in ALL panels. Ears must be completely clear.\n"
-        "- AGE PRESERVATION & FLATTERING LIGHTING: The subject MUST look youthful, smooth, and match the EXACT same age as the input photo. Do NOT add wrinkles, deep lines, under-eye bags, or harsh skin texture. Use soft, diffused lighting that minimizes lines and keeps skin soft and smooth.\n"
+        "- ZERO IDENTITY DRIFT: The output subject MUST look unmistakably identical to the input reference image. Match the exact eyes, nose, lip fullness, jawline, and skin tone. Do NOT generate a generic model face.\n"
+        "- EXACT SKIN TONE: Preserve the exact skin tone, warmth, and undertones from the reference photo.\n"
+        "- HEADWEAR / ACCESSORY REMOVAL: Remove any head towel, wrap, hat, AirPods, earrings, or glasses. Replace headwear with neat, simply styled dark hair without changing the face or forehead shape.\n"
         "- STYLING: In all four panels, the subject must be styled in a clean, fitted solid white crew-neck t-shirt.\n"
-        "- CONSISTENCY: Maintain 100% facial structure, jawline, hair style, and skin tone identically across all four panels.\n"
-        "- Hair should be neatly styled to keep the face clear.\n\n"
+        "- CONSISTENCY: Maintain 100% facial structure, jawline, hair style, and skin tone identically across all four panels.\n\n"
         "Output aspect ratio must be 1:1 square format. Output ONLY the image, no text."
     )
 
