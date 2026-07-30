@@ -144,13 +144,52 @@ DEFAULT_USER_PROMPT = (
 )
 
 
+CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "lab_config.json")
+
+def load_lab_config():
+    """Load persistent prompt and thinking configuration, falling back to defaults."""
+    if os.path.exists(CONFIG_FILE_PATH):
+        try:
+            with open(CONFIG_FILE_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return {
+                    "system_instruction": data.get("system_instruction", DEFAULT_SYSTEM_INSTRUCTION),
+                    "user_prompt": data.get("user_prompt", DEFAULT_USER_PROMPT),
+                    "thinking_budget": data.get("thinking_budget", 2048)
+                }
+        except Exception as e:
+            print(f"[PHOTO LAB] Failed to load lab_config.json: {e}")
+    return {
+        "system_instruction": DEFAULT_SYSTEM_INSTRUCTION,
+        "user_prompt": DEFAULT_USER_PROMPT,
+        "thinking_budget": 2048
+    }
+
+def save_lab_config(system_instruction: str, user_prompt: str, thinking_budget: int = 2048):
+    """Save persistent prompt and thinking configuration to disk."""
+    data = {
+        "system_instruction": system_instruction.strip(),
+        "user_prompt": user_prompt.strip(),
+        "thinking_budget": int(thinking_budget) if thinking_budget is not None else 2048,
+        "updated_at": int(time.time())
+    }
+    try:
+        with open(CONFIG_FILE_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+        print(f"[PHOTO LAB] Saved active configuration to {CONFIG_FILE_PATH}")
+        return True
+    except Exception as e:
+        print(f"[PHOTO LAB] Failed to save lab_config.json: {e}")
+        return False
+
+
 def process_digitals(
     image_url: Union[str, List[str]] = None,
     secondary_url: str = None,
     reference_urls: List[str] = None,
     custom_system: str = None,
     custom_prompt: str = None,
-    thinking_budget: Optional[int] = 2048
+    thinking_budget: Optional[int] = None
 ):
     """
     Two-tiered professional headshot pipeline using Gemini 3 Pro with multi-image reference feeding.
@@ -207,10 +246,12 @@ def process_digitals(
     # ══════════════════════════════════════════════════════════════════════
     # SINGLE STEP: Natural Cleanup (Identity-Locked Studio Transform)
     # ══════════════════════════════════════════════════════════════════════
-    cleanup_system = custom_system.strip() if custom_system and custom_system.strip() else DEFAULT_SYSTEM_INSTRUCTION
-    cleanup_prompt = custom_prompt.strip() if custom_prompt and custom_prompt.strip() else DEFAULT_USER_PROMPT
+    active_cfg = load_lab_config()
+    cleanup_system = custom_system.strip() if custom_system and custom_system.strip() else active_cfg["system_instruction"]
+    cleanup_prompt = custom_prompt.strip() if custom_prompt and custom_prompt.strip() else active_cfg["user_prompt"]
+    effective_budget = thinking_budget if thinking_budget is not None else active_cfg["thinking_budget"]
 
-    budget = int(thinking_budget) if thinking_budget is not None else 2048
+    budget = int(effective_budget) if effective_budget is not None else 2048
     thinking_cfg = types.ThinkingConfig(thinkingBudget=budget) if budget > 0 else None
 
     try:

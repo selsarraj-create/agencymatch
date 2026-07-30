@@ -416,7 +416,9 @@ from api.photo_lab import (
     process_digitals_dual,
     audit_image_quality,
     DEFAULT_SYSTEM_INSTRUCTION,
-    DEFAULT_USER_PROMPT
+    DEFAULT_USER_PROMPT,
+    load_lab_config,
+    save_lab_config
 )
 
 class AuditImageRequest(BaseModel):
@@ -433,13 +435,33 @@ async def audit_image_endpoint(req: AuditImageRequest):
         return {"score": 5, "issues": [], "can_proceed": True}
 
 
-# ── Test-only endpoint (no credits, no profile, no storage save) ──
+# ── Test-only endpoint & Staff Configuration Persistence ──
+class SaveLabConfigRequest(BaseModel):
+    system_instruction: str
+    user_prompt: str
+    thinking_budget: Optional[int] = 2048
+
+@app.post("/api/save-lab-config")
+async def save_lab_config_endpoint(req: SaveLabConfigRequest):
+    """Saves the prompt and thinking budget configuration as the default for the main live application."""
+    success = save_lab_config(
+        system_instruction=req.system_instruction,
+        user_prompt=req.user_prompt,
+        thinking_budget=req.thinking_budget
+    )
+    if success:
+        return {"status": "success", "message": "Prompts and thinking settings successfully saved for the main live application!"}
+    else:
+        return JSONResponse(status_code=500, content={"error": "Failed to save settings to server config"})
+
 @app.get("/api/test-headshot-prompts")
 async def get_test_prompts():
-    """Dev-only: returns the default system instruction and user prompt for the test bench."""
+    """Dev-only: returns the current persistent system instruction, user prompt, and thinking budget."""
+    cfg = load_lab_config()
     return {
-        "system_instruction": DEFAULT_SYSTEM_INSTRUCTION,
-        "user_prompt": DEFAULT_USER_PROMPT
+        "system_instruction": cfg["system_instruction"],
+        "user_prompt": cfg["user_prompt"],
+        "thinking_budget": cfg["thinking_budget"]
     }
 
 class TestHeadshotRequest(BaseModel):

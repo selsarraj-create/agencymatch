@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Upload, Loader2, ArrowRight, RotateCcw, Plus, X, Edit3, Settings2, AlertTriangle, Cpu, Zap } from 'lucide-react';
+import { Upload, Loader2, ArrowRight, RotateCcw, Plus, X, Edit3, Settings2, AlertTriangle, Cpu, Save, CheckCircle2 } from 'lucide-react';
 
 const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000/api';
 
@@ -83,6 +83,8 @@ const PhotoTest = () => {
     const [previews, setPreviews] = useState([]);
     const [resultImage, setResultImage] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
     const [error, setError] = useState(null);
     const [timing, setTiming] = useState(null);
@@ -107,6 +109,9 @@ const PhotoTest = () => {
                 if (res.data.user_prompt && typeof res.data.user_prompt === 'string') {
                     setUserPrompt(res.data.user_prompt);
                 }
+                if (res.data.thinking_budget !== undefined) {
+                    setThinkingBudget(Number(res.data.thinking_budget));
+                }
             }
         } catch (err) {
             console.warn('Using built-in default prompts:', err);
@@ -123,6 +128,7 @@ const PhotoTest = () => {
             setPreviews(newFiles.map(f => URL.createObjectURL(f)));
             setResultImage(null);
             setError(null);
+            setSaveSuccess(false);
             setTiming(null);
             e.target.value = '';
         } catch (err) {
@@ -148,6 +154,33 @@ const PhotoTest = () => {
         setSystemInstruction(DEFAULT_SYSTEM_INSTRUCTION);
         setUserPrompt(DEFAULT_USER_PROMPT);
         setThinkingBudget(2048);
+        setSaveSuccess(false);
+    };
+
+    const handleSaveToMainApp = async () => {
+        setSaving(true);
+        setError(null);
+        setSaveSuccess(false);
+
+        try {
+            const res = await axios.post(`${API_URL}/save-lab-config`, {
+                system_instruction: systemInstruction,
+                user_prompt: userPrompt,
+                thinking_budget: Number(thinkingBudget)
+            });
+
+            if (res.data && res.data.status === 'success') {
+                setSaveSuccess(true);
+                setTimeout(() => setSaveSuccess(false), 5000);
+            } else {
+                throw new Error(res.data?.error || 'Failed to save configuration');
+            }
+        } catch (err) {
+            console.error('Save configuration error:', err);
+            setError(extractErrorMessage(err));
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleGenerate = async () => {
@@ -155,6 +188,7 @@ const PhotoTest = () => {
         setLoading(true);
         setError(null);
         setResultImage(null);
+        setSaveSuccess(false);
         setStatusMessage('Preparing & compressing image(s)...');
 
         const startTime = Date.now();
@@ -198,6 +232,7 @@ const PhotoTest = () => {
         setPreviews([]);
         setResultImage(null);
         setError(null);
+        setSaveSuccess(false);
         setTiming(null);
     };
 
@@ -220,31 +255,61 @@ const PhotoTest = () => {
                             Photo Lab — Staff Prompt & Reasoning Test Bench
                         </h1>
                         <p className="text-sm text-gray-400">
-                            Upload 1 to 3 reference photos & iterate live on Gemini 3 Pro prompts & thinking budget. No credits, no login needed.
+                            Upload 1 to 3 reference photos, iterate live on prompts & thinking budget, and save settings directly to the main live application.
                         </p>
                     </div>
-                    <button
-                        onClick={() => setShowPromptEditor(!showPromptEditor)}
-                        className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors flex items-center gap-1.5"
-                    >
-                        <Edit3 size={14} />
-                        {showPromptEditor ? 'Hide Prompt Editor' : 'Edit Prompts'}
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleSaveToMainApp}
+                            disabled={saving}
+                            className="px-3.5 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-50 text-xs font-bold transition-colors flex items-center gap-1.5 shadow-md"
+                        >
+                            {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                            {saving ? 'Saving...' : 'Save to Main App'}
+                        </button>
+                        <button
+                            onClick={() => setShowPromptEditor(!showPromptEditor)}
+                            className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors flex items-center gap-1.5"
+                        >
+                            <Edit3 size={14} />
+                            {showPromptEditor ? 'Hide Editor' : 'Edit Prompts'}
+                        </button>
+                    </div>
                 </div>
+
+                {/* Save Success Banner */}
+                {saveSuccess && (
+                    <div className="bg-green-900/40 border border-green-500/50 text-green-300 text-sm rounded-2xl p-4 flex items-center justify-between shadow-lg">
+                        <div className="flex items-center gap-2 font-semibold">
+                            <CheckCircle2 size={18} className="text-green-400" />
+                            <span>Prompt & Thinking Settings successfully saved as the live default for all users in the main app!</span>
+                        </div>
+                    </div>
+                )}
 
                 {/* Editable Prompt Engineering & Thinking Budget Panel */}
                 {showPromptEditor && (
                     <div className="bg-gray-900 border border-white/10 rounded-2xl p-5 space-y-5 shadow-xl">
                         <div className="flex justify-between items-center border-b border-white/10 pb-3">
                             <h2 className="text-sm font-bold text-green-400 uppercase tracking-wider flex items-center gap-2">
-                                <Edit3 size={16} /> Live Prompt & Reasoning Workbench
+                                <Edit3 size={16} /> Live Prompt Workbench (Staff Iteration)
                             </h2>
-                            <button
-                                onClick={handleResetPrompts}
-                                className="text-xs text-gray-400 hover:text-white underline font-medium"
-                            >
-                                Reset Defaults
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={handleResetPrompts}
+                                    className="text-xs text-gray-400 hover:text-white underline font-medium"
+                                >
+                                    Reset Defaults
+                                </button>
+                                <button
+                                    onClick={handleSaveToMainApp}
+                                    disabled={saving}
+                                    className="px-3 py-1 rounded-md bg-green-600 hover:bg-green-500 disabled:opacity-50 text-xs font-bold transition-colors flex items-center gap-1"
+                                >
+                                    {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+                                    Save to Live App
+                                </button>
+                            </div>
                         </div>
 
                         {/* Thinking Time Slider Control */}
@@ -399,13 +464,14 @@ const PhotoTest = () => {
                         )}
 
                         {/* Action buttons */}
-                        <div className="flex gap-3 justify-center">
+                        <div className="flex gap-3 justify-center items-center">
                             <button
                                 onClick={handleResetAll}
-                                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-semibold transition-colors flex items-center gap-2"
+                                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-semibold transition-colors flex items-center gap-2"
                             >
                                 <RotateCcw size={14} /> Reset Photos
                             </button>
+
                             <button
                                 onClick={handleGenerate}
                                 disabled={loading || !files.length}
@@ -414,6 +480,17 @@ const PhotoTest = () => {
                                 {loading ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={14} />}
                                 {loading ? 'Processing...' : resultImage ? 'Re-generate' : 'Generate'}
                             </button>
+
+                            {resultImage && (
+                                <button
+                                    onClick={handleSaveToMainApp}
+                                    disabled={saving}
+                                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-sm font-bold transition-colors flex items-center gap-2 shadow-lg"
+                                >
+                                    {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                                    {saving ? 'Saving Settings...' : 'Save & Set as Main App Default'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 )}
