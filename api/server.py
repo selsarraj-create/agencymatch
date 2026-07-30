@@ -458,12 +458,10 @@ async def test_headshot_endpoint(req: TestHeadshotRequest):
             custom_system=req.custom_system_instruction,
             custom_prompt=req.custom_user_prompt
         )
-        if "error" in result:
-            return JSONResponse(status_code=500, content=result)
         return result
     except Exception as e:
         print(f"Test Headshot Error: {e}")
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        return {"error": str(e)}
 
 
 class DigitalGenRequest(BaseModel):

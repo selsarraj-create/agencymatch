@@ -23,13 +23,59 @@ CRITICAL RULES & STYLING:
 
 Output aspect ratio must be 1:1 square format. Output ONLY the image, no text.`;
 
-const readFileAsDataURL = (file) => {
+// Canvas Image Compression to keep payloads small (~200KB per image) and prevent Vercel 4.5MB payload errors
+const compressImageFile = (file, maxWidth = 1024, maxHeight = 1024, quality = 0.85) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth || height > maxHeight) {
+                    if (width > height) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    } else {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve(dataUrl);
+            };
+            img.onerror = (err) => reject(err);
+            img.src = event.target.result;
+        };
         reader.onerror = (err) => reject(err);
         reader.readAsDataURL(file);
     });
+};
+
+// Safe error extractor — ALWAYS returns a string to prevent React Error #31
+const extractErrorMessage = (err) => {
+    if (!err) return 'An unknown error occurred';
+    if (typeof err === 'string') return err;
+    if (err.response?.data?.error) {
+        const e = err.response.data.error;
+        if (typeof e === 'string') return e;
+        if (typeof e === 'object') return JSON.stringify(e);
+    }
+    if (err.response?.data?.detail) {
+        const d = err.response.data.detail;
+        if (typeof d === 'string') return d;
+        if (typeof d === 'object') return JSON.stringify(d);
+    }
+    if (err.message) return String(err.message);
+    return String(err);
 };
 
 const PhotoTest = () => {
@@ -37,6 +83,7 @@ const PhotoTest = () => {
     const [previews, setPreviews] = useState([]);
     const [resultImage, setResultImage] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [statusMessage, setStatusMessage] = useState('');
     const [error, setError] = useState(null);
     const [timing, setTiming] = useState(null);
 
@@ -53,8 +100,12 @@ const PhotoTest = () => {
         try {
             const res = await axios.get(`${API_URL}/test-headshot-prompts`);
             if (res.data) {
-                if (res.data.system_instruction) setSystemInstruction(res.data.system_instruction);
-                if (res.data.user_prompt) setUserPrompt(res.data.user_prompt);
+                if (res.data.system_instruction && typeof res.data.system_instruction === 'string') {
+                    setSystemInstruction(res.data.system_instruction);
+                }
+                if (res.data.user_prompt && typeof res.data.user_prompt === 'string') {
+                    setUserPrompt(res.data.user_prompt);
+                }
             }
         } catch (err) {
             console.warn('Using built-in default prompts:', err);
@@ -75,7 +126,7 @@ const PhotoTest = () => {
             e.target.value = '';
         } catch (err) {
             console.error('File selection error:', err);
-            setError('Failed to select file. Please try again.');
+            setError(extractErrorMessage(err));
         }
     };
 
@@ -102,17 +153,20 @@ const PhotoTest = () => {
         setLoading(true);
         setError(null);
         setResultImage(null);
+        setStatusMessage('Preparing & compressing image(s)...');
 
         const startTime = Date.now();
 
         try {
-            // Read all files locally into base64 data URLs (no Supabase storage dependency)
-            const dataUrls = await Promise.all(files.map(f => readFileAsDataURL(f)));
+            // 1. Compress all reference files on canvas to optimized 1024px JPEGs (~200KB)
+            const compressedDataUrls = await Promise.all(files.map(f => compressImageFile(f)));
 
-            // Call test endpoint with in-memory data URLs & custom editable prompts
+            setStatusMessage('Generating 2x2 Grid with Gemini 3 Pro (8192 Thinking Budget)...');
+
+            // 2. Call test endpoint with optimized data URLs & custom editable prompts
             const response = await axios.post(`${API_URL}/test-headshot`, {
-                reference_urls: dataUrls,
-                photo_url: dataUrls[0],
+                reference_urls: compressedDataUrls,
+                photo_url: compressedDataUrls[0],
                 custom_system_instruction: systemInstruction,
                 custom_user_prompt: userPrompt
             }, { timeout: 180000 });
@@ -121,7 +175,7 @@ const PhotoTest = () => {
                 const mime = response.data.mime_type || 'image/jpeg';
                 setResultImage(`data:${mime};base64,${response.data.image_bytes}`);
             } else if (response.data && response.data.error) {
-                throw new Error(response.data.error);
+                throw new Error(extractErrorMessage(response.data.error));
             } else {
                 throw new Error('No image returned from AI engine');
             }
@@ -129,10 +183,10 @@ const PhotoTest = () => {
             setTiming(((Date.now() - startTime) / 1000).toFixed(1));
         } catch (err) {
             console.error("Test Generation Error:", err);
-            const msg = err.response?.data?.error || err.message || 'Generation failed';
-            setError(msg);
+            setError(extractErrorMessage(err));
         } finally {
             setLoading(false);
+            setStatusMessage('');
         }
     };
 
@@ -267,7 +321,7 @@ const PhotoTest = () => {
                                     {loading ? (
                                         <div className="flex flex-col items-center gap-3 p-4 text-center">
                                             <Loader2 size={32} className="animate-spin text-green-500" />
-                                            <span className="text-sm font-semibold text-gray-300">Generating 2x2 Grid (8192 Thinking Budget)...</span>
+                                            <span className="text-sm font-semibold text-gray-300">{statusMessage || 'Generating 2x2 Grid...'}</span>
                                             <span className="text-xs text-gray-500">Locking facial geometry & skin tone across {files.length} photo(s)...</span>
                                         </div>
                                     ) : resultImage ? (
@@ -279,10 +333,10 @@ const PhotoTest = () => {
                             </div>
                         </div>
 
-                        {/* Error Banner */}
-                        {error && (
+                        {/* Error Banner (Guaranteed String Output) */}
+                        {Boolean(error) && (
                             <div className="bg-red-900/30 border border-red-700/50 text-red-300 text-sm rounded-xl p-3 text-center flex items-center justify-center gap-2">
-                                <AlertTriangle size={16} /> {error}
+                                <AlertTriangle size={16} /> {String(error)}
                             </div>
                         )}
 
