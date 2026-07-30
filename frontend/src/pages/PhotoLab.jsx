@@ -340,11 +340,18 @@ const PhotoLab = ({ isEmbedded = false }) => {
     const navigate = useNavigate();
     const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000/api';
 
-    // Derived state: ready only if both uploaded, audits complete, and no blocking issues
-    const bothReady = portraitRef?.url && fullBodyRef?.url &&
-        !auditingPortrait && !auditingFullBody &&
+    // Derived state: ready if both photos uploaded successfully and no audit block
+    const isUploading = Boolean(
+        (portraitRef?.preview && !portraitRef?.url) ||
+        (fullBodyRef?.preview && !fullBodyRef?.url)
+    );
+
+    const bothReady = Boolean(
+        portraitRef?.url &&
+        fullBodyRef?.url &&
         portraitAudit?.can_proceed !== false &&
-        fullBodyAudit?.can_proceed !== false;
+        fullBodyAudit?.can_proceed !== false
+    );
 
     useEffect(() => { checkUser(); }, []);
 
@@ -400,19 +407,20 @@ const PhotoLab = ({ isEmbedded = false }) => {
     };
 
     /* ── File Validation + Upload ──────────────────────────────────── */
-    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-    const ALLOWED_TYPES = ['image/jpeg', 'image/png'];
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB (allow high-res mobile uploads)
 
     const validateAndUpload = async (file, setter, setErr, setAudit, setAuditing) => {
         setErr(null);
         setAudit(null);
         if (!file) return;
-        if (!ALLOWED_TYPES.includes(file.type)) {
-            setErr('JPEG or PNG only');
+
+        // Allow common image mime types & fallback for mobile camera captures
+        if (file.type && !file.type.startsWith('image/') && !file.name.match(/\.(jpg|jpeg|png|heic|heif|webp)$/i)) {
+            setErr('Please select an image file (JPEG, PNG, HEIC, WebP)');
             return;
         }
         if (file.size > MAX_SIZE) {
-            setErr('Max 5MB');
+            setErr('Max 10MB');
             return;
         }
 
@@ -420,9 +428,17 @@ const PhotoLab = ({ isEmbedded = false }) => {
         setter({ preview, url: null }); // show thumbnail immediately
 
         try {
-            const fileName = `${user.id}/${Date.now()}_${file.name}`;
-            const { error: uploadError } = await supabase.storage.from('uploads').upload(fileName, file);
+            const currentUser = user || (await supabase.auth.getUser())?.data?.user;
+            const userId = currentUser?.id || 'guest';
+            const cleanExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+            const fileName = `${userId}/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${cleanExt}`;
+
+            const { error: uploadError } = await supabase.storage.from('uploads').upload(fileName, file, {
+                contentType: file.type || 'image/jpeg',
+                upsert: true
+            });
             if (uploadError) throw uploadError;
+
             const { data: { publicUrl } } = supabase.storage.from('uploads').getPublicUrl(fileName);
             setter({ preview, url: publicUrl });
 
@@ -439,8 +455,9 @@ const PhotoLab = ({ isEmbedded = false }) => {
             }
         } catch (e) {
             console.error("Upload failed", e);
-            setErr('Upload failed');
+            setErr('Upload failed. Tap to try again.');
             setter(null);
+            setAuditing(false);
         }
     };
 
@@ -887,22 +904,26 @@ const PhotoLab = ({ isEmbedded = false }) => {
                     {step !== 'result' && (
                         <button
                             onClick={handleGenerate}
-                            disabled={!bothReady || credits < 5 || step === 'processing'}
-                            className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] shadow-lg text-sm ${!bothReady || credits < 5
+                            disabled={!bothReady || credits < 5 || step === 'processing' || isUploading}
+                            className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] shadow-lg text-sm ${!bothReady || credits < 5 || isUploading
                                 ? 'bg-gray-200 dark:bg-white/10 text-gray-400 cursor-not-allowed'
                                 : 'bg-gradient-to-r from-brand-start to-brand-end hover:brightness-110 text-white'
                                 }`}
                         >
-                            {step === 'processing' ? (
+                            {step === 'processing' || isUploading ? (
                                 <Loader2 className="animate-spin" size={18} />
                             ) : (
                                 <Sparkles size={18} />
                             )}
                             {step === 'processing'
                                 ? processingStage
-                                : bothReady
-                                    ? 'Generate Digitals (5 Credits)'
-                                    : 'Upload both photos to continue'}
+                                : isUploading
+                                    ? 'Uploading photos...'
+                                    : bothReady
+                                        ? credits < 5
+                                            ? 'Insufficient Credits (Needs 5 Credits)'
+                                            : 'Generate Digitals (5 Credits)'
+                                        : 'Upload both photos to continue'}
                         </button>
                     )}
 
