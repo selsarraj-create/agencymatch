@@ -5,7 +5,7 @@ import json
 import os
 import time
 import stripe
-from typing import Optional
+from typing import Optional, List, Union, Dict, Any
 from pydantic import BaseModel
 from supabase import create_client, Client
 from dotenv import load_dotenv

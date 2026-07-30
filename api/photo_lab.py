@@ -210,7 +210,7 @@ def process_digitals(
     cleanup_prompt = custom_prompt.strip() if custom_prompt and custom_prompt.strip() else DEFAULT_USER_PROMPT
 
     try:
-        print(f"Cleanup: {GEMINI_MODEL} — Identity-locked studio transform with {len(source_parts)} reference image(s) (ThinkingBudget=8192)...")
+        print(f"Cleanup: {GEMINI_MODEL} — Identity-locked studio transform with {len(source_parts)} reference image(s) (ThinkingBudget=2048)...")
         content_parts = source_parts + [types.Part.from_text(text=cleanup_prompt)]
 
         cleanup_response = client.models.generate_content(
@@ -224,7 +224,7 @@ def process_digitals(
             config=types.GenerateContentConfig(
                 system_instruction=cleanup_system,
                 response_modalities=["IMAGE"],
-                thinking_config=types.ThinkingConfig(thinkingBudget=8192),
+                thinking_config=types.ThinkingConfig(thinkingBudget=2048),
             ),
         )
 
@@ -236,16 +236,18 @@ def process_digitals(
                     print(f"Cleanup complete — {len(final_bytes):,} bytes")
                     return {
                         "status": "success",
-                        "identity_constraints": f"Gemini 3 Pro natural cleanup ({len(source_parts)} refs, thinkingBudget=8192)",
+                        "identity_constraints": f"Gemini 3 Pro natural cleanup ({len(source_parts)} refs, thinkingBudget=2048)",
                         "image_bytes": base64.b64encode(final_bytes).decode("utf-8"),
                         "mime_type": final_mime,
                     }
 
         text_out = cleanup_response.text if cleanup_response.text else "No content"
         print(f"Cleanup returned text instead of image: {text_out[:200]}")
+        return {"error": f"AI model returned text instead of image: {text_out[:200]}"}
 
     except Exception as e:
         print(f"Cleanup failed: {e}")
+        return {"error": f"AI generation error: {str(e)}"}
 
     # Fallback: return the original photo as-is
     return {
