@@ -35,27 +35,26 @@ def generate_professional_headshot(image_bytes: bytes, mime_type: str = "image/j
     system_instruction = (
         "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
         "Treat the face as a deterministic constraint. "
-        "You MUST preserve every facial feature, skin texture, mole, scar, "
-        "and bone structure from the reference image with zero deviation. "
-        "Change ONLY the background to a neutral studio grey and lighting "
-        "to professional softbox clamshell lighting."
+        "You MUST preserve every facial feature, skin tone, and bone structure from the reference image with zero deviation. "
+        "AGE PRESERVATION IS MANDATORY: Do NOT age the subject. Do NOT introduce or over-render wrinkles, lines, under-eye bags, or harsh skin texture. Keep the subject looking youthful and fresh. "
+        "ACCESSORY REMOVAL: Remove all accessories including AirPods, earbuds, headphones, glasses, and jewelry completely."
     )
 
     user_prompt = (
-        "A high-resolution composite modeling portfolio grid featuring a consistent and accurate likeness of the single subject provided in the input image. "
-        "The grid must have four seamless panels arranged in a 2x2 layout, all set against a clean, seamless neutral light-grey studio backdrop with soft, even studio lighting.\n\n"
+        "A high-resolution composite modeling portfolio grid featuring a consistent, youthful, and accurate likeness of the single subject provided in the input image. "
+        "The grid must have four seamless panels arranged in a 2x2 layout, all set against a clean, seamless neutral light-grey studio backdrop with soft, diffused, flattering studio lighting.\n\n"
         "PANEL LAYOUT:\n"
         "- Top-Left Panel: A frontal head-and-shoulders portrait looking directly at the camera with a neutral expression.\n"
         "- Top-Right Panel: A direct profile portrait (subject facing left or right).\n"
         "- Bottom-Left Panel: A 3/4 view portrait (subject facing the opposite direction of the profile shot).\n"
-        "- Bottom-Right Panel: A tight close-up detail shot focusing on key facial features, skin texture, and hair.\n\n"
-        "STYLING & IDENTITY RULES:\n"
-        "- In all four panels, the subject must be styled in a clean, high-quality solid white crew-neck t-shirt.\n"
-        "- The subject's expression should remain consistent across all views.\n"
-        "- Hair should be neatly styled to keep the face clear.\n"
-        "- Ensure the specific facial details, skin imperfections, and unique features of the reference subject are preserved authentically, without over-smoothing.\n"
-        "- Maintain 100% facial structure, age, skin tone, and hair consistency across all panels.\n\n"
-        "Output ONLY the image, no text."
+        "- Bottom-Right Panel: A tight close-up portrait shot focusing on the subject's face, eyes, and hair.\n\n"
+        "CRITICAL RULES & STYLING:\n"
+        "- ACCESSORY REMOVAL: Remove ALL accessories including AirPods, earbuds, headphones, glasses, earrings, and necklaces in ALL panels. Ears must be completely clear.\n"
+        "- AGE PRESERVATION & FLATTERING LIGHTING: The subject MUST look youthful, smooth, and match the EXACT same age as the input photo. Do NOT add wrinkles, deep lines, under-eye bags, or harsh skin texture. Use soft, diffused lighting that minimizes lines and keeps skin soft and smooth.\n"
+        "- STYLING: In all four panels, the subject must be styled in a clean, fitted solid white crew-neck t-shirt.\n"
+        "- CONSISTENCY: Maintain 100% facial structure, jawline, hair style, and skin tone identically across all four panels.\n"
+        "- Hair should be neatly styled to keep the face clear.\n\n"
+        "Output aspect ratio must be 1:1 square format. Output ONLY the image, no text."
     )
 
     try:
