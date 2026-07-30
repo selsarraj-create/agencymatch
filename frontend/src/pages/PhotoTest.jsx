@@ -4,6 +4,25 @@ import { Upload, Loader2, ArrowRight, RotateCcw, Plus, X, Edit3, Settings2, Aler
 
 const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000/api';
 
+const DEFAULT_SYSTEM_INSTRUCTION = `PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. The face, facial structure, and skin tone in the input image(s) are HARD CONSTRAINTS. You MUST NOT alter, reshape, pale, standardize, or reinterpret any facial feature. EXACT FACIAL FEATURE LOCK: Preserve the exact jawline, chin shape, nose shape & nostrils, lip shape & fullness, eye shape & eyelid folds, eyebrow arch, and facial proportions. EXACT SKIN TONE LOCK: Preserve the exact skin tone, undertones, and complexion from the reference image. Do NOT lighten, pale, darken, or shift skin color. AGE PRESERVATION: Do NOT age the subject. Do NOT introduce or over-render wrinkles, lines, or under-eye bags. Keep the subject looking youthful, fresh, and exact same age as in the input image. ACCESSORY & HEADWEAR REMOVAL: Remove all accessories including AirPods, earbuds, headphones, glasses, and jewelry. If the subject is wearing a head wrap, towel, turban, hair covering, or hat, remove it and replace it with clean, simple dark hair neatly styled or slicked back. DO NOT alter the forehead height or skull proportions.`;
+
+const DEFAULT_USER_PROMPT = `A high-resolution composite modeling portfolio grid featuring an exact, 100% recognizable, and accurate likeness of the single subject provided in the input reference image(s). The grid must have four seamless panels arranged in a 2x2 layout, all set against a clean, seamless neutral light-grey studio backdrop with soft, diffused, flattering studio lighting.
+
+PANEL LAYOUT:
+- Top-Left Panel: A frontal head-and-shoulders portrait looking directly at the camera with a neutral expression.
+- Top-Right Panel: A direct profile portrait (subject facing left or right).
+- Bottom-Left Panel: A 3/4 view portrait (subject facing the opposite direction of the profile shot).
+- Bottom-Right Panel: A tight close-up portrait shot focusing on the subject's face, eyes, and hair.
+
+CRITICAL RULES & STYLING:
+- ZERO IDENTITY DRIFT: The output subject MUST look unmistakably identical to the input reference image. Match the exact eyes, nose, lip fullness, jawline, and skin tone. Do NOT generate a generic model face.
+- EXACT SKIN TONE: Preserve the exact skin tone, warmth, and undertones from the reference photo.
+- HEADWEAR / ACCESSORY REMOVAL: Remove any head towel, wrap, hat, AirPods, earrings, or glasses. Replace headwear with neat, simply styled dark hair without changing the face or forehead shape.
+- STYLING: In all four panels, the subject must be styled in a clean, fitted solid white crew-neck t-shirt.
+- CONSISTENCY: Maintain 100% facial structure, jawline, hair style, and skin tone identically across all four panels.
+
+Output aspect ratio must be 1:1 square format. Output ONLY the image, no text.`;
+
 const readFileAsDataURL = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -21,11 +40,9 @@ const PhotoTest = () => {
     const [error, setError] = useState(null);
     const [timing, setTiming] = useState(null);
 
-    // Prompt engineering state
-    const [systemInstruction, setSystemInstruction] = useState('');
-    const [userPrompt, setUserPrompt] = useState('');
-    const [defaultSystem, setDefaultSystem] = useState('');
-    const [defaultPrompt, setDefaultPrompt] = useState('');
+    // Prompt engineering state — pre-filled with defaults immediately on load
+    const [systemInstruction, setSystemInstruction] = useState(DEFAULT_SYSTEM_INSTRUCTION);
+    const [userPrompt, setUserPrompt] = useState(DEFAULT_USER_PROMPT);
     const [showPromptEditor, setShowPromptEditor] = useState(true);
 
     useEffect(() => {
@@ -36,13 +53,11 @@ const PhotoTest = () => {
         try {
             const res = await axios.get(`${API_URL}/test-headshot-prompts`);
             if (res.data) {
-                setSystemInstruction(res.data.system_instruction || '');
-                setUserPrompt(res.data.user_prompt || '');
-                setDefaultSystem(res.data.system_instruction || '');
-                setDefaultPrompt(res.data.user_prompt || '');
+                if (res.data.system_instruction) setSystemInstruction(res.data.system_instruction);
+                if (res.data.user_prompt) setUserPrompt(res.data.user_prompt);
             }
         } catch (err) {
-            console.warn('Failed to fetch default prompts:', err);
+            console.warn('Using built-in default prompts:', err);
         }
     };
 
@@ -78,8 +93,8 @@ const PhotoTest = () => {
     };
 
     const handleResetPrompts = () => {
-        setSystemInstruction(defaultSystem);
-        setUserPrompt(defaultPrompt);
+        setSystemInstruction(DEFAULT_SYSTEM_INSTRUCTION);
+        setUserPrompt(DEFAULT_USER_PROMPT);
     };
 
     const handleGenerate = async () => {
