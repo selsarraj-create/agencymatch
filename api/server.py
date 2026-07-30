@@ -429,13 +429,15 @@ async def audit_image_endpoint(req: AuditImageRequest):
 
 # ── Test-only endpoint (no credits, no profile, no storage save) ──
 class TestHeadshotRequest(BaseModel):
-    photo_url: str
+    photo_url: Optional[str] = None
+    reference_urls: Optional[List[str]] = None
 
 @app.post("/api/test-headshot")
 async def test_headshot_endpoint(req: TestHeadshotRequest):
-    """Dev-only: runs the headshot pipeline on a photo URL and returns the result as base64."""
+    """Dev-only: runs the headshot pipeline on photo URL(s) and returns the result as base64."""
     try:
-        result = process_digitals(req.photo_url)
+        urls = req.reference_urls or ([req.photo_url] if req.photo_url else [])
+        result = process_digitals(reference_urls=urls)
         if "error" in result:
             return JSONResponse(status_code=500, content=result)
         return result
