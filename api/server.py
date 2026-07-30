@@ -411,7 +411,13 @@ async def analyze_stats_endpoint(req: StatsAnalysisRequest):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 # --- Photo Lab Endpoints ---
-from api.photo_lab import process_digitals, process_digitals_dual, audit_image_quality
+from api.photo_lab import (
+    process_digitals,
+    process_digitals_dual,
+    audit_image_quality,
+    DEFAULT_SYSTEM_INSTRUCTION,
+    DEFAULT_USER_PROMPT
+)
 
 class AuditImageRequest(BaseModel):
     image_url: str
@@ -428,16 +434,30 @@ async def audit_image_endpoint(req: AuditImageRequest):
 
 
 # ── Test-only endpoint (no credits, no profile, no storage save) ──
+@app.get("/api/test-headshot-prompts")
+async def get_test_prompts():
+    """Dev-only: returns the default system instruction and user prompt for the test bench."""
+    return {
+        "system_instruction": DEFAULT_SYSTEM_INSTRUCTION,
+        "user_prompt": DEFAULT_USER_PROMPT
+    }
+
 class TestHeadshotRequest(BaseModel):
     photo_url: Optional[str] = None
     reference_urls: Optional[List[str]] = None
+    custom_system_instruction: Optional[str] = None
+    custom_user_prompt: Optional[str] = None
 
 @app.post("/api/test-headshot")
 async def test_headshot_endpoint(req: TestHeadshotRequest):
     """Dev-only: runs the headshot pipeline on photo URL(s) and returns the result as base64."""
     try:
         urls = req.reference_urls or ([req.photo_url] if req.photo_url else [])
-        result = process_digitals(reference_urls=urls)
+        result = process_digitals(
+            reference_urls=urls,
+            custom_system=req.custom_system_instruction,
+            custom_prompt=req.custom_user_prompt
+        )
         if "error" in result:
             return JSONResponse(status_code=500, content=result)
         return result

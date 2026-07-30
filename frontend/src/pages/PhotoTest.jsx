@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import axios from 'axios';
-import { Upload, Loader2, ArrowRight, RotateCcw, Plus, X } from 'lucide-react';
+import { Upload, Loader2, ArrowRight, RotateCcw, Plus, X, Edit3, Settings2 } from 'lucide-react';
 
 const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000/api';
 
@@ -12,6 +12,31 @@ const PhotoTest = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [timing, setTiming] = useState(null);
+
+    // Prompt engineering state
+    const [systemInstruction, setSystemInstruction] = useState('');
+    const [userPrompt, setUserPrompt] = useState('');
+    const [defaultSystem, setDefaultSystem] = useState('');
+    const [defaultPrompt, setDefaultPrompt] = useState('');
+    const [showPromptEditor, setShowPromptEditor] = useState(true);
+
+    useEffect(() => {
+        fetchDefaultPrompts();
+    }, []);
+
+    const fetchDefaultPrompts = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/test-headshot-prompts`);
+            if (res.data) {
+                setSystemInstruction(res.data.system_instruction || '');
+                setUserPrompt(res.data.user_prompt || '');
+                setDefaultSystem(res.data.system_instruction || '');
+                setDefaultPrompt(res.data.user_prompt || '');
+            }
+        } catch (err) {
+            console.warn('Failed to fetch default prompts:', err);
+        }
+    };
 
     const handleFileSelect = (e) => {
         const selected = Array.from(e.target.files || []);
@@ -33,6 +58,11 @@ const PhotoTest = () => {
         if (!newFiles.length) {
             setResultImage(null);
         }
+    };
+
+    const handleResetPrompts = () => {
+        setSystemInstruction(defaultSystem);
+        setUserPrompt(defaultPrompt);
     };
 
     const handleGenerate = async () => {
@@ -58,10 +88,12 @@ const PhotoTest = () => {
                 uploadedUrls.push(publicUrl);
             }
 
-            // Call test endpoint with multi-reference photo array
+            // Call test endpoint with multi-reference photo array AND custom editable prompts
             const response = await axios.post(`${API_URL}/test-headshot`, {
                 reference_urls: uploadedUrls,
-                photo_url: uploadedUrls[0]
+                photo_url: uploadedUrls[0],
+                custom_system_instruction: systemInstruction,
+                custom_user_prompt: userPrompt
             }, { timeout: 180000 });
 
             if (response.data.image_bytes) {
@@ -80,7 +112,7 @@ const PhotoTest = () => {
         }
     };
 
-    const handleReset = () => {
+    const handleResetAll = () => {
         setFiles([]);
         setPreviews([]);
         setResultImage(null);
@@ -90,16 +122,79 @@ const PhotoTest = () => {
 
     return (
         <div className="min-h-screen bg-gray-950 text-white p-6">
-            <div className="max-w-4xl mx-auto">
-                <h1 className="text-2xl font-black mb-1">Photo Lab — Test Bench</h1>
-                <p className="text-sm text-gray-400 mb-8">Upload 1 to 3 reference photos (frontal, profile, 3/4) → test AI headshot generation. No credits, no login needed.</p>
+            <div className="max-w-5xl mx-auto space-y-6">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h1 className="text-2xl font-black mb-1 flex items-center gap-2">
+                            <Settings2 className="text-green-400" size={24} />
+                            Photo Lab — Staff Prompt Test Bench
+                        </h1>
+                        <p className="text-sm text-gray-400">
+                            Upload 1 to 3 reference photos & iterate live on Gemini 3 Pro prompts. No credits, no login needed.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => setShowPromptEditor(!showPromptEditor)}
+                        className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors flex items-center gap-1.5"
+                    >
+                        <Edit3 size={14} />
+                        {showPromptEditor ? 'Hide Prompt Editor' : 'Edit Prompts'}
+                    </button>
+                </div>
+
+                {/* Editable Prompt Engineering Panel */}
+                {showPromptEditor && (
+                    <div className="bg-gray-900 border border-white/10 rounded-2xl p-5 space-y-4 shadow-xl">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-sm font-bold text-green-400 uppercase tracking-wider flex items-center gap-2">
+                                <Edit3 size={16} /> Live Prompt Workbench (Staff Iteration)
+                            </h2>
+                            <button
+                                onClick={handleResetPrompts}
+                                className="text-xs text-gray-400 hover:text-white underline font-medium"
+                            >
+                                Reset to Default Prompts
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* System Instruction */}
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-300 flex justify-between">
+                                    <span>1. System Instruction (Identity & Constraints)</span>
+                                </label>
+                                <textarea
+                                    value={systemInstruction}
+                                    onChange={(e) => setSystemInstruction(e.target.value)}
+                                    rows={8}
+                                    className="w-full bg-black/60 border border-white/15 rounded-xl p-3 text-xs font-mono text-gray-200 focus:outline-none focus:border-green-500 transition-colors resize-none leading-relaxed"
+                                    placeholder="Enter system instruction..."
+                                />
+                            </div>
+
+                            {/* User Prompt */}
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-300 flex justify-between">
+                                    <span>2. User Prompt (Grid Layout & Styling Rules)</span>
+                                </label>
+                                <textarea
+                                    value={userPrompt}
+                                    onChange={(e) => setUserPrompt(e.target.value)}
+                                    rows={8}
+                                    className="w-full bg-black/60 border border-white/15 rounded-xl p-3 text-xs font-mono text-gray-200 focus:outline-none focus:border-green-500 transition-colors resize-none leading-relaxed"
+                                    placeholder="Enter user prompt..."
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Upload area */}
                 {previews.length < 3 && (
-                    <div className="mb-6 flex justify-center">
+                    <div className="flex justify-center">
                         <label className="cursor-pointer bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-5 py-3 flex items-center gap-2 text-sm font-semibold transition-colors">
                             <Plus size={18} />
-                            {previews.length === 0 ? 'Upload Reference Photos (1-3)' : `Add Photo (${previews.length}/3)`}
+                            {previews.length === 0 ? 'Upload Reference Photos (1-3)' : `Add Reference Photo (${previews.length}/3)`}
                             <input
                                 id="phototest-input"
                                 type="file"
@@ -154,7 +249,7 @@ const PhotoTest = () => {
                                     ) : resultImage ? (
                                         <img src={resultImage} alt="Result Grid" className="w-full h-full object-cover" />
                                     ) : (
-                                        <span className="text-xs text-gray-500">Tap "Generate" to render</span>
+                                        <span className="text-xs text-gray-500">Tap "Generate" to render with custom prompts</span>
                                     )}
                                 </div>
                             </div>
@@ -170,10 +265,10 @@ const PhotoTest = () => {
                         {/* Action buttons */}
                         <div className="flex gap-3 justify-center">
                             <button
-                                onClick={handleReset}
+                                onClick={handleResetAll}
                                 className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-semibold transition-colors flex items-center gap-2"
                             >
-                                <RotateCcw size={14} /> Reset
+                                <RotateCcw size={14} /> Reset Photos
                             </button>
                             <button
                                 onClick={handleGenerate}

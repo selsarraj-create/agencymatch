@@ -111,13 +111,52 @@ def get_client():
 
 from typing import Union, List, Optional
 
-def process_digitals(image_url: Union[str, List[str]] = None, secondary_url: str = None, reference_urls: List[str] = None):
+DEFAULT_SYSTEM_INSTRUCTION = (
+    "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
+    "The face, facial structure, and skin tone in the input image(s) are HARD CONSTRAINTS. "
+    "You MUST NOT alter, reshape, pale, standardize, or reinterpret any facial feature. "
+    "EXACT FACIAL FEATURE LOCK: Preserve the exact jawline, chin shape, nose shape & nostrils, "
+    "lip shape & fullness, eye shape & eyelid folds, eyebrow arch, and facial proportions. "
+    "EXACT SKIN TONE LOCK: Preserve the exact skin tone, undertones, and complexion from the reference image. "
+    "Do NOT lighten, pale, darken, or shift skin color. "
+    "AGE PRESERVATION: Do NOT age the subject. Do NOT introduce or over-render wrinkles, lines, "
+    "or under-eye bags. Keep the subject looking youthful, fresh, and exact same age as in the input image. "
+    "ACCESSORY & HEADWEAR REMOVAL: Remove all accessories including AirPods, earbuds, headphones, glasses, and jewelry. "
+    "If the subject is wearing a head wrap, towel, turban, hair covering, or hat, remove it and replace it with clean, "
+    "simple dark hair neatly styled or slicked back. DO NOT alter the forehead height or skull proportions."
+)
+
+DEFAULT_USER_PROMPT = (
+    "A high-resolution composite modeling portfolio grid featuring an exact, 100% recognizable, and accurate likeness of the single subject provided in the input reference image(s). "
+    "The grid must have four seamless panels arranged in a 2x2 layout, all set against a clean, seamless neutral light-grey studio backdrop with soft, diffused, flattering studio lighting.\n\n"
+    "PANEL LAYOUT:\n"
+    "- Top-Left Panel: A frontal head-and-shoulders portrait looking directly at the camera with a neutral expression.\n"
+    "- Top-Right Panel: A direct profile portrait (subject facing left or right).\n"
+    "- Bottom-Left Panel: A 3/4 view portrait (subject facing the opposite direction of the profile shot).\n"
+    "- Bottom-Right Panel: A tight close-up portrait shot focusing on the subject's face, eyes, and hair.\n\n"
+    "CRITICAL RULES & STYLING:\n"
+    "- ZERO IDENTITY DRIFT: The output subject MUST look unmistakably identical to the input reference image. Match the exact eyes, nose, lip fullness, jawline, and skin tone. Do NOT generate a generic model face.\n"
+    "- EXACT SKIN TONE: Preserve the exact skin tone, warmth, and undertones from the reference photo.\n"
+    "- HEADWEAR / ACCESSORY REMOVAL: Remove any head towel, wrap, hat, AirPods, earrings, or glasses. Replace headwear with neat, simply styled dark hair without changing the face or forehead shape.\n"
+    "- STYLING: In all four panels, the subject must be styled in a clean, fitted solid white crew-neck t-shirt.\n"
+    "- CONSISTENCY: Maintain 100% facial structure, jawline, hair style, and skin tone identically across all four panels.\n\n"
+    "Output aspect ratio must be 1:1 square format. Output ONLY the image, no text."
+)
+
+
+def process_digitals(
+    image_url: Union[str, List[str]] = None,
+    secondary_url: str = None,
+    reference_urls: List[str] = None,
+    custom_system: str = None,
+    custom_prompt: str = None
+):
     """
     Two-tiered professional headshot pipeline using Gemini 3 Pro with multi-image reference feeding.
 
     Accepts 1, 2, 3, or more reference URLs (frontal, profile, 3/4 view).
     All provided reference images are fed directly to Gemini 3 Pro (thinkingBudget=8192)
-    to build an accurate 3D identity anchor.
+    to build an accurate 3D identity anchor. Supports custom system instructions and prompts for testing.
     """
     client = get_client()
 
@@ -159,37 +198,8 @@ def process_digitals(image_url: Union[str, List[str]] = None, secondary_url: str
     # ══════════════════════════════════════════════════════════════════════
     # SINGLE STEP: Natural Cleanup (Identity-Locked Studio Transform)
     # ══════════════════════════════════════════════════════════════════════
-    cleanup_system = (
-        "PIXEL PRIORITY MODE. IDENTITY LOCK: ABSOLUTE. "
-        "The face, facial structure, and skin tone in the input image(s) are HARD CONSTRAINTS. "
-        "You MUST NOT alter, reshape, pale, standardize, or reinterpret any facial feature. "
-        "EXACT FACIAL FEATURE LOCK: Preserve the exact jawline, chin shape, nose shape & nostrils, "
-        "lip shape & fullness, eye shape & eyelid folds, eyebrow arch, and facial proportions. "
-        "EXACT SKIN TONE LOCK: Preserve the exact skin tone, undertones, and complexion from the reference image. "
-        "Do NOT lighten, pale, darken, or shift skin color. "
-        "AGE PRESERVATION: Do NOT age the subject. Do NOT introduce or over-render wrinkles, lines, "
-        "or under-eye bags. Keep the subject looking youthful, fresh, and exact same age as in the input image. "
-        "ACCESSORY & HEADWEAR REMOVAL: Remove all accessories including AirPods, earbuds, headphones, glasses, and jewelry. "
-        "If the subject is wearing a head wrap, towel, turban, hair covering, or hat, remove it and replace it with clean, "
-        "simple dark hair neatly styled or slicked back. DO NOT alter the forehead height or skull proportions."
-    )
-
-    cleanup_prompt = (
-        "A high-resolution composite modeling portfolio grid featuring an exact, 100% recognizable, and accurate likeness of the single subject provided in the input reference image(s). "
-        "The grid must have four seamless panels arranged in a 2x2 layout, all set against a clean, seamless neutral light-grey studio backdrop with soft, diffused, flattering studio lighting.\n\n"
-        "PANEL LAYOUT:\n"
-        "- Top-Left Panel: A frontal head-and-shoulders portrait looking directly at the camera with a neutral expression.\n"
-        "- Top-Right Panel: A direct profile portrait (subject facing left or right).\n"
-        "- Bottom-Left Panel: A 3/4 view portrait (subject facing the opposite direction of the profile shot).\n"
-        "- Bottom-Right Panel: A tight close-up portrait shot focusing on the subject's face, eyes, and hair.\n\n"
-        "CRITICAL RULES & STYLING:\n"
-        "- ZERO IDENTITY DRIFT: The output subject MUST look unmistakably identical to the input reference image. Match the exact eyes, nose, lip fullness, jawline, and skin tone. Do NOT generate a generic model face.\n"
-        "- EXACT SKIN TONE: Preserve the exact skin tone, warmth, and undertones from the reference photo.\n"
-        "- HEADWEAR / ACCESSORY REMOVAL: Remove any head towel, wrap, hat, AirPods, earrings, or glasses. Replace headwear with neat, simply styled dark hair without changing the face or forehead shape.\n"
-        "- STYLING: In all four panels, the subject must be styled in a clean, fitted solid white crew-neck t-shirt.\n"
-        "- CONSISTENCY: Maintain 100% facial structure, jawline, hair style, and skin tone identically across all four panels.\n\n"
-        "Output aspect ratio must be 1:1 square format. Output ONLY the image, no text."
-    )
+    cleanup_system = custom_system.strip() if custom_system and custom_system.strip() else DEFAULT_SYSTEM_INSTRUCTION
+    cleanup_prompt = custom_prompt.strip() if custom_prompt and custom_prompt.strip() else DEFAULT_USER_PROMPT
 
     try:
         print(f"Cleanup: {GEMINI_MODEL} — Identity-locked studio transform with {len(source_parts)} reference image(s) (ThinkingBudget=8192)...")
@@ -239,7 +249,13 @@ def process_digitals(image_url: Union[str, List[str]] = None, secondary_url: str
     }
 
 
-def process_digitals_dual(portrait_url: str = None, fullbody_url: str = None, reference_urls: List[str] = None):
+def process_digitals_dual(
+    portrait_url: str = None,
+    fullbody_url: str = None,
+    reference_urls: List[str] = None,
+    custom_system: str = None,
+    custom_prompt: str = None
+):
     """
     Parallel Generation Pipeline:
     1. Headshot: Uses process_digitals with all available portrait/reference URLs.
@@ -254,7 +270,12 @@ def process_digitals_dual(portrait_url: str = None, fullbody_url: str = None, re
     if portrait_url and portrait_url not in all_refs:
         all_refs.append(portrait_url)
 
-    headshot_result = process_digitals(reference_urls=all_refs, secondary_url=fullbody_url)
+    headshot_result = process_digitals(
+        reference_urls=all_refs,
+        secondary_url=fullbody_url,
+        custom_system=custom_system,
+        custom_prompt=custom_prompt
+    )
 
     # Full Body Passthrough
     fullbody_result = {"status": "success", "identity_constraints": "Passthrough"}
