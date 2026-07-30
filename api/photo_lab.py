@@ -182,15 +182,23 @@ def process_digitals(
     first_bytes = None
     for idx, u in enumerate(urls):
         try:
-            resp = requests.get(u, timeout=15)
-            resp.raise_for_status()
-            img_bytes = resp.content
+            if u.startswith("data:"):
+                header, b64data = u.split(",", 1)
+                mime = header.split(";")[0].replace("data:", "") if ";" in header else "image/jpeg"
+                img_bytes = base64.b64decode(b64data)
+            else:
+                resp = requests.get(u, timeout=15)
+                resp.raise_for_status()
+                img_bytes = resp.content
+                mime = resp.headers.get("content-type", "image/jpeg").split(";")[0]
+
             if first_bytes is None:
                 first_bytes = img_bytes
-            source_parts.append(types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"))
-            print(f"Downloaded reference image #{idx + 1}: {len(img_bytes):,} bytes")
+            mime_type = mime if mime.startswith("image/") else "image/jpeg"
+            source_parts.append(types.Part.from_bytes(data=img_bytes, mime_type=mime_type))
+            print(f"Loaded reference image #{idx + 1}: {len(img_bytes):,} bytes ({mime_type})")
         except Exception as e:
-            print(f"Failed to fetch reference image #{idx + 1} from {u}: {e}")
+            print(f"Failed to load reference image #{idx + 1}: {e}")
 
     if not source_parts:
         return {"error": "Failed to download any reference images"}

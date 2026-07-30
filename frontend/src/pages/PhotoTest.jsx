@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
 import axios from 'axios';
-import { Upload, Loader2, ArrowRight, RotateCcw, Plus, X, Edit3, Settings2 } from 'lucide-react';
+import { Upload, Loader2, ArrowRight, RotateCcw, Plus, X, Edit3, Settings2, AlertTriangle } from 'lucide-react';
 
 const API_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:8000/api';
+
+const readFileAsDataURL = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
+    });
+};
 
 const PhotoTest = () => {
     const [files, setFiles] = useState([]);
@@ -39,24 +47,33 @@ const PhotoTest = () => {
     };
 
     const handleFileSelect = (e) => {
-        const selected = Array.from(e.target.files || []);
-        if (!selected.length) return;
+        try {
+            const selected = Array.from(e.target.files || []);
+            if (!selected.length) return;
 
-        const newFiles = [...files, ...selected].slice(0, 3);
-        setFiles(newFiles);
-        setPreviews(newFiles.map(f => URL.createObjectURL(f)));
-        setResultImage(null);
-        setError(null);
-        setTiming(null);
-        e.target.value = '';
+            const newFiles = [...files, ...selected].slice(0, 3);
+            setFiles(newFiles);
+            setPreviews(newFiles.map(f => URL.createObjectURL(f)));
+            setResultImage(null);
+            setError(null);
+            setTiming(null);
+            e.target.value = '';
+        } catch (err) {
+            console.error('File selection error:', err);
+            setError('Failed to select file. Please try again.');
+        }
     };
 
     const handleRemoveFile = (index) => {
-        const newFiles = files.filter((_, i) => i !== index);
-        setFiles(newFiles);
-        setPreviews(newFiles.map(f => URL.createObjectURL(f)));
-        if (!newFiles.length) {
-            setResultImage(null);
+        try {
+            const newFiles = files.filter((_, i) => i !== index);
+            setFiles(newFiles);
+            setPreviews(newFiles.map(f => URL.createObjectURL(f)));
+            if (!newFiles.length) {
+                setResultImage(null);
+            }
+        } catch (err) {
+            console.error('Remove file error:', err);
         }
     };
 
@@ -74,39 +91,31 @@ const PhotoTest = () => {
         const startTime = Date.now();
 
         try {
-            const uploadedUrls = [];
-            for (const file of files) {
-                const cleanExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
-                const fileName = `phototest/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${cleanExt}`;
-                const { error: uploadError } = await supabase.storage.from('uploads').upload(fileName, file, {
-                    contentType: file.type || 'image/jpeg',
-                    upsert: true
-                });
-                if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
+            // Read all files locally into base64 data URLs (no Supabase storage dependency)
+            const dataUrls = await Promise.all(files.map(f => readFileAsDataURL(f)));
 
-                const { data: { publicUrl } } = supabase.storage.from('uploads').getPublicUrl(fileName);
-                uploadedUrls.push(publicUrl);
-            }
-
-            // Call test endpoint with multi-reference photo array AND custom editable prompts
+            // Call test endpoint with in-memory data URLs & custom editable prompts
             const response = await axios.post(`${API_URL}/test-headshot`, {
-                reference_urls: uploadedUrls,
-                photo_url: uploadedUrls[0],
+                reference_urls: dataUrls,
+                photo_url: dataUrls[0],
                 custom_system_instruction: systemInstruction,
                 custom_user_prompt: userPrompt
             }, { timeout: 180000 });
 
-            if (response.data.image_bytes) {
+            if (response.data && response.data.image_bytes) {
                 const mime = response.data.mime_type || 'image/jpeg';
                 setResultImage(`data:${mime};base64,${response.data.image_bytes}`);
+            } else if (response.data && response.data.error) {
+                throw new Error(response.data.error);
             } else {
-                throw new Error('No image returned');
+                throw new Error('No image returned from AI engine');
             }
 
             setTiming(((Date.now() - startTime) / 1000).toFixed(1));
         } catch (err) {
-            console.error(err);
-            setError(err.response?.data?.error || err.message || 'Generation failed');
+            console.error("Test Generation Error:", err);
+            const msg = err.response?.data?.error || err.message || 'Generation failed';
+            setError(msg);
         } finally {
             setLoading(false);
         }
@@ -255,10 +264,10 @@ const PhotoTest = () => {
                             </div>
                         </div>
 
-                        {/* Error */}
+                        {/* Error Banner */}
                         {error && (
-                            <div className="bg-red-900/30 border border-red-700/50 text-red-300 text-sm rounded-xl p-3 text-center">
-                                {error}
+                            <div className="bg-red-900/30 border border-red-700/50 text-red-300 text-sm rounded-xl p-3 text-center flex items-center justify-center gap-2">
+                                <AlertTriangle size={16} /> {error}
                             </div>
                         )}
 
